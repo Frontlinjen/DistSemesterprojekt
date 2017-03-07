@@ -250,6 +250,84 @@ paths:
           schema:
             $ref: '#/definitions/Error'
   
+  /tasks/{ID}/applicants:
+    get:
+      summary: Gets a list of applications for task
+      description: Gets a list of applications for task
+      operationId: getApplicationsForID
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: ID
+          description: ID of the applications
+          required: true
+          type: integer
+      responses:
+        404:
+          description: Application not found
+        200:
+          description: Successful operation
+          schema: 
+            type: array
+            items:
+              type: integer
+              minimum: 0
+              maximum: 50
+        400:
+          description: Invalid ID supplied
+    post:
+      summary: Applies to a task
+      description: Applies to a task
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: applicants
+          description: Application info
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: ID
+          description: ID of the application
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: Successful operation
+   
+  /tasks/{ID}/applicants/{applierID}:
+    get:
+      summary: Gets specific application status
+      parameters:
+        - in: path
+          name: applierID
+          description: ID of the Application
+          required: true
+          type: integer
+          format: int32
+        - in: path
+          name: ID
+          description: ID
+          required: true
+          type: integer
+          format: int32
+      tags:
+        - Applications
+      responses:
+        404:
+          description: Application not found
+        200:
+          description: Successful operation
+          schema:
+            type: string
+        400:
+          description:  Invalid ID supplier
+  
   /account/{ID}:
     get:
       summary: Gets information about account with ID
