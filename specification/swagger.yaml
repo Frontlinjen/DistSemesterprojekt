@@ -44,11 +44,11 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /tasks/{ID}:
+  /tasks/{taskID}:
     get:
       summary: Gets the task at ID
       parameters:
-        - name: ID
+        - name: taskID
           in: path
           type: string
           required: true
@@ -70,7 +70,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Task'
-        - name: ID
+        - name: taskID
           in: path
           type: string
           required: true
@@ -82,7 +82,7 @@ paths:
     delete:
       summary: Delete the task at ID, but only if the currently logged in usr is the owner
       parameters: 
-         - name: ID
+         - name: taskID
            in: path
            type: string
            required: true
@@ -91,11 +91,11 @@ paths:
           description: delete was successfull
         404:
           description: Not found
-  /tasks/{ID}/images:
+  /tasks/{taskID}/images:
     get:
       summary: Get a list of images assigned to this task
       parameters:
-        - name: ID
+        - name: taskID
           in: path
           type: string
           required: true
@@ -105,15 +105,16 @@ paths:
           schema:
             type: array
             items:
-              type: integer
-              minimum: 0
-              maximum: 5
+              type: object
+              properties:
+                status:
+                  type: string
         404:
           description: Task not found
     post:
       summary: Adds an image to this task. Not implemented for now
       parameters:
-        - name: ID
+        - name: taskID
           in: path
           type: string
           required: true
@@ -121,13 +122,13 @@ paths:
           200:
             description: The id of the newly added image
   
-  /tasks/{ID}/comments:
+  /tasks/{taskID}/comments:
     get:
       summary: comments type
       description: Gets all comments of a task
       parameters:
         - in: path
-          name: ID
+          name: taskID
           description: ID of the task
           required: true
           type: integer
@@ -140,7 +141,10 @@ paths:
           schema: 
             type: array
             items:
-              type: string
+              type: object
+              properties:
+                status:
+                  type: string
         default:
           description: Unexpected error
           schema:
@@ -155,7 +159,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: ID
+        - name: taskID
           in: path
           type: number
           format: int32
@@ -249,7 +253,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
   
-  /tasks/{ID}/applicants:
+  /tasks/{taskID}/applicants:
     get:
       summary: Gets a list of applications for task
       description: Gets a list of applications for task
@@ -258,7 +262,7 @@ paths:
         - application/json
       parameters:
         - in: path
-          name: ID
+          name: taskID
           description: ID of the applications
           required: true
           type: integer
@@ -270,9 +274,10 @@ paths:
           schema: 
             type: array
             items:
-              type: integer
-              minimum: 0
-              maximum: 50
+              type: object
+              properties:
+                status:
+                  type: integer
         400:
           description: Invalid ID supplied
     post:
@@ -290,7 +295,7 @@ paths:
           schema:
             type: integer
         - in: path
-          name: ID
+          name: taskID
           description: ID of the application
           required: true
           type: integer
@@ -299,7 +304,7 @@ paths:
         200:
           description: Successful operation
    
-  /tasks/{ID}/applicants/{applierID}:
+  /tasks/{taskID}/applicants/{applierID}:
     get:
       summary: Gets specific application status
       parameters:
@@ -310,7 +315,7 @@ paths:
           type: integer
           format: int32
         - in: path
-          name: ID
+          name: taskID
           description: ID
           required: true
           type: integer
