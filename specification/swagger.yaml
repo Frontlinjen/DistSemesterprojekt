@@ -1,0 +1,359 @@
+swagger: '2.0'
+
+info:
+  version: "0.0.1"
+  title: Frontlinjen
+
+paths:
+  /tasks:
+    post:
+      summary: Creates a new task
+      description: Creates a new task and returns the ID of that task
+      parameters:
+        - name: taskdata
+          in: body
+          description: The information for the task to be created
+          required: true
+          schema:
+            $ref: '#/definitions/Task'
+      tags:
+        - Products
+      responses:
+        200:
+          description: The identifier of the newly created task
+          schema:
+            type: integer
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /tasks/{ID}:
+    get:
+      summary: Gets the task at ID
+      parameters:
+        - name: ID
+          in: path
+          type: string
+          required: true
+      tags:
+        - Tasks
+      responses:
+        200:
+          description: The requested task
+          schema:
+            $ref: '#/definitions/Task'
+        404:
+          description: Not found
+    put:
+      summary: Updates the task, but only if the currently logged in user is the owner
+      parameters:
+        - name: taskdata
+          in: body
+          description: Latitude component of location.
+          required: true
+          schema:
+            $ref: '#/definitions/Task'
+        - name: ID
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: success or not
+          schema:
+            type: boolean
+        404:
+          description: Not found
+    delete:
+      summary: Delete the task at ID, but only if the currently logged in usr is the owner
+      parameters: 
+         - name: ID
+           in: path
+           type: string
+           required: true
+      responses:
+        200:
+          description: success or not
+          schema:
+            type: boolean
+        404:
+          description: Not found
+  /tasks/{ID}/images:
+    get:
+      summary: Get a list of images assigned to this task
+      parameters:
+        - name: ID
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: The requested task
+          schema:
+            type: array
+            items:
+              type: integer
+              minimum: 0
+              maximum: 5
+        404:
+          description: Task not found
+    post:
+      summary: Adds an image to this task. Not implemented for now
+      parameters:
+        - name: ID
+          in: path
+          type: string
+          required: true
+      responses:
+          200:
+            description: The id of the newly added image
+  
+  /tasks/ID/comments:
+    get:
+      summary: Receives the comments of a task
+      description: Receives the comments of a task
+      responses:
+        200:
+          description: OK
+    post:
+      summary: Adds a new comment to a task
+      description: Adds a new comment to a task
+      responses:
+        200:
+          description: OK
+          
+  /tasks/ID/comments/ID:
+    delete:
+      summary: Removes the comment
+      description: Removes the comment
+      responses:
+        200:
+          description: OK
+    put:
+      summary: Edits the comment
+      description: Edits the comment
+      responses:
+        200:
+          description: OK
+  
+  /tasks/ID/applicants:
+    get:
+      summary: Gets a list of applicants for task
+      description: Gets a list of applicants for task
+      responses:
+        200:
+          description: OK
+    post:
+      summary: Applies to a task
+      description: Applies to a task
+      responses:
+        200:
+          description: OK
+    
+  
+  /tasks/ID/applicants/ID:
+    get:
+      summary: Gets specific applicant status
+      description: Gets specific applicant status
+      responses:
+        200:
+          description: OK
+    put:
+      summary: Updates applicant status
+      description: Updates applicant status
+      responses:
+        200:
+          description: OK
+  
+  /account/{ID}:
+    get:
+      summary: Gets information about account with ID
+      description: Gets information about account with ID
+      operationId: getUserByID
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: ID
+          description: ID of the account
+          required: true
+          type: integer
+          format: int32
+      responses:
+        "404":
+          description: Account not found
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Account"
+        "400":
+          description: Invalid ID supplied
+    put:
+      summary: Updates an account
+      description: Updates an account
+      operationId: updateAccount
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: ID
+          description: ID of the account
+          required: true
+          type: integer
+          format: int32
+        - in: body
+          name: account
+          description: The updated account
+          required: true
+          schema:
+            $ref: "#/definitions/Account"
+      responses:
+        "404":
+          description: Account not found
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+  /account:
+    post:
+      summary: Creates new profile
+      description: Creates new profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Account info
+          required: true
+          schema:
+            $ref: "#/definitions/Account"
+      responses:
+        "200":
+          description: Successful operation
+        #ID already in use
+    
+  /ratings/ID:
+    get:
+      summary: Gets last 5 ratings for profile ID
+      description: Gets last 5 ratings for profile ID
+      responses:
+        200:
+          description: OK
+    put:
+      summary: Creates a rating for profile ID
+      description: Creates a rating for profile ID
+      responses:
+        200:
+          description: OK
+    
+    
+  /account/applied:
+    get:
+     summary: Gets a list of all tasks the user has applied to
+     description: Gets a list of all tasks the user has applied to
+     responses:
+       200:
+         description: OK
+        
+  /account/ID/tasks:
+    get:
+      summary: Gets all tasks created by account ID
+      description: Gets all tasks created by account ID
+      responses:
+        200:
+          description: OK  
+
+definitions:
+  Task:
+    type: object
+    properties:
+      id:
+        type: string
+        description: the ID identifying this task
+        readOnly: true
+      title:
+        type: string
+        maxLength: 256
+      description:
+        type: string
+        maxLength: 512
+      price:
+        type: number
+        description: The price for completion of the task
+      ECT:
+        type: integer
+        description: The estimated completion time in minutes
+      supplies:
+        type: boolean
+        description: Are relevant supplies available for the task
+      urgent:
+        type: boolean
+        description: Is the task urgent(expires after six hours)
+      views:
+        type: integer
+        readOnly: true
+        description: How many views has this task had?
+      street:
+        type: string
+        maxLength: 128
+      zipaddress:
+        type: integer
+      creatorid:
+        type: string
+        readOnly: true
+        description: The userID of the creator if this task
+      tags:
+        type: array
+        items:
+          type: integer
+          minimum: 3
+          maximum: 63
+          
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+  
+  Account:
+    type: object
+    properties:
+      userID:
+        type: string
+        readOnly: true
+      name:
+        type: string
+      email:
+        type: string
+      phone:
+        type: string
+      sex: # Male = true, female = false. Dont even try, I will cut you.
+        type: boolean
+      aboutMe:
+        type: string
+      competences:
+        type: array
+        items:
+          type: string
+      #profilePhoto:
+      #idleLocation:
+      
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
