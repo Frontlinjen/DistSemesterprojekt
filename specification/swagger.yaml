@@ -36,7 +36,10 @@ paths:
         200:
           description: The identifier of the newly created task
           schema:
-            type: integer
+            type: object
+            properties:
+              taskID:
+                type: integer
         default:
           description: Unexpected error
           schema:
@@ -73,9 +76,7 @@ paths:
           required: true
       responses:
         200:
-          description: success or not
-          schema:
-            type: boolean
+          description: update successfull
         404:
           description: Not found
     delete:
@@ -87,9 +88,7 @@ paths:
            required: true
       responses:
         200:
-          description: success or not
-          schema:
-            type: boolean
+          description: delete was successfull
         404:
           description: Not found
   /tasks/{ID}/images:
@@ -122,13 +121,13 @@ paths:
           200:
             description: The id of the newly added image
   
-  /task/{taskID}/comments:
+  /tasks/{ID}/comments:
     get:
       summary: comments type
       description: Gets all comments of a task
       parameters:
         - in: path
-          name: taskID
+          name: ID
           description: ID of the task
           required: true
           type: integer
@@ -156,7 +155,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: taskID
+        - name: ID
           in: path
           type: number
           format: int32
@@ -324,7 +323,10 @@ paths:
         200:
           description: Successful operation
           schema:
-            type: string
+            type: object
+            properties:
+               status:
+                 type: string
         400:
           description:  Invalid ID supplier
   
@@ -421,10 +423,13 @@ paths:
           schema: 
             type: array
             items:
-              type: integer
+              type: object
+              properties:
+                status:
+                  type: string
         400: 
           description: Invalid ID supplied
-          
+  
   /account/applied:
     get:
       summary: Gets a list of all tasks the user has applied to
@@ -440,7 +445,10 @@ paths:
           schema: 
             type: array
             items:
-              type: string
+              type: object
+              properties:
+                 status:
+                   type: string
         400: 
           description: Invalid ID supplied
           
@@ -494,7 +502,6 @@ definitions:
       id:
         type: string
         description: the ID identifying this task
-        readOnly: true
       title:
         type: string
         maxLength: 256
@@ -515,7 +522,6 @@ definitions:
         description: Is the task urgent(expires after six hours)
       views:
         type: integer
-        readOnly: true
         description: How many views has this task had?
       street:
         type: string
@@ -524,7 +530,6 @@ definitions:
         type: integer
       creatorid:
         type: string
-        readOnly: true
         description: The userID of the creator if this task
       tags:
         type: array
@@ -549,7 +554,6 @@ definitions:
     properties:
       userID:
         type: string
-        readOnly: true
       name:
         type: string
       email:
