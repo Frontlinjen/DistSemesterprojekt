@@ -41,12 +41,21 @@ public class URL{
 		return ret;
 	}
 	
+	public void addParameter(String key, String value)
+	{
+		parameters.put(key, value);
+	}
+	
 	private String parsePath(String url)
 	{
 		int start = url.indexOf("//");
 		String result;
 		if(start != -1){
 			start = url.indexOf('/', start+2);
+		}
+		else
+		{
+			start = url.indexOf('/');
 		}
 		int end = url.indexOf('?');
 		if(end != -1){
@@ -69,7 +78,7 @@ public class URL{
 		}
 		else if(start==0)
 		{
-			result = url.substring(0, end - 1);
+			result = url.substring(0, end);
 		}
 		else if(end==-1)
 		{
