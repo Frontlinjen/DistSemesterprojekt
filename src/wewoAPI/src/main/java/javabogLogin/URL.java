@@ -12,7 +12,7 @@ public class URL{
 	public String getHostname() {
 		return hostname;
 	}
-
+//A
 	public String getPath() {
 		return path;
 	}
