@@ -103,12 +103,7 @@ paths:
         200:
           description: The requested task
           schema:
-            type: array
-            items:
-              type: object
-              properties:
-                status:
-                  type: string
+            $ref: '#/definitions/StringArray'
         404:
           description: Task not found
     post:
@@ -139,12 +134,7 @@ paths:
         200:
           description: Successful operation
           schema: 
-            type: array
-            items:
-              type: object
-              properties:
-                status:
-                  type: string
+            $ref: '#/definitions/StringArray'
         default:
           description: Unexpected error
           schema:
@@ -272,12 +262,7 @@ paths:
         200:
           description: Successful operation
           schema: 
-            type: array
-            items:
-              type: object
-              properties:
-                status:
-                  type: integer
+            $ref: '#/definitions/StringArray'
         400:
           description: Invalid ID supplied
     post:
@@ -328,10 +313,7 @@ paths:
         200:
           description: Successful operation
           schema:
-            type: object
-            properties:
-               status:
-                 type: string
+            $ref: '#/definitions/String'
         400:
           description:  Invalid ID supplier
   
@@ -426,12 +408,7 @@ paths:
         200:
           description: Successful operation
           schema: 
-            type: array
-            items:
-              type: object
-              properties:
-                status:
-                  type: string
+            $ref: '#/definitions/StringArray'
         400: 
           description: Invalid ID supplied
   
@@ -447,13 +424,8 @@ paths:
           description: Account not found
         200:
           description: Successful operation
-          schema: 
-            type: array
-            items:
-              type: object
-              properties:
-                 status:
-                   type: string
+          schema:
+            $ref: '#/definitions/StringArray'
         400: 
           description: Invalid ID supplied
           
@@ -501,6 +473,18 @@ paths:
         #ID already in use
 
 definitions:
+  String:
+    type: object
+    properties:
+        status:
+          type: string
+  StringArray:
+    type: array
+    items:
+      type: object
+      properties:
+        status:
+          type: string
   Task:
     type: object
     properties:
@@ -582,14 +566,4 @@ definitions:
         type: integer
       description:
         type: string
-      #ratee:
-      
-  
-  
-  
-  
-  
-  
-  
-  
-  
+#ratee:
