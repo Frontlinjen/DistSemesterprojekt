@@ -25,14 +25,8 @@ public class TaskController {
 	 
 	public IDObject createTask(Task task, Context context)
 	{
-		Random random = new Random();
-		int ID = random.nextInt(16);
-		StringBuilder taskID = new StringBuilder();
-		for (int i = 0; i < ID; i++) {
-			taskID.append((char)(65+random.nextInt(20)));
-		}
+		
 		IDObject newTaskID = new IDObject();
-		newTaskID.setID(taskID.toString());
 		
 		TaskDAO dao = new MySQLTaskDAO();
 		Date date = new Date(System.currentTimeMillis());
@@ -74,7 +68,7 @@ public class TaskController {
 			return null;
 		}
 		List<Task> tasks = new ArrayList<Task>();
-		for(int i = findData.getIndex(); i < findData.getMax(); i++){
+		for(int i = findData.getIndex(); i > 0; i--){
 			TaskDTO DTOTask = DTOtasks.get(i); //Check om har tag
 			Task task = new Task();
 			task.setCreatorid(DTOTask.getCreatorId());
@@ -100,21 +94,19 @@ public class TaskController {
 		TaskDTO dto;
 		try {
 			dto = dao.getTask(id.getID());
-			Task task = new Task(
-					dto.getId(),
-					dto.getTitle(),
-					dto.getDescription(),
-					dto.getPrice(),
-					dto.getEct(),
-					dto.getSupplies(),
-					dto.getUrgent(),
-					dto.getViews(), 
-					dto.getStreet(),
-					dto.getZipaddress(),
-					dto.getCreatorId()
+			Task task = new Task();
 					//dto.getTags() //Mangler tags fra DTO
 					
-			);
+			task.setCreatorid(dto.getCreatorId());
+			task.setDescription(dto.getDescription());
+			task.setETC(dto.getEct());
+			task.setID(dto.getId());
+			task.setPrice(dto.getPrice());
+			task.setStreet(dto.getStreet());
+			task.setSupplies(dto.getSupplies());
+			task.setTitle(dto.getTitle());
+			task.setUrgent(dto.getUrgent());
+			
 			
 			return task;
 			
@@ -130,25 +122,26 @@ public class TaskController {
 	{
 		
 		TaskDAO dao = new MySQLTaskDAO();
-		Date date = new Date(System.currentTimeMillis());
-		TaskDTO dto = new TaskDTO(
-				task.getID(),
-				task.getTitle(),
-				task.getDescription(),
-				task.getPrice(),
-				task.getETC(),
-				task.isSupplies(),
-				task.isUrgent(),
-				task.getViews(), 
-				task.getStreet(),
-				task.getZipaddress(),
-				date,//Erstat med gammel dato
-				date,
-				context.getIdentity().getIdentityId()
-				);
+		
 		try {
-			dto = (TaskDTO) context.getIdentity();
+			TaskDTO dto = dao.getTask(task.getID());
 			if(dto.getCreatorId().equals(context.getIdentity())){
+				Date date = new Date(System.currentTimeMillis());
+				dto = new TaskDTO(
+						task.getID(),
+						task.getTitle(),
+						task.getDescription(),
+						task.getPrice(),
+						task.getETC(),
+						task.isSupplies(),
+						task.isUrgent(),
+						task.getViews(), 
+						task.getStreet(),
+						task.getZipaddress(),
+						date,//Erstat med gammel dato
+						date,
+						context.getIdentity().getIdentityId()
+						);
 				dao.updateTask(dto);
 			}
 		} catch (DALException e) {

@@ -8,16 +8,16 @@ public class TaskDTO implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	String id, title, description, street, creatorid;
-	int price, ect, views, zipaddress;
-	boolean supplies, urgent;
+	String  title, description, street, creatorid;
+	int id, price, ect, views, zipaddress;
+	int supplies, urgent;
 	Date created, edited;
 	
 	public TaskDTO(){
 		
 	}
 	
-	public TaskDTO(String id, String title, String description, int price, int ect, 
+	public TaskDTO(int id, String title, String description, int price, int ect, 
 			boolean supplies, boolean urgent, int views, String street, int zipaddress, Date created, 
 			Date edited, String creatorid)
 	{	
@@ -26,8 +26,8 @@ public class TaskDTO implements Serializable {
 		this.description = description;
 		this.price = price;
 		this.ect = ect;
-		this.supplies = supplies;
-		this.urgent = urgent;
+		this.supplies = supplies ? 1 : 0;
+		this.urgent = urgent ? 1 : 0;
 		this.views = views;
 		this.street = street;
 		this.zipaddress = zipaddress;
@@ -52,8 +52,8 @@ public class TaskDTO implements Serializable {
 		this.creatorid = tas.getCreatorId();
 	}
 	
-	public String getId(){return id;}
-	public void setId(String id){this.id = id;}
+	public int getId(){return id;}
+	public void setId(int id){this.id = id;}
 	public String getTitle(){return title;}
 	public void setTitle(String title){this.title = title;}
 	public String getDescription(){return description;}
@@ -62,10 +62,10 @@ public class TaskDTO implements Serializable {
 	public void setPrice(int price){this.price = price;}
 	public int getEct(){return ect;}
 	public void setEct(int ect){this.ect = ect;}
-	public boolean getSupplies(){return supplies;}
-	public void setSupplies(boolean supplies){this.supplies = supplies;}
-	public boolean getUrgent(){return urgent;}
-	public void setUrgent(boolean urgent){this.urgent = urgent;}
+	public int getSupplies(){return supplies;}
+	public void setSupplies(int supplies){this.supplies = supplies;}
+	public int getUrgent(){return urgent;}
+	public void setUrgent(int urgent){this.urgent = urgent;}
 	public int getViews(){return views;}
 	public void setViews(int views){this.views = views;}
 	public String getStreet(){return street;}

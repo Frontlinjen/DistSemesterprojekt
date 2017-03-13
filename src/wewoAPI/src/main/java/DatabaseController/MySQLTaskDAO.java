@@ -7,11 +7,11 @@ import java.util.List;
 
 public class MySQLTaskDAO implements TaskDAO{
 
-	public TaskDTO getTask(String id) throws DALException {
-		ResultSet rs = DatabaseConnector.doQuery("SELECT * FROM Tasks WHERE cpr = " + id + ";");
+	public TaskDTO getTask(int id) throws DALException {
+		ResultSet rs = DatabaseConnector.doQuery("SELECT * FROM Tasks WHERE id = " + id + ";");
 	    try {
 	    	if (!rs.first()) throw new DALException("Task med id " + id + " findes ikke");
-	    	return new TaskDTO (rs.getString("ID"), rs.getString("title"), 
+	    	return new TaskDTO (rs.getInt("ID"), rs.getString("title"), 
 					rs.getString("description"), rs.getInt("price"), rs.getInt("ECT"),
 					rs.getBoolean("supplies"), rs.getBoolean("urgent"), rs.getInt("views"),
 					rs.getString("street"), rs.getInt("zipcode"), rs.getDate("created"),
@@ -27,7 +27,7 @@ public class MySQLTaskDAO implements TaskDAO{
 		{
 			while (rs.next()) 
 			{
-				list.add(new TaskDTO(rs.getString("ID"), rs.getString("title"), 
+				list.add(new TaskDTO(rs.getInt("ID"), rs.getString("title"), 
 						rs.getString("description"), rs.getInt("price"), rs.getInt("ECT"),
 						rs.getBoolean("supplies"), rs.getBoolean("urgent"), rs.getInt("views"),
 						rs.getString("street"), rs.getInt("zipcode"), rs.getDate("created"),
@@ -41,10 +41,10 @@ public class MySQLTaskDAO implements TaskDAO{
 	public int createTask(TaskDTO tas) throws DALException {
 		return DatabaseConnector.doUpdate(
 				"INSERT INTO Tasks(ID, title, description, price, ECT, supplies, urgent, views, "
-				+ "street, zipcode, creatorID, tags) VALUES " +
+				+ "street, zipcode, created, edited, creatorID) VALUES " +
 				"(" + tas.getId() + ", '" + tas.getTitle() + "', '" + tas.getDescription() + "', '" + 
 				tas.getPrice() + "', '" + tas.getEct() + "', '" + tas.getSupplies() + "', '" +
-				tas.getUrgent() + "', " + tas.getViews() + "', " + tas.getStreet() + "', '" +
+				tas.getUrgent() + "', '" + tas.getViews() + "', '" + tas.getStreet() + "', '" +
 				tas.getZipaddress() + "', '" + tas.getCreated() + "', '" + tas.getEdited() +
 				"', '" + tas.getCreatorId() + "');"
 			);
@@ -62,7 +62,7 @@ public class MySQLTaskDAO implements TaskDAO{
 		);
 	}
 
-	public int deleteTask(String id) throws DALException {
+	public int deleteTask(int id) throws DALException {
 		return DatabaseConnector.doUpdate("DELETE FROM Tasks WHERE ID = " + id + ";");
 	}
 

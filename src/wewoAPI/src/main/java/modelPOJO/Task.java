@@ -9,10 +9,10 @@ public class Task {
 	public void setTags(List<Integer> tags) {
 		this.tags = tags;
 	}
-	public String getID() {
+	public int getID() {
 		return ID;
 	}
-	public void setID(String iD) {
+	public void setID(int iD) {
 		ID = iD;
 	}
 	public String getTitle() {
@@ -40,16 +40,28 @@ public class Task {
 		ETC = eTC;
 	}
 	public boolean isSupplies() {
-		return supplies;
+		if(supplies == 1)
+			return true;
+		else
+			return false;
 	}
-	public void setSupplies(boolean supplies) {
-		this.supplies = supplies;
+	public void setSupplies(int supplies) {
+		if(supplies == 1)
+			this.supplies = 1;
+		else
+			this.supplies = 0;
 	}
 	public boolean isUrgent() {
-		return urgent;
+		if(urgent == 1 )
+			return true;
+		else
+			return false;
 	}
-	public void setUrgent(boolean urgent) {
-		this.urgent = urgent;
+	public void setUrgent(int urgent) {
+		if(urgent == 1)
+			this.urgent = 1;
+		else
+			this.urgent = 0;
 	}
 	public int getViews() {
 		return views;
@@ -75,13 +87,13 @@ public class Task {
 	public void setCreatorid(String creatorid) {
 		this.creatorid = creatorid;
 	}
-	String ID;
+	int ID;
 	String title;
 	String description;
 	int price;
 	int ETC;
-	boolean supplies;
-	boolean urgent;
+	int supplies;
+	int urgent;
 	int views;
 	String street;
 	int zipaddress;

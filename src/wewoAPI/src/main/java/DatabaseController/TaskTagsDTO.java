@@ -4,14 +4,13 @@ import java.io.Serializable;
 
 public class TaskTagsDTO implements Serializable{
 	
-	int TagID;
-	String TaskID;
-	
-	public TaskTagsDTO(){
-		
-	}
-	
-	public TaskTagsDTO(int tagid, String taskid){
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	int TagID, TaskID;
+
+	public TaskTagsDTO(int tagid, int taskid){
 		this.TagID = tagid;
 		this.TaskID = taskid;
 	}
@@ -21,9 +20,17 @@ public class TaskTagsDTO implements Serializable{
 		this.TaskID = tas.getTaskID();
 	}
 	
-	public int getTagID(){return TagID;}
-	public void setTagID(int TagID){this.TagID = TagID;}
-	public String getTaskID(){return TaskID;}
-	public void setTagID(String TaskID){this.TaskID = TaskID;}
+	public int getTagID(){
+		return TagID;
+		}
+	public void setTagID(int TagID){
+		this.TagID = TagID;
+		}
+	public int getTaskID(){
+		return TaskID;
+		}
+	public void setTaskID(int TaskID){
+		this.TaskID = TaskID;
+		}
 
 }

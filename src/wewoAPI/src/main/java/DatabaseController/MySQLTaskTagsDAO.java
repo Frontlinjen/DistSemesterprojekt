@@ -7,14 +7,14 @@ import java.util.List;
 
 public class MySQLTaskTagsDAO implements TaskTagsDAO{
 
-	public List<TaskTagsDTO> getTaskTagsList(String ID) throws DALException {
+	public List<TaskTagsDTO> getTaskTagsList(int ID) throws DALException {
 		List<TaskTagsDTO> list = new ArrayList<TaskTagsDTO>();
 		ResultSet rs = DatabaseConnector.doQuery("SELECT * FROM Tasks;");
 		try
 		{
 			while (rs.next()) 
 			{
-				list.add(new TaskTagsDTO(rs.getInt("TagID"), rs.getString("TaskID")));
+				list.add(new TaskTagsDTO(rs.getInt("TagID"), rs.getInt("TaskID")));
 			}
 		}
 		catch (SQLException e) { throw new DALException(e.getMessage()); }
@@ -34,7 +34,7 @@ public class MySQLTaskTagsDAO implements TaskTagsDAO{
 		{
 			while (rs.next()) 
 			{
-				list.add(new TaskTagsDTO(rs.getInt("TagID"), rs.getString("TaskID")));
+				list.add(new TaskTagsDTO(rs.getInt("TagID"), rs.getInt("TaskID")));
 			}
 		}
 		catch (SQLException e) { throw new DALException(e.getMessage()); }
@@ -48,7 +48,7 @@ public class MySQLTaskTagsDAO implements TaskTagsDAO{
 		"';");
 	}
 
-	public int deleteTaskTags(int TagID, String TaskID) throws DALException {
+	public int deleteTaskTags(int TagID, int TaskID) throws DALException {
 		return DatabaseConnector.doUpdate("DELETE FROM TaskTags WHERE TagID = " + TagID + " AND " +
 				"TaskID = " + TaskID + ";");
 	}
