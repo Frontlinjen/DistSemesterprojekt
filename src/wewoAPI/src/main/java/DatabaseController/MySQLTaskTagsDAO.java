@@ -21,15 +21,31 @@ public class MySQLTaskTagsDAO implements TaskTagsDAO{
 		return list;
 	}
 
-	public List<TaskTagsDTO> getTagsTasksList() throws DALException {
+	public List<TaskTagsDTO> getTagsTasksList(List<Integer> tags) throws DALException {
+		String s = null;
+		for(int i = 0; i < tags.size(); i++){
+			if(s == null && i != tags.size()-1){
+				s = tags.get(i) + ", ";
+			}
+			else if(s == null && i == tags.size()-1){
+				s = tags.get(i) + "";
+			}
+			else if (s != null && i != tags.size()-1){
+				s = s + tags.get(i) + ", ";
+			}
+			else {
+				s = s + tags.get(i) + "";
+			}
+		}
 		
 		List<TaskTagsDTO> list = new ArrayList<TaskTagsDTO>();
 		ResultSet rs = DatabaseConnector.doQuery("select * from Tasks INNER JOIN (select "
-				+ "TaskID from TaskTags, Tags where Tags.ID in (@values) GROUP BY TaskID) "
-				+ "AS TaskIDs ON Tasks.ID = TaskIDs.TaskID LIMIT @begin, @end;\",\");"
-				+ "new MySqlParameter(\"values\", String.Join(\",\", tags)), "
-				+ "new MySqlParameter(\"begin\", index*max+1), new MySqlParameter(\"end\", "
-				+ "index*max+ max));");
+				+ "TaskID from TaskTags, Tags where Tags.ID in (" + s + ") GROUP BY TaskID);"
+				//+ "AS TaskIDs ON Tasks.ID = TaskIDs.TaskID LIMIT @begin, @end;\",\");"
+				//+ "new MySqlParameter(\"values\", String.Join(\",\", tags)), "
+				//+ "new MySqlParameter(\"begin\", index*max+1), new MySqlParameter(\"end\", "
+				//+ "index*max+ max));"
+				);
 		try
 		{
 			while (rs.next()) 
@@ -38,6 +54,7 @@ public class MySQLTaskTagsDAO implements TaskTagsDAO{
 			}
 		}
 		catch (SQLException e) { throw new DALException(e.getMessage()); }
+		System.out.println(list);
 		return list;
 		
 	}

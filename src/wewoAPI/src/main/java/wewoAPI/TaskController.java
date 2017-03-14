@@ -57,7 +57,7 @@ public class TaskController {
 	
 	//See: https://github.com/Hjorthen/Bubble/blob/master/AuthTest/Repositories/TaskRepository.cs#L74
 	public List<Task> findTasks(FindDataObject findData, Context context)
-	{
+	{/*
 		TaskDAO dao = new MySQLTaskDAO();
 		List<TaskDTO> DTOtasks;
 		try {
@@ -68,8 +68,7 @@ public class TaskController {
 			return null;
 		}
 		List<Task> tasks = new ArrayList<Task>();
-		for(int i = findData.getIndex(); i > 0; i--){
-			TaskDTO DTOTask = DTOtasks.get(i); //Check om har tag
+		for(int i = 0; i < DTOtasks.size(); i++){
 			Task task = new Task();
 			task.setCreatorid(DTOTask.getCreatorId());
 			task.setDescription(DTOTask.getDescription());
@@ -85,7 +84,8 @@ public class TaskController {
 			task.setZipaddress(DTOTask.getZipaddress());
 			tasks.add(task);
 		}
-		return tasks;
+		return tasks;*/
+		return null;
 	}
 	
 	public Task getTask(IDObject id, Context context)

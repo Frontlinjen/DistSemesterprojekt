@@ -39,15 +39,26 @@ public class MySQLTaskDAO implements TaskDAO{
 	}
 
 	public int createTask(TaskDTO tas) throws DALException {
-		return DatabaseConnector.doUpdate(
+		int res = DatabaseConnector.doUpdate(
 				"INSERT INTO Tasks(ID, title, description, price, ECT, supplies, urgent, views, "
 				+ "street, zipcode, created, edited, creatorID) VALUES " +
 				"(" + tas.getId() + ", '" + tas.getTitle() + "', '" + tas.getDescription() + "', '" + 
 				tas.getPrice() + "', '" + tas.getEct() + "', '" + tas.getSupplies() + "', '" +
 				tas.getUrgent() + "', '" + tas.getViews() + "', '" + tas.getStreet() + "', '" +
 				tas.getZipaddress() + "', '" + tas.getCreated() + "', '" + tas.getEdited() +
-				"', '" + tas.getCreatorId() + "');"
-			);
+				"', '" + tas.getCreatorId() + "');");
+		
+		try {
+			ResultSet rs = DatabaseConnector.doQuery("SELECT LAST_INSERT_ID();");
+			rs.first();
+			int ID = rs.getInt("last_insert_id()");
+			tas.id = ID;
+			return res;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return res;
 	}
 
 	public int updateTask(TaskDTO tas) throws DALException {
