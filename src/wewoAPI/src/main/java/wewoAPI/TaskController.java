@@ -1,21 +1,15 @@
 package wewoAPI;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.sql.Date;
 import java.util.List;
-import java.util.Random;
-
-import javax.security.auth.callback.Callback;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 
 import DatabaseController.DALException;
 import DatabaseController.MySQLTaskDAO;
 import DatabaseController.TaskDAO;
 import DatabaseController.TaskDTO;
+import exceptions.UnauthorizedException;
 import modelPOJO.IDObject;
 import modelPOJO.Task;
 import modelPOJO.FindDataObject;;
@@ -23,8 +17,12 @@ import modelPOJO.FindDataObject;;
 public class TaskController {
 	//Initialize database connection
 	 
-	public IDObject createTask(Task task, Context context)
+	public IDObject createTask(Task task, Context context) throws UnauthorizedException
 	{
+		if(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty())
+		{
+			throw new UnauthorizedException();
+		}
 		
 		IDObject newTaskID = new IDObject();
 		
@@ -47,6 +45,8 @@ public class TaskController {
 				);
 		try {
 			dao.createTask(dto);
+			newTaskID.setID(dto.getId());
+			return newTaskID;
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -88,6 +88,7 @@ public class TaskController {
 		return null;
 	}
 	
+	
 	public Task getTask(IDObject id, Context context)
 	{
 		TaskDAO dao = new MySQLTaskDAO();
@@ -118,7 +119,7 @@ public class TaskController {
 	}
 	
 	//PUT /task/{ID}
-	public int updateTask(Task task, Context context)
+	public void updateTask(Task task, Context context)
 	{
 		
 		TaskDAO dao = new MySQLTaskDAO();
@@ -147,9 +148,7 @@ public class TaskController {
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return 1;
 		}
-		return 0;
 	}
 	
 	public int deleteTask(IDObject id, Context context)

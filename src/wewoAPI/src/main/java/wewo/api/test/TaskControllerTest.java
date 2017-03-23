@@ -36,7 +36,7 @@ public class TaskControllerTest {
 		ContextTest cont = new ContextTest();
 		
 		
-		//TC.createTask(task, cont);
+		//System.out.println(TC.createTask(task, cont).getID());
 		Task t = TC.getTask(ID, cont);
 		
 		t.getTags();

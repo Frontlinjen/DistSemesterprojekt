@@ -7,19 +7,35 @@ info:
 paths:
   /tasks:
     get:
-      summary: Queries tasks
+      summary: Queries tasks from tags
       description: Queries a tasks and returns a list of tasks
+      parameters:
+        - name: tag
+          required: true
+          in: query
+          type: array
+          items: 
+            type: integer
+          collectionFormat: multi
+        - name: page
+          in: query
+          type: integer
+        - name: count
+          in: query
+          type: integer
       responses:
         "200":
-          description: Successful operation
+          description: Returns a list of tasks
           schema:
             type: array
             items:
               $ref: '#/definitions/Task'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+        "400":
+          description: Invalid tags were specified
+        "401":
+          description: User is not logged in or session has expired'
+      security:
+      - sigv4: []
     post:
       summary: Creates a new task
       description: Creates a new task and returns the ID of that task
@@ -471,7 +487,12 @@ paths:
         200:
           description: Successful operation
         #ID already in use
-
+securityDefinitions:
+  sigv4:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    x-amazon-apigateway-authtype: "awsSigv4"
 definitions:
   String:
     type: object
