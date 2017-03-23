@@ -6,16 +6,16 @@ import modelPOJO.IDObject;
 import modelPOJO.JsonList;
 import modelPOJO.ResponseObject;
 public class ApplicantsController {
-	JsonList<String> GetApplicants(IDObject taskid, Context context)
+	public JsonList<String> GetApplicants(IDObject taskid, Context context)
 	{
 		return null;
 	}
 	
-	void PostApplications(Application application, Context context)
+	public void PostApplications(Application application, Context context)
 	{
 		
 	}
-	ResponseObject<String> GetApplication(IDObject object, Context context)
+	public ResponseObject<String> GetApplication(IDObject object, Context context)
 	{
 		return null;
 	}
