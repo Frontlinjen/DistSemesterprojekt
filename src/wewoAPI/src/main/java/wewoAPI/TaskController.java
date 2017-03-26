@@ -6,8 +6,8 @@ import java.util.List;
 import com.amazonaws.services.lambda.runtime.Context;
 
 import DatabaseController.DALException;
-import DatabaseController.MySQLTaskDAO;
-import DatabaseController.TaskDAO;
+import DatabaseController.MySQLTaskRespository;
+import DatabaseController.TaskRespository;
 import DatabaseController.TaskDTO;
 import exceptions.UnauthorizedException;
 import modelPOJO.IDObject;
@@ -26,7 +26,7 @@ public class TaskController {
 		
 		IDObject newTaskID = new IDObject();
 		
-		TaskDAO dao = new MySQLTaskDAO();
+		TaskRespository dao = new MySQLTaskRespository();
 		Date date = new Date(System.currentTimeMillis());
 		TaskDTO dto = new TaskDTO(
 				newTaskID.getID(),
@@ -91,7 +91,7 @@ public class TaskController {
 	
 	public Task getTask(IDObject id, Context context)
 	{
-		TaskDAO dao = new MySQLTaskDAO();
+		TaskRespository dao = new MySQLTaskRespository();
 		TaskDTO dto;
 		try {
 			dto = dao.getTask(id.getID());
@@ -122,7 +122,7 @@ public class TaskController {
 	public void updateTask(Task task, Context context)
 	{
 		
-		TaskDAO dao = new MySQLTaskDAO();
+		TaskRespository dao = new MySQLTaskRespository();
 		
 		try {
 			TaskDTO dto = dao.getTask(task.getID());
@@ -153,7 +153,7 @@ public class TaskController {
 	
 	public int deleteTask(IDObject id, Context context)
 	{
-		TaskDAO dao = new MySQLTaskDAO();
+		TaskRespository dao = new MySQLTaskRespository();
 		
 		try {
 			TaskDTO task = dao.getTask(id.getID());

@@ -5,6 +5,28 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+
+import java.sql.PreparedStatement;
+
+class PreparedStatementWrapper{
+	private PreparedStatement statement;
+	private String query;
+	
+	public PreparedStatementWrapper(String query)
+	{
+		this.query = query;
+	}
+	
+	public void generateStatement(Connection db) throws SQLException
+	{
+		statement = db.prepareStatement(query);
+	}
+	public PreparedStatement get(){
+		return statement;
+	}
+	
+}
 
 public class DatabaseConnector {
 	/**
@@ -34,6 +56,16 @@ public class DatabaseConnector {
 	
 	private static Connection conn;
 	private static Statement stm;
+	private static HashMap<String, PreparedStatementWrapper> statements;
+	
+	public static void RegisterStatement(String identifier, String query)
+	{
+		if(!statements.containsKey(identifier))
+		{
+			PreparedStatementWrapper statement = new PreparedStatementWrapper(query);
+			statements.put(identifier, statement);
+		}
+	}
 	
 	public DatabaseConnector(String server, int port, String database,
 			String username, String password)
@@ -43,6 +75,7 @@ public class DatabaseConnector {
 		conn	= connectToDatabase("jdbc:mysql://"+server+":"+port+"/"+database,
 					username, password);
 		stm		= conn.createStatement();
+		statements = new HashMap<String, PreparedStatementWrapper>();
 	}
 	
 	public DatabaseConnector() throws InstantiationException, IllegalAccessException,
@@ -50,6 +83,22 @@ public class DatabaseConnector {
 	{
 		this(Constant.server, Constant.port, Constant.database,
 				Constant.username, Constant.password);
+	}
+	
+	public static PreparedStatement getPreparedStatement(String identifier) throws SQLException
+	{
+		PreparedStatementWrapper ret = statements.get(identifier);
+		if(ret != null)
+		{
+			if(ret.get() != null){
+				return ret.get();
+			}
+			else{
+				ret.generateStatement(conn);
+				return ret.get();
+			}
+		}
+		return null;
 	}
 	
 	public static ResultSet doQuery(String cmd) throws DALException

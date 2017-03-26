@@ -15,7 +15,7 @@ public class ApplicantsController {
 	{
 		
 	}
-	public ResponseObject<String> GetApplication(IDObject object, Context context)
+	public 	ResponseObject<String> GetApplication(IDObject object, Context context)
 	{
 		return null;
 	}
