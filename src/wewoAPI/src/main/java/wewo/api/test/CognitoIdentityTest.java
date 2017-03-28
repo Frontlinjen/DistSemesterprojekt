@@ -1,12 +1,14 @@
 package wewo.api.test;
 
 public class CognitoIdentityTest implements com.amazonaws.services.lambda.runtime.CognitoIdentity{
-
+	String identityId;
+	
+	public void setIdentityId(String id){
+		identityId = id;
+	}
 
 	public String getIdentityId() {
-		// TODO Auto-generated method stub
-		String username = "TestName";
-		return username;
+		return identityId;
 	}
 
 	public String getIdentityPoolId() {

@@ -37,7 +37,7 @@ public class TaskDTO implements Serializable {
 	}
 	
 	//Should never contain fields that the user can't set
-	static TaskDTO fromModel(Task task)
+	public static TaskDTO fromModel(Task task)
 	{
 		TaskDTO dto = new TaskDTO();
 		//dto.setCreatorId(task.getCreatorid());
@@ -52,7 +52,7 @@ public class TaskDTO implements Serializable {
 		return dto;
 	}
 	
-	Task getModel(){
+	public Task getModel(){
 		Task task = new Task();
 		task.setCreatorid(this.getCreatorId());
 		task.setDescription(this.getDescription());
