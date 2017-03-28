@@ -6,7 +6,27 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
 public class ContextTest implements Context{
-
+	CognitoIdentityTest cognito = new CognitoIdentityTest();
+	
+	public ContextTest(String identity){
+		cognito.setIdentityId(identity);
+	}
+	
+	public void setIdentity(String s)
+	{
+		if(cognito == null)
+		{
+			cognito = new CognitoIdentityTest();
+		}
+		cognito.setIdentityId(s);
+	}
+	
+	public void clearIdentity()
+	{
+		cognito = null;
+	}
+	
+	
 	public String getAwsRequestId() {
 		// TODO Auto-generated method stub
 		return null;
@@ -38,9 +58,7 @@ public class ContextTest implements Context{
 	}
 
 	public CognitoIdentity getIdentity() {
-		// TODO Auto-generated method stub
-		CognitoIdentityTest cog = new CognitoIdentityTest();
-		return cog;
+		return cognito;
 	}
 
 	public ClientContext getClientContext() {
