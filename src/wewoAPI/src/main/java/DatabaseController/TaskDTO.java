@@ -3,6 +3,9 @@
 import java.io.Serializable;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.List;
+
+import modelPOJO.Task;
 
 public class TaskDTO implements Serializable {
 	
@@ -12,30 +15,11 @@ public class TaskDTO implements Serializable {
 	int id, price, ect, views, zipaddress;
 	int supplies, urgent;
 	Date created, edited;
+	List<Integer> tags;
 	
 	public TaskDTO(){
 		
 	}
-	
-	public TaskDTO(int id, String title, String description, int price, int ect, 
-			boolean supplies, boolean urgent, int views, String street, int zipaddress, Date created, 
-			Date edited, String creatorid)
-	{	
-		this.id = id;
-		this.title = title;
-		this.description = description;
-		this.price = price;
-		this.ect = ect;
-		this.supplies = supplies ? 1 : 0;
-		this.urgent = urgent ? 1 : 0;
-		this.views = views;
-		this.street = street;
-		this.zipaddress = zipaddress;
-		this.created = created;
-		this.edited = edited;
-		this.creatorid = creatorid;
-	}
-	
 	public TaskDTO(TaskDTO tas){
 		this.id = tas.getId();
 		this.title = tas.getTitle();
@@ -52,30 +36,63 @@ public class TaskDTO implements Serializable {
 		this.creatorid = tas.getCreatorId();
 	}
 	
+	//Should never contain fields that the user can't set
+	static TaskDTO fromModel(Task task)
+	{
+		TaskDTO dto = new TaskDTO();
+		//dto.setCreatorId(task.getCreatorid());
+		dto.setDescription(task.getDescription());
+		dto.setEct(task.getETC());
+		dto.setPrice(task.getPrice());
+		dto.setStreet(task.getStreet());
+		dto.setSupplies(task.isSupplies() ? 1 : 0);
+		dto.setTags(task.getTags());
+		dto.setTitle(task.getTitle());
+		dto.setUrgent(task.isUrgent() ? 1 : 0);
+		return dto;
+	}
+	
+	Task getModel(){
+		Task task = new Task();
+		task.setCreatorid(this.getCreatorId());
+		task.setDescription(this.getDescription());
+		task.setETC(this.getEct());
+		task.setPrice(this.getPrice());
+		task.setStreet(this.getStreet());
+		task.setSupplies(this.getSupplies() == 0 ? 0 : 1);
+		task.setTags(this.getTags());
+		task.setTitle(this.getTitle());
+		task.setUrgent(this.getUrgent() == 0 ? 1 : 0);
+		return task;
+	}
+	
+	
 	public int getId(){return id;}
-	public void setId(int id){this.id = id;}
+	public TaskDTO setId(int id){this.id = id; return this;}
 	public String getTitle(){return title;}
-	public void setTitle(String title){this.title = title;}
+	public TaskDTO setTitle(String title){this.title = title; return this;}
 	public String getDescription(){return description;}
-	public void setDescription(String description){this.description = description;}
+	public TaskDTO setDescription(String description){this.description = description; return this;}
 	public int getPrice(){return price;}
-	public void setPrice(int price){this.price = price;}
+	public TaskDTO setPrice(int price){this.price = price; return this;}
 	public int getEct(){return ect;}
-	public void setEct(int ect){this.ect = ect;}
+	public TaskDTO setEct(int ect){this.ect = ect; return this;}
 	public int getSupplies(){return supplies;}
-	public void setSupplies(int supplies){this.supplies = supplies;}
+	public TaskDTO setSupplies(int supplies){this.supplies = supplies; return this;}
 	public int getUrgent(){return urgent;}
-	public void setUrgent(int urgent){this.urgent = urgent;}
+	public TaskDTO setUrgent(int urgent){this.urgent = urgent; return this;}
 	public int getViews(){return views;}
-	public void setViews(int views){this.views = views;}
+	public TaskDTO setViews(int views){this.views = views; return this;}
 	public String getStreet(){return street;}
-	public void setStreet(String street){this.street = street;}
+	public TaskDTO setStreet(String street){this.street = street; return this;}
 	public int getZipaddress(){return zipaddress;}
-	public void setZipaddress(int zipaddress){this.zipaddress = zipaddress;}
+	public TaskDTO setZipaddress(int zipaddress){this.zipaddress = zipaddress; return this;}
 	public Date getCreated(){return created;}
-	public void setCreated(Date created){this.created = created;}
+	public TaskDTO setCreated(Date created){this.created = created; return this;}
 	public Date getEdited(){return edited;}
-	public void setEdited(Date edited){this.edited = edited;}
+	public TaskDTO setEdited(Date edited){this.edited = edited; return this;}
 	public String getCreatorId(){return creatorid;}
-	public void setCreatorId(String creatorid){this.creatorid = creatorid;}
+	public TaskDTO setCreatorId(String creatorid){this.creatorid = creatorid; return this;}
+	public void setTags(List<Integer> tags) { this.tags = tags; }
+	public List<Integer> getTags() { return tags; }
 }

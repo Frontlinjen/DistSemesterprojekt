@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class MySQLTaskRespository implements TaskRespository{
@@ -31,15 +32,23 @@ public class MySQLTaskRespository implements TaskRespository{
 			if (!rs.first()) 
 				throw new DALException("Task med id " + id + " findes ikke");
 			
-			return new TaskDTO (rs.getInt("ID"), rs.getString("title"), 
-					rs.getString("description"), rs.getInt("price"), rs.getInt("ECT"),
-					rs.getBoolean("supplies"), rs.getBoolean("urgent"), rs.getInt("views"),
-					rs.getString("street"), rs.getInt("zipcode"), rs.getDate("created"),
-					rs.getDate("edited"), rs.getString("creatorID"));
+			return generate(rs);
+			
 		}
 		catch (SQLException e) {throw new DALException(e); }
 	}
 
+	private TaskDTO generate(ResultSet rs) throws SQLException
+	{
+		TaskDTO task = new TaskDTO();
+		task.setId(rs.getInt("ID")).setTitle(rs.getString("title"))
+		.setDescription(rs.getString("description")).setTitle("title")
+		.setSupplies(rs.getBoolean("supplies") ? 1 : 0).setUrgent(rs.getBoolean("urgent") ? 1 : 0)
+		.setViews(rs.getInt("views")).setStreet(rs.getString("street")).setZipaddress(rs.getInt("zipcode"))
+		.setCreated(rs.getDate("created")).setEdited(rs.getDate("edited")).setCreatorId(rs.getString("creatorID"));
+		return task;
+	}
+	
 	public List<TaskDTO> getTaskList() throws DALException {
 		List<TaskDTO> list = new ArrayList<TaskDTO>();
 		ResultSet rs = DatabaseConnector.doQuery("SELECT * FROM Tasks;");
@@ -47,13 +56,10 @@ public class MySQLTaskRespository implements TaskRespository{
 		{
 			while (rs.next()) 
 			{
-				list.add(new TaskDTO(rs.getInt("ID"), rs.getString("title"), 
-						rs.getString("description"), rs.getInt("price"), rs.getInt("ECT"),
-						rs.getBoolean("supplies"), rs.getBoolean("urgent"), rs.getInt("views"),
-						rs.getString("street"), rs.getInt("zipcode"), rs.getDate("created"),
-						rs.getDate("edited"), rs.getString("creatorID")));
+				TaskDTO task = generate(rs);
+				list.add(task);
 			}
-		}
+		} 
 		catch (SQLException e) { throw new DALException(e.getMessage()); }
 		return list;
 	}
@@ -112,8 +118,34 @@ public class MySQLTaskRespository implements TaskRespository{
 	}
 
 	public List<TaskDTO> queryTasks(List<Integer> tags) {
+		int START = 0;
+		int END = 25;
+	
+		StringBuilder sb = new StringBuilder();
+		for (Integer integer : tags) {
+			sb.append(tags + ", ");
+		}
+		String TAGS = sb.toString();
+		try{
+			
 		
-		
+		//Potential risk of SQL Injection
+		ResultSet rs  = DatabaseConnector.doQuery("select * from Tasks INNER JOIN from TaskTags " + 
+		"(select TaskID from TaskTags, Tags where Tags.ID in (" + TAGS  + ") GROUP BY TaskID)" + 
+		" AS TaskID ON Tasks.ID = TaskIDs.TaskID LIMIT " + START + ", " + END + ";");
+		while(rs.next())
+		{
+			
+		}
+		}
+		catch(SQLException e)
+		{
+			
+		}
+		catch(DALException e)
+		{
+			
+		}
 		return null;
 	}
 

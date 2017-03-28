@@ -57,34 +57,8 @@ public class TaskController {
 	
 	//See: https://github.com/Hjorthen/Bubble/blob/master/AuthTest/Repositories/TaskRepository.cs#L74
 	public List<Task> findTasks(FindDataObject findData, Context context)
-	{/*
-		TaskDAO dao = new MySQLTaskDAO();
-		List<TaskDTO> DTOtasks;
-		try {
-			DTOtasks = dao.getTaskList();
-		} catch (DALException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-		List<Task> tasks = new ArrayList<Task>();
-		for(int i = 0; i < DTOtasks.size(); i++){
-			Task task = new Task();
-			task.setCreatorid(DTOTask.getCreatorId());
-			task.setDescription(DTOTask.getDescription());
-			task.setETC(DTOTask.getEct());
-			task.setID(DTOTask.getId());
-			task.setPrice(DTOTask.getPrice());
-			task.setStreet(DTOTask.getStreet());
-			task.setSupplies(DTOTask.getSupplies());
-			//task.setTags(Arrays.asList(tags)); //Forkert?
-			task.setTitle(DTOTask.getTitle());
-			task.setUrgent(DTOTask.getUrgent());
-			task.setViews(DTOTask.getViews());
-			task.setZipaddress(DTOTask.getZipaddress());
-			tasks.add(task);
-		}
-		return tasks;*/
+	{
+		
 		return null;
 	}
 	
@@ -128,21 +102,15 @@ public class TaskController {
 			TaskDTO dto = dao.getTask(task.getID());
 			if(dto.getCreatorId().equals(context.getIdentity())){
 				Date date = new Date(System.currentTimeMillis());
-				dto = new TaskDTO(
-						task.getID(),
-						task.getTitle(),
-						task.getDescription(),
-						task.getPrice(),
-						task.getETC(),
-						task.isSupplies(),
-						task.isUrgent(),
-						task.getViews(), 
-						task.getStreet(),
-						task.getZipaddress(),
-						date,//Erstat med gammel dato
-						date,
-						context.getIdentity().getIdentityId()
-						);
+				dto = new TaskDTO()
+						.setTitle(task.getTitle())
+						.setDescription(task.getDescription())
+						.setPrice(task.getPrice())
+						.setEct(task.getETC())
+						.setSupplies(task.isSupplies() ? 1 : 0)
+						.setUrgent(task.isUrgent() ? 1 : 0)
+						.setStreet(task.getStreet())
+						.setZipaddress(task.getZipaddress());
 				dao.updateTask(dto);
 			}
 		} catch (DALException e) {
