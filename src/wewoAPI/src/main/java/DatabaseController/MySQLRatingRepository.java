@@ -1,7 +1,4 @@
-import DatabaseController.DALException;
-import DatabaseController.RatingDTO;
-import DatabaseController.RatingRepository;
-
+package DatabaseController;
 public class MySQLRatingRepository implements RatingRepository{
 
 	private final String GET_RATING = "SELECT * FROM UserRatings WHERE raterID = ? AND rateeID = ?;";
