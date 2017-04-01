@@ -1,0 +1,22 @@
+2017-04-01 16:47:01,858 [Worker-1] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: dk.wewo.www:wewoAPI:0.0.1-SNAPSHOT @ C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\pom.xml.
+2017-04-01 16:47:02,639 [Worker-1] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2017-04-01 16:47:02,646 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\src\main\resources
+2017-04-01 16:47:02,651 [Worker-1] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2017-04-01 16:47:02,659 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\src\test\resources
+2017-04-01 16:47:04,131 [Worker-1] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: dk.wewo.www:wewoAPI:0.0.1-SNAPSHOT @ C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\pom.xml.
+2017-04-01 16:47:04,944 [Worker-9] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2017-04-01 16:47:05,036 [Worker-9] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\src\main\resources
+2017-04-01 16:47:05,039 [Worker-9] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2017-04-01 16:47:05,060 [Worker-9] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\src\test\resources
+2017-04-01 16:47:41,965 [Worker-0] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2017-04-01 16:47:41,974 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\src\main\resources
+2017-04-01 16:47:41,976 [Worker-0] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2017-04-01 16:47:41,985 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\src\test\resources
+2017-04-01 16:48:02,460 [Worker-9] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2017-04-01 16:48:02,473 [Worker-9] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\src\main\resources
+2017-04-01 16:48:02,482 [Worker-9] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2017-04-01 16:48:02,490 [Worker-9] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\src\test\resources
+2017-04-01 16:48:18,355 [Worker-7] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2017-04-01 16:48:18,361 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\src\main\resources
+2017-04-01 16:48:18,367 [Worker-7] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2017-04-01 16:48:18,378 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Thomas\Desktop\DistprojWorkspace\src\wewoAPI\src\test\resources
