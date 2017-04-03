@@ -15,7 +15,17 @@ import modelPOJO.Task;
 import modelPOJO.FindDataObject;;
 
 public class TaskController {
-	//Initialize database connection
+	TaskRespository repository;
+	
+	public TaskController()
+	{
+		repository = new MySQLTaskRespository();
+	}
+	
+	public TaskController(TaskRespository repository)
+	{
+		this.repository = repository;
+	}
 	 
 	public IDObject createTask(Task task, Context context) throws UnauthorizedException
 	{
@@ -27,22 +37,9 @@ public class TaskController {
 		IDObject newTaskID = new IDObject();
 		
 		TaskRespository dao = new MySQLTaskRespository();
-		Date date = new Date(System.currentTimeMillis());
-		TaskDTO dto = new TaskDTO(
-				newTaskID.getID(),
-				task.getTitle(),
-				task.getDescription(),
-				task.getPrice(),
-				task.getETC(),
-				task.isSupplies(),
-				task.isUrgent(),
-				task.getViews(), 
-				task.getStreet(),
-				task.getZipaddress(),
-				date,
-				date,
-				context.getIdentity().getIdentityId()
-				);
+		task.setCreatorid(context.getIdentity().getIdentityId());
+		TaskDTO dto = TaskDTO.fromModel(task);
+		
 		try {
 			dao.createTask(dto);
 			newTaskID.setID(dto.getId());
@@ -69,19 +66,7 @@ public class TaskController {
 		TaskDTO dto;
 		try {
 			dto = dao.getTask(id.getID());
-			Task task = new Task();
-					//dto.getTags() //Mangler tags fra DTO
-					
-			task.setCreatorid(dto.getCreatorId());
-			task.setDescription(dto.getDescription());
-			task.setETC(dto.getEct());
-			task.setID(dto.getId());
-			task.setPrice(dto.getPrice());
-			task.setStreet(dto.getStreet());
-			task.setSupplies(dto.getSupplies());
-			task.setTitle(dto.getTitle());
-			task.setUrgent(dto.getUrgent());
-			
+			Task task = dto.getModel();
 			
 			return task;
 			
