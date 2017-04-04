@@ -5,11 +5,11 @@ import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
-import DatabaseController.DALException;
+import DAOException.DALException;
 import DatabaseController.MySQLTaskRespository;
 import DatabaseController.TaskRespository;
 import DatabaseController.TaskDTO;
-import exceptions.UnauthorizedException;
+import exceptions.*;
 import modelPOJO.IDObject;
 import modelPOJO.Task;
 import modelPOJO.FindDataObject;;
@@ -26,13 +26,18 @@ public class TaskController {
 	{
 		this.repository = repository;
 	}
-	 
-	public IDObject createTask(Task task, Context context) throws UnauthorizedException
+	
+	private void verifyLogin(Context context) throws UnauthorizedException
 	{
 		if(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty())
 		{
-			throw new UnauthorizedException();
-		}
+			throw new UnauthorizedException("Invalid login");
+		}	
+	}
+	 
+	public IDObject createTask(Task task, Context context) throws UnauthorizedException
+	{
+		verifyLogin(context);
 		
 		IDObject newTaskID = new IDObject();
 		
@@ -60,17 +65,18 @@ public class TaskController {
 	}
 	
 	
-	public Task getTask(IDObject id, Context context)
+	public Task getTask(IDObject id, Context context) throws NotFoundException
 	{
 		TaskRespository dao = new MySQLTaskRespository();
 		TaskDTO dto;
 		try {
 			dto = dao.getTask(id.getID());
 			Task task = dto.getModel();
-			
+			if(task==null)
+				throw new NotFoundException("No such task");
 			return task;
-			
-		} catch (DALException e) {
+		
+		}catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -78,14 +84,19 @@ public class TaskController {
 	}
 	
 	//PUT /task/{ID}
-	public void updateTask(Task task, Context context)
+	public void updateTask(Task task, Context context) throws NotFoundException, ForbiddenException, UnauthorizedException
 	{
-		
+		verifyLogin(context);
 		TaskRespository dao = new MySQLTaskRespository();
 		
 		try {
 			TaskDTO dto = dao.getTask(task.getID());
+			if(dto == null)
+			{
+				throw new NotFoundException("No such task");
+			}
 			if(dto.getCreatorId().equals(context.getIdentity())){
+				
 				Date date = new Date(System.currentTimeMillis());
 				dto = new TaskDTO()
 						.setTitle(task.getTitle())
@@ -98,25 +109,36 @@ public class TaskController {
 						.setZipaddress(task.getZipaddress());
 				dao.updateTask(dto);
 			}
+			else
+			{
+				throw new ForbiddenException("Insuffecient access rights");
+			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	public int deleteTask(IDObject id, Context context)
+	public int deleteTask(IDObject id, Context context) throws ForbiddenException, NotFoundException, UnauthorizedException
 	{
+		verifyLogin(context);
 		TaskRespository dao = new MySQLTaskRespository();
 		
 		try {
 			TaskDTO task = dao.getTask(id.getID());
+			if(task == null)
+				throw new NotFoundException("The specified task were not found");
+			
 			if(task.getCreatorId().equals(context.getIdentity())){
 				dao.deleteTask(id.getID());
 			}
+			else
+			{
+				throw new ForbiddenException("Insuffecient access rights");
+			}
 		} catch (DALException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return 1;
+			return 0;
 		}
 		return 0;
 	}
