@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
-import DAOException.DALException;
+import DatabaseController.DALException;
 import DatabaseController.MySQLTaskRespository;
 import DatabaseController.TaskRespository;
 import DatabaseController.TaskDTO;
@@ -41,12 +41,11 @@ public class TaskController {
 		
 		IDObject newTaskID = new IDObject();
 		
-		TaskRespository dao = new MySQLTaskRespository();
-		task.setCreatorid(context.getIdentity().getIdentityId());
 		TaskDTO dto = TaskDTO.fromModel(task);
-		
+		dto.setCreatorId(context.getIdentity().getIdentityId());
+
 		try {
-			dao.createTask(dto);
+			repository.createTask(dto);
 			newTaskID.setID(dto.getId());
 			return newTaskID;
 		} catch (DALException e) {
@@ -67,13 +66,14 @@ public class TaskController {
 	
 	public Task getTask(IDObject id, Context context) throws NotFoundException
 	{
-		TaskRespository dao = new MySQLTaskRespository();
 		TaskDTO dto;
 		try {
-			dto = dao.getTask(id.getID());
-			Task task = dto.getModel();
-			if(task==null)
+			dto = repository.getTask(id.getID());
+			if(dto==null)
 				throw new NotFoundException("No such task");
+			
+			Task task = dto.getModel();
+
 			return task;
 		
 		}catch (DALException e) {
@@ -87,15 +87,14 @@ public class TaskController {
 	public void updateTask(Task task, Context context) throws NotFoundException, ForbiddenException, UnauthorizedException
 	{
 		verifyLogin(context);
-		TaskRespository dao = new MySQLTaskRespository();
 		
 		try {
-			TaskDTO dto = dao.getTask(task.getID());
+			TaskDTO dto = repository.getTask(task.getID());
 			if(dto == null)
 			{
 				throw new NotFoundException("No such task");
 			}
-			if(dto.getCreatorId().equals(context.getIdentity())){
+			if(dto.getCreatorId().equals(context.getIdentity().getIdentityId())){
 				
 				Date date = new Date(System.currentTimeMillis());
 				dto = new TaskDTO()
@@ -107,7 +106,7 @@ public class TaskController {
 						.setUrgent(task.isUrgent() ? 1 : 0)
 						.setStreet(task.getStreet())
 						.setZipaddress(task.getZipaddress());
-				dao.updateTask(dto);
+				repository.updateTask(dto);
 			}
 			else
 			{
@@ -121,16 +120,14 @@ public class TaskController {
 	
 	public int deleteTask(IDObject id, Context context) throws ForbiddenException, NotFoundException, UnauthorizedException
 	{
-		verifyLogin(context);
-		TaskRespository dao = new MySQLTaskRespository();
-		
+		verifyLogin(context);		
 		try {
-			TaskDTO task = dao.getTask(id.getID());
+			TaskDTO task = repository.getTask(id.getID());
 			if(task == null)
 				throw new NotFoundException("The specified task were not found");
 			
-			if(task.getCreatorId().equals(context.getIdentity())){
-				dao.deleteTask(id.getID());
+			if(task.getCreatorId().equals(context.getIdentity().getIdentityId())){
+				repository.deleteTask(id.getID());
 			}
 			else
 			{
