@@ -19,18 +19,29 @@ public class MySQLRatingRepository implements RatingRepository{
 		DatabaseConnector.RegisterStatement("CREATE_TASK", CREATE_RATING);
 	}
 	
-	public RatingDTO getRating(RatingDTO rate) throws DALException {
+	public String lookUpRater(String rateeID, int ratingID){
+		try{
+			return rater;
+		}
+		catch(SQLException e){
+			
+		}
+		return null;
+		
+	}
+	
+	public RatingDTO getRating(String raterID, String rateeID) throws DALException {
 		PreparedStatement statement;
 		try {
 			statement = DatabaseConnector.getPreparedStatement("GET_RATING");
-			statement.setInt(2, rate.raterID);
-			statement.setInt(3, rate.rateeID);
+			statement.setString(1, raterID);
+			statement.setString(2, rateeID);
 		
 
 			ResultSet rs = statement.executeQuery();
 
 			if (!rs.first()) 
-				throw new DALException("Rating med rateeID " + rate.rateeID + " og/eller raterID " + rate.raterID + " findes ikke");
+				throw new DALException("Rating med rateeID " + rateeID + " og/eller raterID " + raterID + " findes ikke");
 			
 			return generate(rs);
 			
@@ -42,8 +53,8 @@ public class MySQLRatingRepository implements RatingRepository{
 
 	private RatingDTO generate(ResultSet rs) throws SQLException{
 		RatingDTO rate = new RatingDTO();
-		rate.setRating(rs.getInt("Rating")).setRaterID(rs.getInt("RaterID"))
-		.setRateeID(rs.getInt("RateeID")).setMessage(rs.getString("Message"));
+		rate.setRating(rs.getInt("Rating")).setRaterID(rs.getString("RaterID"))
+		.setRateeID(rs.getString("RateeID")).setMessage(rs.getString("Message"));
 		return rate;
 	}
 
@@ -51,8 +62,8 @@ public class MySQLRatingRepository implements RatingRepository{
 		try {
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("CREATE_RATING");
 			statement.setInt(1, rate.rating);
-			statement.setInt(2, rate.raterID);
-			statement.setInt(3, rate.rateeID);
+			statement.setString(2, rate.raterID);
+			statement.setString(3, rate.rateeID);
 			statement.setString(4, rate.message);
 			
 			int res = statement.executeUpdate();

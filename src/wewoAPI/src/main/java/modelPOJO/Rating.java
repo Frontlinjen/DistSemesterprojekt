@@ -2,19 +2,14 @@ package modelPOJO;
 
 public class Rating {
 
-	int rating, raterID, rateeID;
-	String message;
+	int rating;
+	String rateeID, message;
 	
-	public int getRaterID() {
-		return raterID;
-	}
-	public void setRaterID(int raterID) {
-		this.raterID = raterID;
-	}
-	public int getRateeID() {
+	
+	public String getRateeID() {
 		return rateeID;
 	}
-	public void setRateeID(int rateeID) {
+	public void setRateeID(String rateeID) {
 		this.rateeID = rateeID;
 	}
 	
