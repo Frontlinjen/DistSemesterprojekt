@@ -7,26 +7,24 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.amazonaws.auth.policy.Statement;
+
 public class MySQLRatingRepository implements RatingRepository{
 
+	private final String GET_RATER = "SELECT * FROM UserRatings WHERE rateeID = ? AND ratingID = ?";
 	private final String GET_RATING = "SELECT * FROM UserRatings WHERE raterID = ? AND rateeID = ?;";
 	private final String CREATE_RATING = "INSERT INTO UserRatings(rating, raterID, rateeID, message) "
 									   + "VALUES (?, ?, ?, ?);";
 
-
 	public MySQLRatingRepository(){
 		DatabaseConnector.RegisterStatement("GET_TASK", GET_RATING);
 		DatabaseConnector.RegisterStatement("CREATE_TASK", CREATE_RATING);
+		DatabaseConnector.RegisterStatement("GET_RATER", GET_RATER);
 	}
 	
-	public String lookUpRater(String rateeID, int ratingID){
-		try{
-			return rater;
-		}
-		catch(SQLException e){
-			
-		}
-		return null;
+	public int lookUpRater(String rateeID, int ratingID){
+		return DatabaseConnector.doUpdate("GET raterID FROM UserRatings WHERE rateeID = " + rateeID + " AND ratingID = " + ratingID + ";");
+	}
 		
 	}
 	
