@@ -11,7 +11,13 @@ public class MockTaskRepository implements TaskRespository {
 	private List<TaskDTO> database = new ArrayList<TaskDTO>();
 	
 	public TaskDTO getTask(int id) throws DALException {
-		return database.get(id);
+		try{
+			return database.get(id);
+		}
+		catch(IndexOutOfBoundsException e)
+		{
+			return null;
+		}
 	}
 
 	public List<TaskDTO> queryTasks(List<Integer> tags) throws DALException {

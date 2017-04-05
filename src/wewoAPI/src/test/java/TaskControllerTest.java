@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
+import exceptions.ForbiddenException;
+import exceptions.NotFoundException;
 import exceptions.UnauthorizedException;
 import mockRepositories.MockTaskRepository;
 import modelPOJO.IDObject;
@@ -26,11 +28,12 @@ public class TaskControllerTest {
 	private Task generateTestData()
 	{
 		Task task = new Task();
-		task.setDescription("Test" + ++dataCounter);
+		task.setDescription("Test" + dataCounter++);
 		task.setTitle("Title" + dataCounter);
 		task.setETC(30);
 		task.setPrice(55);
 		task.setStreet("Nowhere");
+		task.setCreatorid("TestAcc666");
 		return task;
 	}
 	
@@ -43,13 +46,18 @@ public class TaskControllerTest {
 			task.setCreatorid("Nobody");
 			IDObject id = controller.createTask(task, context);
 			assertNotNull(id);
-			assertTrue(id.getID() > 0);
+			assertTrue(id.getID() >= 0);
 			
-			Task newTask = controller.getTask(id, context);
-			assertEquals(newTask.getCreatorid(), context.getIdentity().getIdentityId());
+			Task newTask;
+			try {
+				newTask = controller.getTask(id, context);
+				assertEquals(newTask.getCreatorid(), context.getIdentity().getIdentityId());
+			} catch (NotFoundException e) {
+				fail("Task was not created");
+			}
 			
 		} catch (UnauthorizedException e) {
-			// TODO Auto-generated catch block
+			fail("User was not authorized");
 			e.printStackTrace();
 		}
 		
@@ -62,8 +70,6 @@ public class TaskControllerTest {
 			controller.createTask(task, context);
 			assertTrue(false); //Exception should always be thrown
 		} catch (UnauthorizedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 	
@@ -73,10 +79,9 @@ public class TaskControllerTest {
 		context.clearIdentity();
 		try {
 			controller.createTask(task, context);
-			assertTrue(false); //Exception should always be thrown
+			fail("Exception should have been thrown");
 		} catch (UnauthorizedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
 		}
 	}
 	
@@ -84,15 +89,27 @@ public class TaskControllerTest {
 	public void getNonexistingTask(){
 		IDObject id = new IDObject();
 		id.setID(666);
-		Task task = controller.getTask(id, context);
-		assertNull(task);
+		Task task;
+		try {
+			task = controller.getTask(id, context);
+			fail("Task should not be found!");
+		} catch (NotFoundException e) {
+		}
 	}
 	
 	@Test
 	public void deleteTask(){
 		IDObject id = new IDObject();
 		id.setID(0);
-		controller.deleteTask(id, context);
+		try {
+			controller.deleteTask(id, context);
+		} catch (ForbiddenException e) {
+			fail("No access");
+		} catch (NotFoundException e) {
+			
+		} catch (UnauthorizedException e) {
+			fail("Not logged in");
+		}
 	}
 	
 	@Test
@@ -104,7 +121,11 @@ public class TaskControllerTest {
 			controller.deleteTask(id, context);
 			assertTrue(false);
 		} catch (UnauthorizedException e) {
+			fail("Not logged in");
+		} catch (ForbiddenException e) {
 			
+		} catch (NotFoundException e) {
+			fail("No such task found");
 		}
 	}
 	
@@ -114,22 +135,26 @@ public class TaskControllerTest {
 			IDObject id = new IDObject();
 			id.setID(666);
 			controller.deleteTask(id, context);
-		} catch (UnauthorizedException e) {
+			assertTrue(false); //Should return NotFoundException
+		} catch (NotFoundException e) {
 			
+		}
+		catch(UnauthorizedException e){
+			fail(e.getMessage());
+		} catch (ForbiddenException e) {
+			fail(e.getMessage());
 		}
 	}
 	
 	@Test
 	public void updateTask(){
-		Task task = generateTestData();
 		try{
-			task.setID(0);
-			task.setCreatorid("Nobody");
-			task.setTitle("Update");
-			controller.updateTask(task, context);
-			
 			IDObject id = new IDObject();
 			id.setID(0);
+			Task task = controller.getTask(id, context);
+			context.setIdentity(task.getCreatorid());
+			task.setTitle("Update");
+			controller.updateTask(task, context);
 			Task getTask = controller.getTask(id, context);
 			assertNotNull(getTask);
 			assertNotEquals(task.getCreatorid(), getTask.getCreatorid());
@@ -137,24 +162,52 @@ public class TaskControllerTest {
 		}
 		catch(UnauthorizedException e)
 		{
+			fail(e.getMessage());
+		} catch (NotFoundException e) {
+			fail(e.getMessage());
+		} catch (ForbiddenException e) {
+			fail(e.getMessage());
+		}
+	}
+	@Test
+	public void updateNonExistingTask(){
+		try{
+			Task task = generateTestData();
+			task.setCreatorid(context.getIdentity().getIdentityId());
+			context.setIdentity(task.getCreatorid());
+			task.setTitle("Update");
+			task.setID(1394234);
+			controller.updateTask(task, context);
+			fail("Should have caused NotFoundException");
 			
+		}
+		catch(UnauthorizedException e)
+		{
+			fail(e.getMessage());
+		} catch (NotFoundException e) {
+
+		} catch (ForbiddenException e) {
+			fail(e.getMessage());
 		}
 	}
 	
 	@Test
 	public void updateWrongPermissionsTask(){
-		Task task = generateTestData();
 		context.setIdentity("Alice");
 		try{
-			task.setID(0);
-			task.setCreatorid("Nobody");
+			IDObject id = new IDObject();
+			id.setID(0);
+			Task task = controller.getTask(id, context);
 			task.setTitle("Update");
 			controller.updateTask(task, context);
-			assertTrue(false);
+			fail("Excepton should have been thrown");
 		}
 		catch(UnauthorizedException e)
 		{
-			
+			fail(e.getMessage());
+		} catch (NotFoundException e) {
+			fail(e.getMessage());
+		} catch (ForbiddenException e) {
 		}
 	}
 	@Test
@@ -170,7 +223,10 @@ public class TaskControllerTest {
 		}
 		catch(UnauthorizedException e)
 		{
-			
+		} catch (NotFoundException e) {
+			fail(e.getMessage());
+		} catch (ForbiddenException e) {
+			fail(e.getMessage());
 		}
 	}
 	
