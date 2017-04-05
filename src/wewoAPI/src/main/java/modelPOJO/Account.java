@@ -3,10 +3,10 @@ import java.util.List;
 
 public class Account {
 	
-	public String getuserID() {
+	public int getuserID() {
 		return userID;
 	}
-	public void setuserID(String userID) {
+	public void setUserID(int userID) {
 		this.userID = userID;
 	}
 	public String getName() {
@@ -45,7 +45,7 @@ public class Account {
 	public void setCompetences(List<String> competences) {
 		this.competences = competences;
 	}
-	String userID;
+	int userID;
 	String name;
 	String email;
 	String phone;
