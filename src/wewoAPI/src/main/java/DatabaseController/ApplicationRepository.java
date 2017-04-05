@@ -8,5 +8,5 @@ public interface ApplicationRepository {
 	List<ApplicationDTO> getApplicationList() throws DALException;
 	int createApplication(ApplicationDTO app) throws DALException;
 	int updateApplication(ApplicationDTO app) throws DALException;
-	int deleteApplication(ApplicationDTO app) throws DALException;
+	int deleteApplication(int id) throws DALException;
 }

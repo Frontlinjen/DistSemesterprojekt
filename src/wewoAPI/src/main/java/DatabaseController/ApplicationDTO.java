@@ -17,6 +17,12 @@ public class ApplicationDTO implements Serializable {
 		
 	}
 	
+	public ApplicationDTO(ApplicationDTO dto){
+		this.taskid = dto.taskid;
+		this.applierid = dto.applierid;
+		this.applicationMessage = dto.applicationMessage;
+	}
+	
 	static ApplicationDTO fromModel(Application app)
 	{
 		ApplicationDTO dto = new ApplicationDTO();
@@ -36,24 +42,27 @@ public class ApplicationDTO implements Serializable {
 		return applierid;
 	}
 	
-	public void setApplierid(String applierid) {
+	public ApplicationDTO setApplierid(String applierid) {
 		this.applierid = applierid;
+		return this;
 	}
 	
 	public String getTaskid() {
 		return taskid;
 	}
 
-	public void setTaskid(String taskid) {
+	public ApplicationDTO setTaskid(String taskid) {
 		this.taskid = taskid;
+		return this;
 	}
 
 	public String getApplicationMessage() {
 		return applicationMessage;
 	}
 
-	public void setApplicationMessage(String applicationMessage) {
+	public ApplicationDTO setApplicationMessage(String applicationMessage) {
 		this.applicationMessage = applicationMessage;
+		return this;
 	}
 
 }
