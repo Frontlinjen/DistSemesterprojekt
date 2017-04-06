@@ -6,13 +6,11 @@ import exceptions.UnauthorizedException;
 import modelPOJO.Application;
 import modelPOJO.IDObject;
 import modelPOJO.JsonList;
-import modelPOJO.ResponseObject;
+import modelPOJO.Task;
 import DatabaseController.ApplicationDTO;
-import DatabaseController.ApplicationRepository;
 import DatabaseController.DALException;
 import DatabaseController.MySQLApplicationRepository;
 import DatabaseController.MySQLTaskRepository;
-import DatabaseController.TaskDTO;
 
 public class ApplicationController {
 	
@@ -37,19 +35,33 @@ public class ApplicationController {
 		}	
 	}
 		
-	public JsonList<String> GetApplicants(IDObject taskid, Context context) throws UnauthorizedException, DALException
+	public JsonList<String> GetApplicants(IDObject taskid, Context context) throws UnauthorizedException
 	{
 		MySQLTaskRepository tas = new MySQLTaskRepository();
+		MySQLApplicationRepository app = new MySQLApplicationRepository();
 		
 		verifyLogin(context);
-		if(tas.getTask(taskid.getID()).getCreatorId() != context.getIdentity().getIdentityId()){
-			throw new UnauthorizedException("Du har ikke adgang til dette.");
+		try {
+			if(tas.getTask(taskid.getID()).getCreatorId() != context.getIdentity().getIdentityId()){
+				throw new UnauthorizedException("Du har ikke adgang til dette.");
+			}
+			
+		} catch (DALException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 		try {
-			tas.getTaskList();
+			JsonList<String> applications = new JsonList<String>();
+			applications.setElements(app.getApplicationList(taskid.getID()));
+//			for (int i = 0; i < app.getApplicationList(taskid.getID()).size(); i++) {
+//				applications.getElements().addAll(i, app.getApplicationList(taskid.getID()));
+//			}
+			return applications;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return null;
+		
 		
 	}
 	
@@ -82,9 +94,29 @@ public class ApplicationController {
 		
 	}
 	
-	public 	ResponseObject<String> GetApplication(IDObject object, Context context)
+	public 	Application GetApplication(Task task, Application application, Context context) throws UnauthorizedException
 	{
-		return null;
+		ApplicationDTO dto = new ApplicationDTO();
+		MySQLTaskRepository tas = new MySQLTaskRepository();
+		MySQLApplicationRepository app = new MySQLApplicationRepository();
+		
+		verifyLogin(context);
+		try {
+			if(tas.getTask(task.getID()).getCreatorId() != context.getIdentity().getIdentityId() ||
+			   app.getApplication(Integer.parseInt(application.getTaskid())).getApplierid() != context.getIdentity().getIdentityId() )
+			
+			application.setApplicationMessage(dto.getApplicationMessage());
+			application.setApplierid(dto.getApplierid());
+			application.setTaskid(dto.getTaskid());
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DALException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return application;
 	}
 
 }
