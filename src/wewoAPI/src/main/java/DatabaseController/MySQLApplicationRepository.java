@@ -36,15 +36,16 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 		catch (SQLException e) {throw new DALException(e); }
 	}
 
-	public List<ApplicationDTO> getApplicationList() throws DALException {
-		List<ApplicationDTO> list = new ArrayList<ApplicationDTO>();
+	public List<String> getApplicationList(int i) throws DALException {
+		List<String> list = new ArrayList<String>();
 		ResultSet rs = DatabaseConnector.doQuery("SELECT * FROM Appliers;");
 		try
 		{
+			ApplicationDTO dto = new ApplicationDTO();
+			String stringList = dto.applierid;
 			while (rs.next()) 
 			{
-				ApplicationDTO dto = generate(rs);
-				list.add(dto);
+					list.add(stringList);
 			}
 		} 
 		catch (SQLException e) { throw new DALException(e.getMessage()); }
