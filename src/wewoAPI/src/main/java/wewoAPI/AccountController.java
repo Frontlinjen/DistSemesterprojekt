@@ -1,23 +1,18 @@
 package wewoAPI;
 
-import java.sql.Date;
-
 import com.amazonaws.services.lambda.runtime.Context;
 
 import DatabaseController.AccountDTO;
 import DatabaseController.AccountRepository;
 import DatabaseController.DALException;
 import DatabaseController.MySQLAccountRepository;
-import DatabaseController.MySQLTaskRespository;
-import DatabaseController.TaskDTO;
-import DatabaseController.TaskRespository;
 import modelPOJO.Account;
 import modelPOJO.IDObject;
 import modelPOJO.JsonList;
-import modelPOJO.Task;
+import modelPOJO.UserIDObject;
 
 public class AccountController {
-	public Account getAccount(IDObject userID, Context context)
+	public Account getAccount(UserIDObject userID, Context context)
 	{
 		AccountRepository dao = new MySQLAccountRepository();
 		AccountDTO dto;
@@ -57,15 +52,15 @@ public class AccountController {
 			e.printStackTrace();
 		}
 	}
-	JsonList<IDObject> getApplicants(IDObject taskid, Context context)
+	
+	JsonList<IDObject> getCompetences(IDObject userid, Context context)
 	{
-		return null;
+		Account acc = getAccount(userid, context);
+		return (JsonList<IDObject>) acc.getCompetences();
 	}
-	JsonList<IDObject> getCreatedTasks(IDObject userID, Context context) {
-		return null;
-	}
-	void createAccount(Account account, Context context){
-		IDObject newUserID = new IDObject();
+	
+	public void createAccount(Account account, Context context){
+		UserIDObject newUserID = new UserIDObject();
 		
 		AccountRepository dao = new MySQLAccountRepository();
 		AccountDTO dto = new AccountDTO(

@@ -7,7 +7,7 @@ import modelPOJO.Account;
 
 public class AccountDTO implements Serializable{
 	
-	int userID;
+	String userID;
 	String name;
 	String email;
 	String phone;
@@ -15,7 +15,11 @@ public class AccountDTO implements Serializable{
 	String aboutMe;
 	List<String> competences;
 	
-	public AccountDTO(int userID, String name, String email, String phone, boolean sex, String aboutMe, List<String> competences){
+	public AccountDTO(){
+		
+	}
+	
+	public AccountDTO(String userID, String name, String email, String phone, boolean sex, String aboutMe, List<String> competences){
 		this.userID = userID;
 		this.name = name;
 		this.email = email;
@@ -59,11 +63,11 @@ public class AccountDTO implements Serializable{
 		return acc;
 	}
 
-	public int getUserID() {
+	public String getUserID() {
 		return userID;
 	}
 
-	public AccountDTO setUserID(int userID) {
+	public AccountDTO setUserID(String userID) {
 		this.userID = userID;
 		return this;
 	}
