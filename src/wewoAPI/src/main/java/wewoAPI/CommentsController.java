@@ -6,10 +6,14 @@ import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
+import DatabaseController.AccountRepository;
 import DatabaseController.CommentDTO;
 import DatabaseController.CommentRepository;
 import DatabaseController.DALException;
+import DatabaseController.MySQLAccountRepository;
 import DatabaseController.MySQLCommentRepository;
+import DatabaseController.MySQLException;
+import DatabaseController.MySQLTaskRepository;
 import DatabaseController.TaskDTO;
 import DatabaseController.TaskRespository;
 import exceptions.NotFoundException;
@@ -24,11 +28,13 @@ import modelPOJO.Task;
 class CommentController{
 	CommentRepository repository;
 	TaskRespository taskRepo;
+	AccountRepository accountRepo;
 	
 	public CommentController()
 	{
 		repository = new MySQLCommentRepository();
 		taskRepo = new MySQLTaskRepository();
+		accountRepo = new MySQLAccountRepository();
 	}
 	
 	public CommentController(CommentRepository repository)
@@ -56,12 +62,15 @@ class CommentController{
 			newCommentID.setID(dto.getID());
 			return newCommentID;
 		}
-		catch(ForeignKeyFailed e)
+		catch(ForeignKeyException e)
 		{
-			throw new exceptions.BadRequestException("No such task");
-			//TODO Find ud af om det er en ugyldig task eller om brugeren ikke er oprettet i databasen?
-			try{
-				taskRepo.getTask(comment.getTaskID());
+			//Is the task legit
+			if(taskRepo.getTask(comment.getTaskID()) == null){
+				throw new exceptions.BadRequestException("No such task");
+			}
+			//Is the user legit
+			if(accountRepo.getAccount(comment.getOwner()) == null){
+				throw new exceptions.UnauthorizedException("Unauthorized");
 			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
@@ -88,9 +97,12 @@ class CommentController{
 			resultJson.setElements(commentList);
 			return resultJson;
 			
-		}catch(ForeignKeyFailed e)
+		}catch(ForeignKeyException e)
 		{
-			throw new exceptions.BadRequestException("No such task");
+			//Is the task legit
+			if(taskRepo.getTask(taskId.getID()) == null){
+				throw new exceptions.BadRequestException("No such task");
+			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -110,9 +122,12 @@ class CommentController{
 			comment.setOwner(dto.getOwnerId());
 			return comment;
 			
-		}catch(ForeignKeyFailed e)
+		}catch(ForeignKeyException e)
 		{
-			throw new exceptions.BadRequestException("No such task");
+			//Is the task legit
+			if(taskRepo.getTask(SharedId.getFirstID()) == null){
+				throw new exceptions.BadRequestException("No such task");
+			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -137,9 +152,16 @@ class CommentController{
 						.setOwnerId(comment.getOwner());
 				repository.updateComment(dto);
 			}
-		}catch(ForeignKeyFailed e)
+		}catch(ForeignKeyException e)
 		{
-			throw new exceptions.BadRequestException("No such task");
+			//Is the task legit
+			if(taskRepo.getTask(comment.getTaskID()) == null){
+				throw new exceptions.BadRequestException("No such task");
+			}
+			//Is the user legit
+			if(accountRepo.getAccount(comment.getOwner()) == null){
+				throw new exceptions.UnauthorizedException("Unauthorized");
+			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -155,9 +177,16 @@ class CommentController{
 			if(commentDTO.getOwnerId().equals(context.getIdentity().getIdentityId())){
 				repository.deleteComment(comment.getTaskID(), comment.getID());
 			}
-		}catch(ForeignKeyFailed e)
+		}catch(ForeignKeyException e)
 		{
-			throw new exceptions.BadRequestException("No such task");
+			//Is the task legit
+			if(taskRepo.getTask(comment.getTaskID()) == null){
+				throw new exceptions.BadRequestException("No such task");
+			}
+			//Is the user legit
+			if(accountRepo.getAccount(comment.getOwner()) == null){
+				throw new exceptions.UnauthorizedException("Unauthorized");
+			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
