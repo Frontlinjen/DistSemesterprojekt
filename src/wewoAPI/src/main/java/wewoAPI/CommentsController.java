@@ -1,37 +1,77 @@
 package wewoAPI;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
+import DatabaseController.AccountRepository;
 import DatabaseController.CommentDTO;
 import DatabaseController.CommentRepository;
 import DatabaseController.DALException;
+import DatabaseController.MySQLAccountRepository;
 import DatabaseController.MySQLCommentRepository;
-import DatabaseController.MySQLTaskRespository;
+import DatabaseController.MySQLException;
+import DatabaseController.MySQLTaskRepository;
 import DatabaseController.TaskDTO;
 import DatabaseController.TaskRespository;
+import exceptions.NotFoundException;
 import exceptions.UnauthorizedException;
 import modelPOJO.Comment;
+import modelPOJO.DoubleIDObject;
 import modelPOJO.FindDataObject;
 import modelPOJO.IDObject;
+import modelPOJO.JsonList;
 import modelPOJO.Task;
 
 class CommentController{
-	public IDObject createComment(Comment comment, Context context) throws UnauthorizedException{
+	CommentRepository repository;
+	TaskRespository taskRepo;
+	AccountRepository accountRepo;
+	
+	public CommentController()
+	{
+		repository = new MySQLCommentRepository();
+		taskRepo = new MySQLTaskRepository();
+		accountRepo = new MySQLAccountRepository();
+	}
+	
+	public CommentController(CommentRepository repository)
+	{
+		this.repository = repository;
+	}
+	
+	private void verifyLogin(Context context) throws UnauthorizedException
+	{
 		if(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty())
 		{
-			throw new UnauthorizedException();
-		}
+			throw new UnauthorizedException("Invalid login");
+		}	
+	}
+	
+	public IDObject createComment(Comment comment, Context context) throws UnauthorizedException{
+		 
+		verifyLogin(context);
+		
 		IDObject newCommentID = new IDObject();
 		
-		CommentRepository dao = new MySQLCommentRepository();
 		CommentDTO dto = CommentDTO.fromModel(comment);
 		try {
-			dao.createComment(dto);
-			newCommentID.setID(dto.getId()); //TODO Implement Id
+			repository.createComment(dto);
+			newCommentID.setID(dto.getID());
 			return newCommentID;
+		}
+		catch(ForeignKeyException e)
+		{
+			//Is the task legit
+			if(taskRepo.getTask(comment.getTaskID()) == null){
+				throw new exceptions.BadRequestException("No such task");
+			}
+			//Is the user legit
+			if(accountRepo.getAccount(comment.getOwner()) == null){
+				throw new exceptions.UnauthorizedException("Unauthorized");
+			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -41,26 +81,53 @@ class CommentController{
 		
 	}
 	
-	public List<Comment> getCommentList(IDObject taskId, Context context) throws UnauthorizedException{
-		if(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty())
+	public JsonList<Comment> getCommentList(IDObject taskId, Context context){
+		List<CommentDTO> dtoList;
+		List<Comment> commentList = new ArrayList<Comment>();
+		try {
+			dtoList = repository.getCommentList(taskId.getID());
+			for(CommentDTO dto: dtoList){
+				Comment com = new Comment();
+				com.setText(dto.getText());
+				com.setOwner(dto.getOwnerId());
+				com.setDate(dto.getDate());
+				commentList.add(com);
+			}
+			JsonList<Comment> resultJson = new JsonList<Comment>();
+			resultJson.setElements(commentList);
+			return resultJson;
+			
+		}catch(ForeignKeyException e)
 		{
-			throw new UnauthorizedException();
+			//Is the task legit
+			if(taskRepo.getTask(taskId.getID()) == null){
+				throw new exceptions.BadRequestException("No such task");
+			}
+		} catch (DALException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		//Do same as getComment but with a forloop interating every comment in task
+		return null;
+		
 	}
 	
 	public Comment getComment(DoubleIDObject SharedId, Context context)
 	{
-		CommentRepository dao = new MySQLCommentRepository();
 		CommentDTO dto;
 		try {
-			dto = dao.getComment(SharedId.getFirstId(), SharedId.getSecondId());
+			dto = repository.getComment(SharedId.getFirstID(), SharedId.getSecondID());
 			Comment comment = new Comment();
 			comment.setText(dto.getText());
 			comment.setDate(dto.getDate());
 			comment.setOwner(dto.getOwnerId());
 			return comment;
 			
+		}catch(ForeignKeyException e)
+		{
+			//Is the task legit
+			if(taskRepo.getTask(SharedId.getFirstID()) == null){
+				throw new exceptions.BadRequestException("No such task");
+			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -68,18 +135,32 @@ class CommentController{
 		return null;
 	}
 	
-	public void updateComment(Comment comment, Context context)
+	public void updateComment(Comment comment, Context context) throws UnauthorizedException, NotFoundException
 	{
-		CommentRepository dao = new MySQLCommentRepository();
+		verifyLogin(context);
 		
 		try {
-			CommentDTO dto = dao.getComment(comment.getID());
-			if(dto.getOwnerId().equals(context.getIdentity())){ //Are we sure that Id should be an integer?
+			CommentDTO dto = repository.getComment(comment.getTaskID(),comment.getID());
+			if(dto==null)
+			{
+				throw new exceptions.NotFoundException("No such comment");
+			}
+			if(dto.getOwnerId().equals(context.getIdentity().getIdentityId())){
 				dto = new CommentDTO()
 						.setText(comment.getText())
 						.setDate(comment.getDate())
 						.setOwnerId(comment.getOwner());
-				dao.updateComment(dto);
+				repository.updateComment(dto);
+			}
+		}catch(ForeignKeyException e)
+		{
+			//Is the task legit
+			if(taskRepo.getTask(comment.getTaskID()) == null){
+				throw new exceptions.BadRequestException("No such task");
+			}
+			//Is the user legit
+			if(accountRepo.getAccount(comment.getOwner()) == null){
+				throw new exceptions.UnauthorizedException("Unauthorized");
 			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
@@ -87,14 +168,24 @@ class CommentController{
 		}
 	}
 	
-	public int deleteTask(DoubleIDObject id, Context context)
+	public int deleteComment(Comment comment, Context context) throws UnauthorizedException
 	{
-		CommentRepository dao = new MySQLCommentRepository();
+		verifyLogin(context);
 		
 		try {
-			CommentDTO comment = dao.getComment(id.getFirstId(), id.getSecondId());
-			if(comment.getOwnerId().equals(context.getIdentity())){
-				dao.deleteComment(id.getFirstId(), id.getSecondId());
+			CommentDTO commentDTO = repository.getComment(comment.getTaskID(), comment.getID());
+			if(commentDTO.getOwnerId().equals(context.getIdentity().getIdentityId())){
+				repository.deleteComment(comment.getTaskID(), comment.getID());
+			}
+		}catch(ForeignKeyException e)
+		{
+			//Is the task legit
+			if(taskRepo.getTask(comment.getTaskID()) == null){
+				throw new exceptions.BadRequestException("No such task");
+			}
+			//Is the user legit
+			if(accountRepo.getAccount(comment.getOwner()) == null){
+				throw new exceptions.UnauthorizedException("Unauthorized");
 			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block

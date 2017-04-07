@@ -9,7 +9,7 @@ import DatabaseController.DALException;
 import DatabaseController.MySQLTaskRespository;
 import DatabaseController.TaskRespository;
 import DatabaseController.TaskDTO;
-import exceptions.UnauthorizedException;
+import exceptions.*;
 import modelPOJO.IDObject;
 import modelPOJO.Task;
 import modelPOJO.FindDataObject;;
@@ -26,22 +26,26 @@ public class TaskController {
 	{
 		this.repository = repository;
 	}
-	 
-	public IDObject createTask(Task task, Context context) throws UnauthorizedException
+	
+	private void verifyLogin(Context context) throws UnauthorizedException
 	{
 		if(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty())
 		{
-			throw new UnauthorizedException();
-		}
+			throw new UnauthorizedException("Invalid login");
+		}	
+	}
+	 
+	public IDObject createTask(Task task, Context context) throws UnauthorizedException
+	{
+		verifyLogin(context);
 		
 		IDObject newTaskID = new IDObject();
 		
-		TaskRespository dao = new MySQLTaskRespository();
-		task.setCreatorid(context.getIdentity().getIdentityId());
 		TaskDTO dto = TaskDTO.fromModel(task);
-		
+		dto.setCreatorId(context.getIdentity().getIdentityId());
+
 		try {
-			dao.createTask(dto);
+			repository.createTask(dto);
 			newTaskID.setID(dto.getId());
 			return newTaskID;
 		} catch (DALException e) {
@@ -60,17 +64,19 @@ public class TaskController {
 	}
 	
 	
-	public Task getTask(IDObject id, Context context)
+	public Task getTask(IDObject id, Context context) throws NotFoundException
 	{
-		TaskRespository dao = new MySQLTaskRespository();
 		TaskDTO dto;
 		try {
-			dto = dao.getTask(id.getID());
+			dto = repository.getTask(id.getID());
+			if(dto==null)
+				throw new NotFoundException("No such task");
+			
 			Task task = dto.getModel();
-			
+
 			return task;
-			
-		} catch (DALException e) {
+		
+		}catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -78,14 +84,18 @@ public class TaskController {
 	}
 	
 	//PUT /task/{ID}
-	public void updateTask(Task task, Context context)
+	public void updateTask(Task task, Context context) throws NotFoundException, ForbiddenException, UnauthorizedException
 	{
-		
-		TaskRespository dao = new MySQLTaskRespository();
+		verifyLogin(context);
 		
 		try {
-			TaskDTO dto = dao.getTask(task.getID());
-			if(dto.getCreatorId().equals(context.getIdentity())){
+			TaskDTO dto = repository.getTask(task.getID());
+			if(dto == null)
+			{
+				throw new NotFoundException("No such task");
+			}
+			if(dto.getCreatorId().equals(context.getIdentity().getIdentityId())){
+				
 				Date date = new Date(System.currentTimeMillis());
 				dto = new TaskDTO()
 						.setTitle(task.getTitle())
@@ -96,7 +106,11 @@ public class TaskController {
 						.setUrgent(task.isUrgent() ? 1 : 0)
 						.setStreet(task.getStreet())
 						.setZipaddress(task.getZipaddress());
-				dao.updateTask(dto);
+				repository.updateTask(dto);
+			}
+			else
+			{
+				throw new ForbiddenException("Insuffecient access rights");
 			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
@@ -104,19 +118,24 @@ public class TaskController {
 		}
 	}
 	
-	public int deleteTask(IDObject id, Context context)
+	public int deleteTask(IDObject id, Context context) throws ForbiddenException, NotFoundException, UnauthorizedException
 	{
-		TaskRespository dao = new MySQLTaskRespository();
-		
+		verifyLogin(context);		
 		try {
-			TaskDTO task = dao.getTask(id.getID());
-			if(task.getCreatorId().equals(context.getIdentity())){
-				dao.deleteTask(id.getID());
+			TaskDTO task = repository.getTask(id.getID());
+			if(task == null)
+				throw new NotFoundException("The specified task were not found");
+			
+			if(task.getCreatorId().equals(context.getIdentity().getIdentityId())){
+				repository.deleteTask(id.getID());
+			}
+			else
+			{
+				throw new ForbiddenException("Insuffecient access rights");
 			}
 		} catch (DALException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return 1;
+			return 0;
 		}
 		return 0;
 	}

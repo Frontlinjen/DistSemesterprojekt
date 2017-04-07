@@ -6,7 +6,7 @@ public class Account {
 	public String getuserID() {
 		return userID;
 	}
-	public void setuserID(String userID) {
+	public void setUserID(String userID) {
 		this.userID = userID;
 	}
 	public String getName() {

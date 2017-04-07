@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MySQLTaskRespository implements TaskRespository{
+public class MySQLTaskRepository implements TaskRespository{
 	private final String GET_TASK = "SELECT * FROM Tasks WHERE id = ?;";
 	private final String CREATE_TASK = "INSERT INTO Tasks(title, description, price, ECT, supplies, urgent"
 									 + "street, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
@@ -15,7 +15,7 @@ public class MySQLTaskRespository implements TaskRespository{
 									   "= '?', urgent = '?', street = '?', zipcode = '?' WHERE ID = '?';";
 	
 	
-	public MySQLTaskRespository(){
+	public MySQLTaskRepository(){
 		DatabaseConnector.RegisterStatement("GET_TASK", GET_TASK);
 		DatabaseConnector.RegisterStatement("CREATE_TASK", CREATE_TASK);
 		DatabaseConnector.RegisterStatement("UPDATE_TASK", UPDATE_TASK);
