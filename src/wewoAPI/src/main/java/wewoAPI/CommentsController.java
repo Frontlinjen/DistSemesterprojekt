@@ -28,7 +28,7 @@ class CommentController{
 	public CommentController()
 	{
 		repository = new MySQLCommentRepository();
-		taskRepo = new TaskRespository();
+		taskRepo = new MySQLTaskRepository();
 	}
 	
 	public CommentController(CommentRepository repository)
@@ -61,7 +61,7 @@ class CommentController{
 			throw new exceptions.BadRequestException("No such task");
 			//TODO Find ud af om det er en ugyldig task eller om brugeren ikke er oprettet i databasen?
 			try{
-				rep
+				taskRepo.getTask(comment.getTaskID());
 			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
