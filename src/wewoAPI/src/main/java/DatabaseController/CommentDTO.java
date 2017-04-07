@@ -7,8 +7,10 @@ import modelPOJO.Comment;
 
 public class CommentDTO implements Serializable{
 	String text;
-	int ownerId;
+	String ownerId;
 	Date date;
+	int ID;
+	int taskID;
 	
 	public CommentDTO(){
 	}
@@ -18,6 +20,7 @@ public class CommentDTO implements Serializable{
 		dto.setDate(comment.getDate());
 		dto.setOwnerId(comment.getOwner());
 		dto.setText(comment.getText());
+		dto.setID(comment.getID());
 		return dto;
 	}
 	
@@ -26,6 +29,7 @@ public class CommentDTO implements Serializable{
 		comment.setDate(this.getDate());
 		comment.setOwner(this.getOwnerId());
 		comment.setText(this.getText());
+		comment.setID(this.getID());
 		return comment;
 	}
 
@@ -38,11 +42,11 @@ public class CommentDTO implements Serializable{
 		return this;
 	}
 
-	public int getOwnerId() {
+	public String getOwnerId() {
 		return ownerId;
 	}
 
-	public CommentDTO setOwnerId(int ownerId) {
+	public CommentDTO setOwnerId(String ownerId) {
 		this.ownerId = ownerId;
 		return this;
 	}
@@ -55,4 +59,21 @@ public class CommentDTO implements Serializable{
 		this.date = date;
 		return this;
 	}
+	
+	public int getID() {
+		return ID;
+	}
+
+	public CommentDTO setID(int ID) {
+		this.ID = ID;
+		return this;
+	}
+
+	public int getTaskID() {
+		return taskID;
+	}
+
+	public void setTaskID(int taskID) {
+		this.taskID = taskID;
+	}	
 }
