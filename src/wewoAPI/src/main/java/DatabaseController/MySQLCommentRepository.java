@@ -58,8 +58,10 @@ public class MySQLCommentRepository implements CommentRepository{
 		try {
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("CREATE_COMMENT");
 			statement.setString(1, com.getText());
-			statement.setInt(2, com.getOwnerId());
+			statement.setString(2, com.getOwnerId());
 			statement.setDate(3, com.getDate());
+			statement.setInt(4, com.getID());
+			statement.setInt(5, com.getTaskID());
 
 			int res = statement.executeUpdate();
 			
@@ -81,8 +83,10 @@ public class MySQLCommentRepository implements CommentRepository{
 		try{
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("UPDATE_COMMENT");
 			statement.setString(1, com.getText());
-			statement.setInt(2, com.getOwnerId());
+			statement.setString(2, com.getOwnerId());
 			statement.setDate(3, com.getDate());
+			statement.setInt(4, com.getID());
+			statement.setInt(5, com.getTaskID());
 			return statement.executeUpdate();
 		}
 		catch(SQLException e){
@@ -92,13 +96,26 @@ public class MySQLCommentRepository implements CommentRepository{
 	}
 
 	public int deleteComment(int taskId, int commentId) throws DALException {
-		return DatabaseConnector.doUpdate("DELETE FROM Tasks WHERE ID = " + id + ";"); //TODO Fix
+		try{
+			PreparedStatement statement = DatabaseConnector.getPreparedStatement("UPDATE_COMMENT");
+			statement.setInt(1, taskId);
+			statement.setInt(2, commentId);
+			return statement.executeUpdate();
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+		}
+		return 0;
 	}
 	
 	private CommentDTO generate(ResultSet rs) throws SQLException
 	{
 		CommentDTO comment = new CommentDTO();
-		comment.setText(rs.getString("Text")).setDate(rs.getDate("Date")).setOwnerId(rs.getInt("OwnerId"));
+		comment.setText(rs.getString("Text"));
+		comment.setDate(rs.getDate("Date"));
+		comment.setOwnerId(rs.getString("OwnerId"));
+		comment.setTaskID(rs.getInt("TaskID"));
+		comment.setID(rs.getInt("ID"));
 		return comment;
 	}
 

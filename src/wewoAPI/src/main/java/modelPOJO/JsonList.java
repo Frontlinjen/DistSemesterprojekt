@@ -12,5 +12,4 @@ public class JsonList<T> {
 	public void setElements(List<T> elements) {
 		this.elements = elements;
 	}
-	
 }

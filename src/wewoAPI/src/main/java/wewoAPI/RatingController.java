@@ -5,12 +5,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import modelPOJO.IDObject;
 import modelPOJO.JsonList;
 import modelPOJO.Rating;
-import modelPOJO.Task;
-import DatabaseController.MySQLTaskRespository;
 import DatabaseController.RatingDTO;
 import DatabaseController.RatingRepository;
-import DatabaseController.TaskDTO;
-import DatabaseController.TaskRespository;
 import exceptions.UnauthorizedException;
 import DatabaseController.DALException;
 import DatabaseController.MySQLRatingRepository;
@@ -32,36 +28,36 @@ public class RatingController{
 	{
 		if(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty())
 		{
-			throw new UnauthorizedException();
+			throw new UnauthorizedException(null);
 		}
 		
-		IDObject newRatingID = new IDObject();
+		IDObject newRating = new IDObject();
 		
 		RatingRepository dao = new MySQLRatingRepository();
-		rate.setRaterID(context.getIdentity().getIdentityId());
-		RatingDTO dto = RatingDTO(rate);
+		rate.setMessage(context.getIdentity().getIdentityId());
+		RatingDTO dto = RatingDTO.fromModel(rate);
 		
 		try {
 			dao.createRating(dto);
-			newRatingID.setID(dto.getId());
-			return newTaskID;
+			newRating.setID(rate.getRateeID());
+			return newRating;
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		return newTaskID;
+		return newRating;
 	}
 	
-	public Task getRating(IDObject id, Context context)
+	public Rating getRating(IDObject rating, Context context)
 	{
-		TaskRespository dao = new MySQLTaskRespository();
-		TaskDTO dto;
+		RatingRepository dao = new MySQLRatingRepository();
+		RatingDTO dto;
 		try {
-			dto = dao.getTask(id.getID());
-			Task task = dto.getModel();
+			dto = dao.getRating();
+			Rating rate = dto.getModel();
 			
-			return task;
+			return rate;
 			
 		} catch (DALException e) {
 			// TODO Auto-generated catch block

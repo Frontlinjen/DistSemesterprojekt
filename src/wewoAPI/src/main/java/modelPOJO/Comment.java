@@ -4,8 +4,10 @@ import java.sql.Date;
 
 public class Comment {
 	String text;
-	int ownerId;
+	String ownerId;
 	Date date;
+	int ID;
+	int taskID;
 	
 	public String getText() {
 		return text;
@@ -13,10 +15,10 @@ public class Comment {
 	public void setText(String text) {
 		this.text = text;
 	}
-	public int getOwner() {
+	public String getOwner() {
 		return ownerId;
 	}
-	public void setOwner(int ownerId) {
+	public void setOwner(String ownerId) {
 		this.ownerId = ownerId;
 	}
 	public Date getDate() {
@@ -24,6 +26,18 @@ public class Comment {
 	}
 	public void setDate(Date date) {
 		this.date = date;
+	}
+	public int getID() {
+		return ID;
+	}
+	public void setID(int ID) {
+		this.ID = ID;
+	}
+	public int getTaskID() {
+		return taskID;
+	}
+	public void setTaskID(int taskID) {
+		this.taskID = taskID;
 	}
 	
 	
