@@ -23,7 +23,7 @@ public class ApplicationDTO implements Serializable {
 		this.applicationMessage = dto.applicationMessage;
 	}
 	
-	static ApplicationDTO fromModel(Application app)
+	public static ApplicationDTO fromModel(Application app)
 	{
 		ApplicationDTO dto = new ApplicationDTO();
 		dto.setTaskid(app.getTaskid());

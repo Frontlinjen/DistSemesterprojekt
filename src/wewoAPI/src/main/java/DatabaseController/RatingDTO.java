@@ -9,7 +9,7 @@ public class RatingDTO implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	
-	int rating;
+	int rating, ratingID;
 	String raterID, rateeID, message;
 	
 	public RatingDTO(){
@@ -21,6 +21,7 @@ public class RatingDTO implements Serializable{
 		this.rateeID = rate.rateeID;
 		this.rating = rate.rating;
 		this.message = rate.message;
+		this.ratingID = rate.ratingID;
 	}
 	
 	public static RatingDTO fromModel(Rating rate){
@@ -28,6 +29,7 @@ public class RatingDTO implements Serializable{
 		dto.setRating(rate.getRating());
 		dto.setRateeID(rate.getRateeID());
 		dto.setMessage(rate.getMessage());
+		dto.setRatingID(rate.getRatingID());
 		return dto;
 	}
 	
@@ -36,6 +38,7 @@ public class RatingDTO implements Serializable{
 		rate.setRating(this.getRating());;
 		rate.setRateeID(this.getRateeID());
 		rate.setMessage(this.getMessage());
+		rate.setRatingID(this.getRatingID());
 		return rate;
 	}
 	
@@ -47,4 +50,6 @@ public class RatingDTO implements Serializable{
 	public RatingDTO setRating(int rating){this.rating = rating; return this;}
 	public String getMessage(){return message;}
 	public RatingDTO setMessage(String message){this.message = message; return this;}
+	public int getRatingID(){return rating;}
+	public RatingDTO setRatingID(int ratingID){this.ratingID = rating; return this;}
 }
