@@ -1,9 +1,7 @@
-import modelPOJO.IDObject;
 import modelPOJO.Rating;
+import modelPOJO.RatingIDObject;
 import wewo.api.test.ContextTest;
 import wewoAPI.RatingController;
-
-import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +32,7 @@ public class RatingControllerTest {
 	@Test
 	public void createRating() throws UnauthorizedException{
 		Rating rate = generateTestData();
-		IDObject id = controller.createRating(rate, context);
+		RatingIDObject id = controller.createRating(rate, context);
 	}
 	
 	@Test
