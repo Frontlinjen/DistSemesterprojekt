@@ -13,9 +13,11 @@ import DatabaseController.DALException;
 import DatabaseController.MySQLAccountRepository;
 import DatabaseController.MySQLCommentRepository;
 import DatabaseController.MySQLException;
+import DatabaseController.MySQLException.ForeignKeyException;
 import DatabaseController.MySQLTaskRepository;
 import DatabaseController.TaskDTO;
 import DatabaseController.TaskRespository;
+import exceptions.BadRequestException;
 import exceptions.NotFoundException;
 import exceptions.UnauthorizedException;
 import modelPOJO.Comment;
@@ -25,19 +27,19 @@ import modelPOJO.IDObject;
 import modelPOJO.JsonList;
 import modelPOJO.Task;
 
-class CommentController{
+public class CommentsController{
 	CommentRepository repository;
 	TaskRespository taskRepo;
 	AccountRepository accountRepo;
 	
-	public CommentController()
+	public CommentsController()
 	{
 		repository = new MySQLCommentRepository();
 		taskRepo = new MySQLTaskRepository();
 		accountRepo = new MySQLAccountRepository();
 	}
 	
-	public CommentController(CommentRepository repository)
+	public CommentsController(CommentRepository repository)
 	{
 		this.repository = repository;
 	}
@@ -65,14 +67,30 @@ class CommentController{
 		catch(ForeignKeyException e)
 		{
 			//Is the task legit
-			if(taskRepo.getTask(comment.getTaskID()) == null){
-				throw new exceptions.BadRequestException("No such task");
+			try {
+				if(taskRepo.getTask(comment.getTaskID()) == null){
+					throw new exceptions.BadRequestException("No such task");
+				}
+			} catch (DALException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (BadRequestException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 			//Is the user legit
-			if(accountRepo.getAccount(comment.getOwner()) == null){
-				throw new exceptions.UnauthorizedException("Unauthorized");
+			try {
+				if(accountRepo.getAccount(comment.getOwner()) == null){
+					throw new exceptions.UnauthorizedException("Unauthorized");
+				}
+			} catch (DALException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		} catch (DALException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BadRequestException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -100,10 +118,21 @@ class CommentController{
 		}catch(ForeignKeyException e)
 		{
 			//Is the task legit
-			if(taskRepo.getTask(taskId.getID()) == null){
-				throw new exceptions.BadRequestException("No such task");
+			try {
+				if(taskRepo.getTask(taskId.getID()) == null){
+					throw new exceptions.BadRequestException("No such task");
+				}
+			} catch (DALException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (BadRequestException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		} catch (DALException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BadRequestException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -125,10 +154,21 @@ class CommentController{
 		}catch(ForeignKeyException e)
 		{
 			//Is the task legit
-			if(taskRepo.getTask(SharedId.getFirstID()) == null){
-				throw new exceptions.BadRequestException("No such task");
+			try {
+				if(taskRepo.getTask(SharedId.getFirstID()) == null){
+					throw new exceptions.BadRequestException("No such task");
+				}
+			} catch (DALException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (BadRequestException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		} catch (DALException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BadRequestException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -155,14 +195,30 @@ class CommentController{
 		}catch(ForeignKeyException e)
 		{
 			//Is the task legit
-			if(taskRepo.getTask(comment.getTaskID()) == null){
-				throw new exceptions.BadRequestException("No such task");
+			try {
+				if(taskRepo.getTask(comment.getTaskID()) == null){
+					throw new exceptions.BadRequestException("No such task");
+				}
+			} catch (DALException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (BadRequestException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 			//Is the user legit
-			if(accountRepo.getAccount(comment.getOwner()) == null){
-				throw new exceptions.UnauthorizedException("Unauthorized");
+			try {
+				if(accountRepo.getAccount(comment.getOwner()) == null){
+					throw new exceptions.UnauthorizedException("Unauthorized");
+				}
+			} catch (DALException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		} catch (DALException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BadRequestException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -180,17 +236,33 @@ class CommentController{
 		}catch(ForeignKeyException e)
 		{
 			//Is the task legit
-			if(taskRepo.getTask(comment.getTaskID()) == null){
-				throw new exceptions.BadRequestException("No such task");
+			try {
+				if(taskRepo.getTask(comment.getTaskID()) == null){
+					throw new exceptions.BadRequestException("No such task");
+				}
+			} catch (DALException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (BadRequestException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 			//Is the user legit
-			if(accountRepo.getAccount(comment.getOwner()) == null){
-				throw new exceptions.UnauthorizedException("Unauthorized");
+			try {
+				if(accountRepo.getAccount(comment.getOwner()) == null){
+					throw new exceptions.UnauthorizedException("Unauthorized");
+				}
+			} catch (DALException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return 1;
+		} catch (BadRequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return 0;
 	}

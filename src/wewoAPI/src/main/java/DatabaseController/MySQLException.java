@@ -3,39 +3,39 @@ package DatabaseController;
 import java.sql.SQLException;
 
 public class MySQLException extends Exception{
-	class EntryNullException extends MySQLException{
+	
+	public static class EntryNullException extends MySQLException{ //TODO Fix infinite loops
 		public EntryNullException(SQLException exception) {
 			super(exception);
+			super.message = "Value needs to be inserted.";
 		}
-
-		super.message = "Value needs to be inserted.";
 	}
 	
-	class ForeignKeyException extends MySQLException{
+	public static class ForeignKeyException extends MySQLException{
 		public ForeignKeyException(SQLException exception) {
 			super(exception);
+			super.message = "Parent does not exist.";
 		}
-
-		super.message = "Parent does not exist.";
 	}
 	
 	private static final long serialVersionUID = 1L;
 	public static final int FOREIGN_KEY_CONSTRAINT = 1452;
 	public static final int CANNOT_BE_NULL = 1048;
+	public static String message;
 	
 	public MySQLException(SQLException exception){
 		switch(exception.getErrorCode()){
 		
 		case CANNOT_BE_NULL:
 			try {
-				throw new EntryNullException();
+				throw new EntryNullException(exception);
 			} catch (EntryNullException e) {
 				e.printStackTrace();
 			}
 	
 		case FOREIGN_KEY_CONSTRAINT:
 			try {
-				throw new ForeignKeyException();
+				throw new ForeignKeyException(exception);
 			} catch (ForeignKeyException e) {
 				e.printStackTrace();
 			}
