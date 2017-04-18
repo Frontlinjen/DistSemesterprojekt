@@ -2,8 +2,7 @@ package wewoAPI;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
-import modelPOJO.IDObject;
-import modelPOJO.JsonList;
+import modelPOJO.RatingIDObject;
 import modelPOJO.Rating;
 import DatabaseController.RatingDTO;
 import DatabaseController.RatingRepository;
@@ -24,14 +23,14 @@ public class RatingController{
 		this.repository = repository;
 	}
 	
-	public IDObject createRating(Rating rate, Context context) throws UnauthorizedException
+	public RatingIDObject createRating(Rating rate, Context context) throws UnauthorizedException
 	{
 		if(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty())
 		{
 			throw new UnauthorizedException(null);
 		}
 		
-		IDObject newRating = new IDObject();
+		RatingIDObject newRating = new RatingIDObject();
 		
 		RatingRepository dao = new MySQLRatingRepository();
 		rate.setMessage(context.getIdentity().getIdentityId());
@@ -39,7 +38,7 @@ public class RatingController{
 		
 		try {
 			dao.createRating(dto);
-			newRating.setID(rate.getRateeID());
+			newRating.setRateeID(rate.getRateeID());
 			return newRating;
 		} catch (DALException e) {
 			// TODO Auto-generated catch block
@@ -49,12 +48,12 @@ public class RatingController{
 		return newRating;
 	}
 	
-	public Rating getRating(IDObject rating, Context context)
+	public Rating getRating(RatingIDObject rating, Context context)
 	{
 		RatingRepository dao = new MySQLRatingRepository();
 		RatingDTO dto;
 		try {
-			dto = dao.getRating();
+			dto = dao.getRating(rating.getRaterID(), rating.getRateeID());
 			Rating rate = dto.getModel();
 			
 			return rate;
