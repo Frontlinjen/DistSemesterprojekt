@@ -3,11 +3,6 @@ package DatabaseController;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import com.amazonaws.auth.policy.Statement;
 
 public class MySQLRatingRepository implements RatingRepository{
 
@@ -16,9 +11,9 @@ public class MySQLRatingRepository implements RatingRepository{
 	private final String CREATE_RATING = "INSERT INTO UserRatings(rating, raterID, rateeID, message) "
 									   + "VALUES (?, ?, ?, ?);";
 
-	public MySQLRatingRepository(){
-		DatabaseConnector.RegisterStatement("GET_TASK", GET_RATING);
-		DatabaseConnector.RegisterStatement("CREATE_TASK", CREATE_RATING);
+	public MySQLRatingRepository() throws DALException{
+		DatabaseConnector.RegisterStatement("GET_RATING", GET_RATING);
+		DatabaseConnector.RegisterStatement("CREATE_RATING", CREATE_RATING);
 		DatabaseConnector.RegisterStatement("GET_RATER", GET_RATER);
 	}
 	
@@ -75,13 +70,11 @@ public class MySQLRatingRepository implements RatingRepository{
 			statement.setString(3, rate.rateeID);
 			statement.setString(4, rate.message);
 			
-			int res = statement.executeUpdate();
-
 			//Ved ikke helt hvordan jeg skal lave denne del...
-			/*ResultSet rs = DatabaseConnector.doQuery("SELECT LAST_INSERT_ID();");
+			ResultSet rs = DatabaseConnector.doQuery("SELECT LAST_INSERT_ID();");
 			rs.first();
 			int ID = rs.getInt("last_insert_id()");
-			rate.id = ID;*/
+			rate.ratingID = ID;
 			return true;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

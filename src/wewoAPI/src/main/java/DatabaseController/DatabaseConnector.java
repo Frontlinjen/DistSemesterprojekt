@@ -58,8 +58,9 @@ public class DatabaseConnector {
 	private static Statement stm;
 	private static HashMap<String, PreparedStatementWrapper> statements;
 	
-	public static void RegisterStatement(String identifier, String query)
+	public static void RegisterStatement(String identifier, String query) throws DALException
 	{
+		connector();
 		if(!statements.containsKey(identifier))
 		{
 			PreparedStatementWrapper statement = new PreparedStatementWrapper(query);

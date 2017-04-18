@@ -13,7 +13,7 @@ import DatabaseController.MySQLRatingRepository;
 public class RatingController{
 	RatingRepository repository;
 	
-	public RatingController()
+	public RatingController() throws DALException
 	{
 		repository = new MySQLRatingRepository();
 	}
@@ -23,7 +23,7 @@ public class RatingController{
 		this.repository = repository;
 	}
 	
-	public RatingIDObject createRating(Rating rate, Context context) throws UnauthorizedException
+	public RatingIDObject createRating(Rating rate, Context context) throws UnauthorizedException, DALException
 	{
 		if(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty())
 		{
@@ -48,7 +48,7 @@ public class RatingController{
 		return newRating;
 	}
 	
-	public Rating getRating(RatingIDObject rating, Context context)
+	public Rating getRating(RatingIDObject rating, Context context) throws DALException
 	{
 		RatingRepository dao = new MySQLRatingRepository();
 		RatingDTO dto;
