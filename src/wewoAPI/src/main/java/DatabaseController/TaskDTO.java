@@ -45,10 +45,10 @@ public class TaskDTO implements Serializable {
 		dto.setEct(task.getETC());
 		dto.setPrice(task.getPrice());
 		dto.setStreet(task.getStreet());
-		dto.setSupplies(task.isSupplies() ? 1 : 0);
+		dto.setSupplies(task.isSupplies());
 		dto.setTags(task.getTags());
 		dto.setTitle(task.getTitle());
-		dto.setUrgent(task.isUrgent() ? 1 : 0);
+		dto.setUrgent(task.isUrgent());
 		return dto;
 	}
 	
@@ -59,10 +59,10 @@ public class TaskDTO implements Serializable {
 		task.setETC(this.getEct());
 		task.setPrice(this.getPrice());
 		task.setStreet(this.getStreet());
-		task.setSupplies(this.getSupplies() == 0 ? 0 : 1);
+		task.setSupplies(this.getSupplies());
 		task.setTags(this.getTags());
 		task.setTitle(this.getTitle());
-		task.setUrgent(this.getUrgent() == 0 ? 1 : 0);
+		task.setUrgent(this.getUrgent());
 		return task;
 	}
 	

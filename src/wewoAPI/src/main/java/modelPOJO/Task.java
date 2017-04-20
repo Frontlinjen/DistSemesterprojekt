@@ -39,29 +39,17 @@ public class Task {
 	public void setETC(int eTC) {
 		ETC = eTC;
 	}
-	public boolean isSupplies() {
-		if(supplies == 1)
-			return true;
-		else
-			return false;
+	public int isSupplies() {
+		return supplies;
 	}
 	public void setSupplies(int supplies) {
-		if(supplies == 1)
-			this.supplies = 1;
-		else
-			this.supplies = 0;
+		this.supplies = supplies;
 	}
-	public boolean isUrgent() {
-		if(urgent == 1 )
-			return true;
-		else
-			return false;
+	public int isUrgent() {
+		return urgent;
 	}
 	public void setUrgent(int urgent) {
-		if(urgent == 1)
-			this.urgent = 1;
-		else
-			this.urgent = 0;
+		this.urgent = urgent;
 	}
 	public int getViews() {
 		return views;

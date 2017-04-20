@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ControllerBase {
-	protected class LambdaResponse{
-		private class LambdaResponseData{
+	static public class LambdaResponse{
+		static public class LambdaResponseData{
 			@JsonProperty("isBase64Encoded")
 			public boolean base64 = false;
 			public int statusCode;
@@ -65,6 +65,8 @@ public class ControllerBase {
 		
 		public void dispatch(JsonGenerator out){
 			try {
+				bodyWriter.writeEndObject();
+				bodyWriter.flush();
 				data.body = bodyStream.toString();
 				out.writeObject(data);
 			} catch (IOException e) {
@@ -76,10 +78,9 @@ public class ControllerBase {
 		}
 				
 	}
-	protected class LambdaRequest{
+	static public class LambdaRequest{
 		@JsonIgnoreProperties(ignoreUnknown=true)
-		
-		private class LambdaRequestData{
+		static public class LambdaRequestData{
 			public Map<String, String> headers = new HashMap<String, String>();
 			@JsonProperty("queryStringParameters")
 			public Map<String, String> queryString = new HashMap<String, String>();
@@ -116,8 +117,21 @@ public class ControllerBase {
 			if(data.body != null && data.body.has(name)){
 				try {
 					TreeNode node = data.body.get(name);
-					return objectConverter.treeToValue(node, type);
+					if(node != null)
+						return objectConverter.treeToValue(node, type);
 				} catch (JsonProcessingException e) {
+					e.printStackTrace();
+				}
+			}
+			return null;
+		}
+		public <T> T getObject(Class<T> type){
+			if(data.body != null)
+			{
+				try {
+					return objectConverter.treeToValue(data.body, type);
+				} catch (JsonProcessingException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -131,7 +145,7 @@ public class ControllerBase {
 	protected LambdaResponse request;
 	protected LambdaRequest response;
 	
-	public void Something(InputStream i, OutputStream out)
+	public void Setup(InputStream i, OutputStream out)
 	{
 		request = new LambdaResponse(factory);
 		try {
