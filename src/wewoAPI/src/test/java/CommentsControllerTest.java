@@ -61,7 +61,7 @@ public class CommentsControllerTest {//Tests kan ikke se CommentsController?? Hæ
 				newComment = controller.getComment(dido, context);
 				assertEquals(newComment.getOwner(), context.getIdentity().getIdentityId());
 				assertEquals(comment, newComment);
-			} catch (NotFoundException e) {
+			} catch (Exception e) { //Replace with NotFoundException
 				fail("Task was not created");
 			}
 			
@@ -135,6 +135,7 @@ public class CommentsControllerTest {//Tests kan ikke se CommentsController?? Hæ
 			controller.getComment(dido, context);
 			fail("Task was found");
 		} catch (NotFoundException e) {
+			e.printStackTrace();
 		} catch (UnauthorizedException e) {
 			fail("User was not authorized");
 			e.printStackTrace();

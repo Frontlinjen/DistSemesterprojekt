@@ -140,7 +140,7 @@ public class CommentsController{
 		
 	}
 	
-	public Comment getComment(DoubleIDObject SharedId, Context context)
+	public Comment getComment(DoubleIDObject SharedId, Context context) throws NotFoundException
 	{
 		CommentDTO dto;
 		try {
@@ -224,7 +224,7 @@ public class CommentsController{
 		}
 	}
 	
-	public int deleteComment(Comment comment, Context context) throws UnauthorizedException
+	public int deleteComment(Comment comment, Context context) throws UnauthorizedException, NotFoundException
 	{
 		verifyLogin(context);
 		
