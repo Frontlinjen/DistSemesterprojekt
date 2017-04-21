@@ -59,8 +59,8 @@ public class CommentsControllerTest {//Tests kan ikke se CommentsController?? Hæ
 			dido.setSecondID(comment.getID());
 			try {
 				newComment = controller.getComment(dido, context);
-				assertEquals(newComment.getOwner(), context.getIdentity().getIdentityId());
-				assertEquals(comment, newComment);
+				assertTrue(newComment.getOwner().equals(context.getIdentity().getIdentityId()));
+				assertTrue(comment.equals(newComment));
 			} catch (Exception e) { //Replace with NotFoundException
 				fail("Task was not created");
 			}
@@ -82,13 +82,13 @@ public class CommentsControllerTest {//Tests kan ikke se CommentsController?? Hæ
 			DoubleIDObject dido = new DoubleIDObject();
 			dido.setFirstID(comment.getTaskID());
 			dido.setSecondID(comment.getID());
-			assertEquals(controller.getComment(dido, context), comment);
+			assertTrue(controller.getComment(dido, context).equals(comment));
 			IDObject ido = new IDObject();
 			ido.setID(comment.getTaskID());
 			List<Comment> rList = new ArrayList<Comment>();
 			rList.add(comment);
 			rList.add(comment2);
-			assertEquals(((List<Comment>)controller.getCommentList(ido, context)),rList);
+			assertTrue(((List<Comment>)controller.getCommentList(ido, context)).equals(rList));
 		} catch (NotFoundException e) {
 			fail("Task was not created");
 		} catch (UnauthorizedException e) {
@@ -113,9 +113,9 @@ public class CommentsControllerTest {//Tests kan ikke se CommentsController?? Hæ
 			dido2.setFirstID(comment2.getTaskID());
 			dido2.setSecondID(comment2.getID());
 			Comment reComment2 = controller.getComment(dido2, context);
-			assertEquals(comment, reComment1);
-			assertEquals(comment2, reComment2);
-			assertNotEquals(reComment1, reComment2);
+			assertTrue(comment.equals(reComment1));
+			assertTrue(comment2.equals(reComment2));
+			assertFalse(reComment1.equals(reComment2));
 			assertTrue(reComment2.getText().equals("blah"));
 		} catch (NotFoundException e) {
 			fail("Task was not created");

@@ -32,7 +32,7 @@ public class CommentsController{
 	TaskRespository taskRepo;
 	AccountRepository accountRepo;
 	
-	public CommentsController()
+	public CommentsController() throws DALException
 	{
 		repository = new MySQLCommentRepository();
 		taskRepo = new MySQLTaskRepository();
