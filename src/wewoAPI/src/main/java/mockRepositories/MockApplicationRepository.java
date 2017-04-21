@@ -23,7 +23,8 @@ public class MockApplicationRepository implements ApplicationRepository {
 	}
 
 	public List<String> getApplicationList(int id) throws DALException {
-		return null;
+		List<String> applicantList = new ArrayList<String>();
+		applicantList.addAll(applicantList);
 	}
 
 	public int createApplication(ApplicationDTO app) throws DALException {
@@ -40,5 +41,7 @@ public class MockApplicationRepository implements ApplicationRepository {
 		database.remove(id);
 		return 1;
 	}
+
+
 
 }

@@ -12,7 +12,7 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 	private final String CREATE_APPLICATION = "INSERT INTO Tasks(TaskID, ApplierID, appliermessage) VALUES (?, ?, ?);";
 	private final String UPDATE_APPLICATION = "UPDATE Application SET  TaskID = '?', ApplierID =  '?', appliermessage = '?';";
 	
-	public MySQLApplicationRepository(){
+	public MySQLApplicationRepository() throws DALException{
 		DatabaseConnector.RegisterStatement("GET_APPLICATION", GET_APPLICATION);
 		DatabaseConnector.RegisterStatement("CREATE_APPLICATION", CREATE_APPLICATION);
 		DatabaseConnector.RegisterStatement("UPDATE_APPLICATION", UPDATE_APPLICATION);
