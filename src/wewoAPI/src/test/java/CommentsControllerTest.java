@@ -27,6 +27,7 @@ public class CommentsControllerTest {//Tests kan ikke se CommentsController?? Hæ
 	Context context;
 
 	@Before
+	
 	public void setUp() throws Exception {
 		controller = new CommentsController(new MockCommentsRepository());
 		context = new ContextTest("TestUser");
@@ -45,7 +46,7 @@ public class CommentsControllerTest {//Tests kan ikke se CommentsController?? Hæ
 	}
 	
 	@Test
-	private void createComment(){
+	public void createComment(){
 		Comment comment = generateTestData();
 		try {
 			IDObject id = controller.createComment(comment, context);
@@ -72,7 +73,7 @@ public class CommentsControllerTest {//Tests kan ikke se CommentsController?? Hæ
 	}
 	
 	@Test
-	private void getComment(){
+	public void getComment(){
 		Comment comment = generateTestData();
 		Comment comment2 = generateTestData();
 		comment2.setID(22);
@@ -98,7 +99,7 @@ public class CommentsControllerTest {//Tests kan ikke se CommentsController?? Hæ
 	}
 	
 	@Test
-	private void updateComment(){
+	public void updateComment(){
 		Comment comment = generateTestData();
 		Comment comment2 = generateTestData();
 		comment2.setText("blah");
@@ -126,7 +127,7 @@ public class CommentsControllerTest {//Tests kan ikke se CommentsController?? Hæ
 	}
 	
 	@Test
-	private void deleteComment(){
+	public void deleteComment(){
 		Comment comment = generateTestData();
 		try {
 			controller.createComment(comment, context);
