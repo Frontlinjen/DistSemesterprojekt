@@ -34,11 +34,13 @@ public class TaskController extends ControllerBase{
 		try{
 			if(!verifyLogin(context)){
 				raiseError(out, 401, "Not logged in");
+				return;
 			}
 			StartRequest(in);
 			Task task = request.getObject(Task.class);
 			if(task == null){
 				raiseError(out, 400, "Invalid Task Object");
+				return;
 			}
 			TaskDTO dto = TaskDTO.fromModel(task);
 			dto.setCreatorId(context.getIdentity().getIdentityId());
@@ -48,6 +50,7 @@ public class TaskController extends ControllerBase{
 				response.addResponseObject("TaskID", dto.getId());
 				response.setStatusCode(200);
 				FinishRequest(out);
+				return;
 			} catch (DALException e) {
 				raiseError(out, 503, "Database unavailable");
 				return;
@@ -56,6 +59,7 @@ public class TaskController extends ControllerBase{
 		}
 		catch(Exception e)
 		{
+			e.printStackTrace();
 			raiseError(out, 500, "(╯°□°）╯︵ ┻━┻");
 			return;
 		}
@@ -75,7 +79,15 @@ public class TaskController extends ControllerBase{
 		
 		try {
 			StartRequest(in);
-			int taskID = request.getObject("TaskID", Integer.class);
+			
+			int taskID;
+			try{
+				taskID = Integer.parseInt(request.getPath("taskID"));			
+			}
+			catch(NumberFormatException neg){
+				raiseError(out, 400, "No taskID specified on path");
+				return;
+			}
 			TaskDTO dto;
 			dto = repository.getTask(taskID);
 			if(dto==null)
@@ -104,6 +116,16 @@ public class TaskController extends ControllerBase{
 		try {
 			StartRequest(in);
 			Task task = request.getObject(Task.class);
+			int taskID;
+			try{
+				taskID = Integer.parseInt(request.getPath("taskID"));
+			}
+			catch(Exception e)
+			{
+				raiseError(out, 400, "No taskID specified");
+				return;
+			}
+			task.setID(taskID);
 			TaskDTO dto = repository.getTask(task.getID());
 			if(dto == null)
 			{
@@ -111,8 +133,6 @@ public class TaskController extends ControllerBase{
 				return;
 			}
 			if(dto.getCreatorId().equals(context.getIdentity().getIdentityId())){
-				
-				Date date = new Date(System.currentTimeMillis());
 				dto = TaskDTO.fromModel(task);
 				repository.updateTask(dto);
 				response.setStatusCode(200);
@@ -137,7 +157,15 @@ public class TaskController extends ControllerBase{
 		}	
 		try {
 			StartRequest(in);
-			int taskId = request.getObject("TaskID", Integer.class);
+			int taskId;
+			try{
+				taskId = Integer.parseInt(request.getPath("taskID"));
+			}
+			catch(NumberFormatException eng)
+			{
+				raiseError(out, 400, "No taskID specified");
+				return;
+			}
 			TaskDTO task = repository.getTask(taskId);
 			if(task == null)
 			{
@@ -148,11 +176,12 @@ public class TaskController extends ControllerBase{
 			if(task.getCreatorId().equals(context.getIdentity().getIdentityId())){
 				repository.deleteTask(taskId);
 				response.setStatusCode(200);
+				FinishRequest(out);
 				return;
 			}
 			else
 			{
-				raiseError(out, 401, "User does not own that task");
+				raiseError(out, 403, "User does not own that task");
 				return;
 			}
 		} catch (DALException e) {
