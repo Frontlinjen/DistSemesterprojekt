@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -20,6 +21,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import exceptions.InternalServerErrorException;
+import exceptions.UnauthorizedException;
+
 public class ControllerBase {
 	static public class LambdaResponse{
 		static public class LambdaResponseData{
@@ -32,10 +36,10 @@ public class ControllerBase {
 		private LambdaResponseData data;
 		private JsonGenerator bodyWriter;
 		private StringWriter bodyStream;
-		
-		
+				
 		public LambdaResponse(JsonFactory factory){
 			data = new LambdaResponseData();
+			data.statusCode = 200;
 			try {
 				bodyStream = new StringWriter();
 				bodyWriter = factory.createGenerator(bodyStream);
@@ -84,7 +88,12 @@ public class ControllerBase {
 			public Map<String, String> headers = new HashMap<String, String>();
 			@JsonProperty("queryStringParameters")
 			public Map<String, String> queryString = new HashMap<String, String>();
-			public Map<String, String> pathParameters = new HashMap<String, String>();			
+			public Map<String, String> pathParameters = new HashMap<String, String>();
+			void setBody(String content) throws JsonProcessingException, IOException{
+				ObjectMapper mapper = new ObjectMapper();
+				if(content != null && !content.isEmpty())
+					body = (ObjectNode)mapper.readTree(content);
+			}
 			public ObjectNode body;
 		}
 		
@@ -140,16 +149,64 @@ public class ControllerBase {
 		
 	}
 	
-	private JsonFactory factory = new JsonFactory(new ObjectMapper());
+	private ObjectMapper mapper = new ObjectMapper();
+	private JsonFactory factory = new JsonFactory(mapper);
 
-	protected LambdaResponse request;
-	protected LambdaRequest response;
+	protected LambdaResponse response;
+	protected LambdaRequest request;
 	
-	public void Setup(InputStream i, OutputStream out)
-	{
-		request = new LambdaResponse(factory);
+	
+	private class Error{
+		public Error(String s){
+			error = s;
+		}
+		public String error;
+	}
+	protected void raiseError(OutputStream out, int errorCode, String value) throws InternalServerErrorException{
+		//Discard current procress
+		request = null;
+		response = null;
 		try {
-			response = new LambdaRequest(factory.createParser(i), new ObjectMapper());
+			//Write emergency data
+			LambdaResponse.LambdaResponseData data = new LambdaResponse.LambdaResponseData();
+			data.statusCode = errorCode;
+			data.body = mapper.writeValueAsString(new Error(value));
+			JsonGenerator gen = factory.createGenerator(out);
+			//gen.writeStartObject();
+			gen.writeObject(data);
+			//gen.writeEndObject();
+			gen.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException("Failed to write response");
+		}
+		
+		
+	}
+	
+	protected  boolean verifyLogin(Context context)
+	{
+		return !(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty());
+	}
+	
+	
+	protected void FinishRequest(OutputStream o) throws InternalServerErrorException
+	{
+		if(response != null)
+		{
+			try {
+				response.dispatch(factory.createGenerator(o));
+			} catch (IOException e) {
+				throw new InternalServerErrorException("Failed to write response");
+			}
+		}
+	}
+	
+	protected void StartRequest(InputStream i)
+	{
+		response = new LambdaResponse(factory);
+		try {
+			request = new LambdaRequest(factory.createParser(i), new ObjectMapper());
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,12 +1,14 @@
 package wewoAPI;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Date;
 import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
 import DatabaseController.DALException;
-import DatabaseController.MySQLTaskRespository;
+import DatabaseController.MySQLTaskRepository;
 import DatabaseController.TaskRespository;
 import DatabaseController.TaskDTO;
 import exceptions.*;
@@ -14,46 +16,54 @@ import modelPOJO.IDObject;
 import modelPOJO.Task;
 import modelPOJO.FindDataObject;;
 
-public class TaskController {
+public class TaskController extends ControllerBase{
 	TaskRespository repository;
 	
 	public TaskController()
 	{
-		repository = new MySQLTaskRespository();
+		repository = new MySQLTaskRepository();
 	}
 	
 	public TaskController(TaskRespository repository)
 	{
 		this.repository = repository;
 	}
-	
-	private void verifyLogin(Context context) throws UnauthorizedException
+		 
+	public void createTask(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		if(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty())
-		{
-			throw new UnauthorizedException("Invalid login");
-		}	
-	}
-	 
-	public IDObject createTask(Task task, Context context) throws UnauthorizedException
-	{
-		verifyLogin(context);
-		
-		IDObject newTaskID = new IDObject();
-		
-		TaskDTO dto = TaskDTO.fromModel(task);
-		dto.setCreatorId(context.getIdentity().getIdentityId());
+		try{
+			if(!verifyLogin(context)){
+				raiseError(out, 401, "Not logged in");
+				return;
+			}
+			StartRequest(in);
+			Task task = request.getObject(Task.class);
+			if(task == null){
+				raiseError(out, 400, "Invalid Task Object");
+				return;
+			}
+			TaskDTO dto = TaskDTO.fromModel(task);
+			dto.setCreatorId(context.getIdentity().getIdentityId());
 
-		try {
-			repository.createTask(dto);
-			newTaskID.setID(dto.getId());
-			return newTaskID;
-		} catch (DALException e) {
-			// TODO Auto-generated catch block
+			try {
+				repository.createTask(dto);
+				response.addResponseObject("TaskID", dto.getId());
+				response.setStatusCode(200);
+				FinishRequest(out);
+				return;
+			} catch (DALException e) {
+				raiseError(out, 503, "Database unavailable");
+				return;
+			}
+			
+		}
+		catch(Exception e)
+		{
 			e.printStackTrace();
+			raiseError(out, 500, "(╯°□°）╯︵ ┻━┻");
+			return;
 		}
 		
-		return newTaskID;
 	}
 	
 	//See: https://github.com/Hjorthen/Bubble/blob/master/AuthTest/Repositories/TaskRepository.cs#L74
@@ -64,79 +74,118 @@ public class TaskController {
 	}
 	
 	
-	public Task getTask(IDObject id, Context context) throws NotFoundException
+	public void getTask(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		TaskDTO dto;
+		
 		try {
-			dto = repository.getTask(id.getID());
+			StartRequest(in);
+			
+			int taskID;
+			try{
+				taskID = Integer.parseInt(request.getPath("taskID"));			
+			}
+			catch(NumberFormatException neg){
+				raiseError(out, 400, "No taskID specified on path");
+				return;
+			}
+			TaskDTO dto;
+			dto = repository.getTask(taskID);
 			if(dto==null)
-				throw new NotFoundException("No such task");
+			{
+				raiseError(out, 404, "No task was found using ID " + taskID);
+				return;
+			}
 			
 			Task task = dto.getModel();
-
-			return task;
-		
+			response.addResponseObject("Task", task);
+			response.setStatusCode(200);
+			FinishRequest(out);
 		}catch (DALException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			raiseError(out, 503, "Database unavailable");
+			return;
 		}
-		return null;
 	}
 	
 	//PUT /task/{ID}
-	public void updateTask(Task task, Context context) throws NotFoundException, ForbiddenException, UnauthorizedException
+	public void updateTask(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		verifyLogin(context);
+		if(!verifyLogin(context)){
+			raiseError(out, 401, "Not logged in");
+		}
 		
 		try {
+			StartRequest(in);
+			Task task = request.getObject(Task.class);
+			int taskID;
+			try{
+				taskID = Integer.parseInt(request.getPath("taskID"));
+			}
+			catch(Exception e)
+			{
+				raiseError(out, 400, "No taskID specified");
+				return;
+			}
+			task.setID(taskID);
 			TaskDTO dto = repository.getTask(task.getID());
 			if(dto == null)
 			{
-				throw new NotFoundException("No such task");
+				raiseError(out, 404, "No task was found using ID " + task.getID());
+				return;
 			}
 			if(dto.getCreatorId().equals(context.getIdentity().getIdentityId())){
-				
-				Date date = new Date(System.currentTimeMillis());
-				dto = new TaskDTO()
-						.setTitle(task.getTitle())
-						.setDescription(task.getDescription())
-						.setPrice(task.getPrice())
-						.setEct(task.getETC())
-						.setSupplies(task.isSupplies() ? 1 : 0)
-						.setUrgent(task.isUrgent() ? 1 : 0)
-						.setStreet(task.getStreet())
-						.setZipaddress(task.getZipaddress());
+				dto = TaskDTO.fromModel(task);
 				repository.updateTask(dto);
+				response.setStatusCode(200);
+				FinishRequest(out);
+				return;
 			}
 			else
 			{
-				throw new ForbiddenException("Insuffecient access rights");
+				raiseError(out, 403, "User does not own that task");
+				return;
 			}
 		} catch (DALException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			raiseError(out, 503, "Database unavailable");
+			return;
 		}
 	}
 	
-	public int deleteTask(IDObject id, Context context) throws ForbiddenException, NotFoundException, UnauthorizedException
+	public void deleteTask(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		verifyLogin(context);		
+		if(!verifyLogin(context)){
+			raiseError(out, 401, "Not logged in");
+		}	
 		try {
-			TaskDTO task = repository.getTask(id.getID());
+			StartRequest(in);
+			int taskId;
+			try{
+				taskId = Integer.parseInt(request.getPath("taskID"));
+			}
+			catch(NumberFormatException eng)
+			{
+				raiseError(out, 400, "No taskID specified");
+				return;
+			}
+			TaskDTO task = repository.getTask(taskId);
 			if(task == null)
-				throw new NotFoundException("The specified task were not found");
+			{
+				raiseError(out, 404, "No such task");
+				return;
+			}
 			
 			if(task.getCreatorId().equals(context.getIdentity().getIdentityId())){
-				repository.deleteTask(id.getID());
+				repository.deleteTask(taskId);
+				response.setStatusCode(200);
+				FinishRequest(out);
+				return;
 			}
 			else
 			{
-				throw new ForbiddenException("Insuffecient access rights");
+				raiseError(out, 403, "User does not own that task");
+				return;
 			}
 		} catch (DALException e) {
-			e.printStackTrace();
-			return 0;
+			raiseError(out, 503, "Database unavailable");
 		}
-		return 0;
 	}
 }

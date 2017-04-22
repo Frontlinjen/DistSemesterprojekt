@@ -8,21 +8,22 @@ import modelPOJO.IDObject;
 import modelPOJO.JsonList;
 import modelPOJO.Task;
 import DatabaseController.ApplicationDTO;
+import DatabaseController.ApplicationRepository;
 import DatabaseController.DALException;
 import DatabaseController.MySQLApplicationRepository;
 import DatabaseController.MySQLTaskRepository;
 
 public class ApplicationController {
 	
-	MySQLApplicationRepository repository;
+	ApplicationRepository repository;
 	
 	
-	public ApplicationController()
+	public ApplicationController() throws DALException
 	{
 		repository = new MySQLApplicationRepository();
 	}
 	
-	public ApplicationController(MySQLApplicationRepository repository)
+	public ApplicationController(ApplicationRepository repository)
 	{
 		this.repository = repository;
 	}
@@ -35,7 +36,7 @@ public class ApplicationController {
 		}	
 	}
 		
-	public JsonList<String> GetApplicants(IDObject taskid, Context context) throws UnauthorizedException
+	public JsonList<String> GetApplicants(IDObject taskid, Context context) throws UnauthorizedException, DALException
 	{
 		MySQLTaskRepository tas = new MySQLTaskRepository();
 		MySQLApplicationRepository app = new MySQLApplicationRepository();
@@ -94,7 +95,7 @@ public class ApplicationController {
 		
 	}
 	
-	public 	Application GetApplication(Task task, Application application, Context context) throws UnauthorizedException
+	public 	Application GetApplication(Task task, Application application, Context context) throws UnauthorizedException, DALException
 	{
 		ApplicationDTO dto = new ApplicationDTO();
 		MySQLTaskRepository tas = new MySQLTaskRepository();

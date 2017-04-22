@@ -1,30 +1,45 @@
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import exceptions.ForbiddenException;
+import exceptions.InternalServerErrorException;
 import exceptions.NotFoundException;
 import exceptions.UnauthorizedException;
 import mockRepositories.MockTaskRepository;
 import modelPOJO.IDObject;
 import modelPOJO.Task;
 import wewo.api.test.ContextTest;
+import wewoAPI.ControllerBase;
 import wewoAPI.TaskController;
 
 public class TaskControllerTest {
 	TaskController controller;
 	ContextTest context;
+	ObjectMapper mapper;
+	ByteArrayOutputStream out;
 	int dataCounter = 0;
 	@Before
 	public void setUp() throws Exception {
 		controller = new TaskController(new MockTaskRepository());
 		context = new ContextTest("Jeiner");
-		controller.createTask(generateTestData(), context);
+		mapper = new ObjectMapper();
+		out = new ByteArrayOutputStream();
 	}
 
+	
 	private Task generateTestData()
 	{
 		Task task = new Task();
@@ -39,195 +54,164 @@ public class TaskControllerTest {
 	
 	
 	@Test
-	public void createTask() {
+	public void createTask() throws InternalServerErrorException, IOException {
 		Task task = generateTestData();
-		try {
-			task.setID(-1);
-			task.setCreatorid("Nobody");
-			IDObject id = controller.createTask(task, context);
-			assertNotNull(id);
-			assertTrue(id.getID() >= 0);
-			
-			Task newTask;
-			try {
-				newTask = controller.getTask(id, context);
-				assertEquals(newTask.getCreatorid(), context.getIdentity().getIdentityId());
-			} catch (NotFoundException e) {
-				fail("Task was not created");
-			}
-			
-		} catch (UnauthorizedException e) {
-			fail("User was not authorized");
-			e.printStackTrace();
-		}
-		
-	}
-	@Test
-	public void createTaskWithoutValidLogin(){
-		Task task = generateTestData();
-		context.setIdentity("");
-		try {
-			controller.createTask(task, context);
-			assertTrue(false); //Exception should always be thrown
-		} catch (UnauthorizedException e) {
-		}
-	}
-	
-	@Test
-	public void createTaskWithoutLogin(){
-		Task task = generateTestData();
-		context.clearIdentity();
-		try {
-			controller.createTask(task, context);
-			fail("Exception should have been thrown");
-		} catch (UnauthorizedException e) {
-			
-		}
-	}
-	
-	@Test
-	public void getNonexistingTask(){
-		IDObject id = new IDObject();
-		id.setID(666);
-		Task task;
-		try {
-			task = controller.getTask(id, context);
-			fail("Task should not be found!");
-		} catch (NotFoundException e) {
-		}
-	}
-	
-	@Test
-	public void deleteTask(){
-		IDObject id = new IDObject();
-		id.setID(0);
-		try {
-			controller.deleteTask(id, context);
-		} catch (ForbiddenException e) {
-			fail("No access");
-		} catch (NotFoundException e) {
-			
-		} catch (UnauthorizedException e) {
-			fail("Not logged in");
-		}
-	}
-	
-	@Test
-	public void deleteTaskCheckPermissions(){
-		try {
-			IDObject id = new IDObject();
-			id.setID(0);
-			context.setIdentity("Jeiner22");
-			controller.deleteTask(id, context);
-			assertTrue(false);
-		} catch (UnauthorizedException e) {
-			fail("Not logged in");
-		} catch (ForbiddenException e) {
-			
-		} catch (NotFoundException e) {
-			fail("No such task found");
-		}
-	}
-	
-	@Test
-	public void deleteNonexistingTask(){
-		try {
-			IDObject id = new IDObject();
-			id.setID(666);
-			controller.deleteTask(id, context);
-			assertTrue(false); //Should return NotFoundException
-		} catch (NotFoundException e) {
-			
-		}
-		catch(UnauthorizedException e){
-			fail(e.getMessage());
-		} catch (ForbiddenException e) {
-			fail(e.getMessage());
-		}
-	}
-	
-	@Test
-	public void updateTask(){
-		try{
-			IDObject id = new IDObject();
-			id.setID(0);
-			Task task = controller.getTask(id, context);
-			context.setIdentity(task.getCreatorid());
-			task.setTitle("Update");
-			controller.updateTask(task, context);
-			Task getTask = controller.getTask(id, context);
-			assertNotNull(getTask);
-			assertNotEquals(task.getCreatorid(), getTask.getCreatorid());
-			assertEquals(task.getTitle(), getTask.getTitle());
-		}
-		catch(UnauthorizedException e)
-		{
-			fail(e.getMessage());
-		} catch (NotFoundException e) {
-			fail(e.getMessage());
-		} catch (ForbiddenException e) {
-			fail(e.getMessage());
-		}
-	}
-	@Test
-	public void updateNonExistingTask(){
-		try{
-			Task task = generateTestData();
-			task.setCreatorid(context.getIdentity().getIdentityId());
-			context.setIdentity(task.getCreatorid());
-			task.setTitle("Update");
-			task.setID(1394234);
-			controller.updateTask(task, context);
-			fail("Should have caused NotFoundException");
-			
-		}
-		catch(UnauthorizedException e)
-		{
-			fail(e.getMessage());
-		} catch (NotFoundException e) {
 
-		} catch (ForbiddenException e) {
-			fail(e.getMessage());
-		}
+		task.setID(-1);
+		task.setCreatorid("Nobody");
+
+
+
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(task));
+
+		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		Integer taskID = response.getBody("TaskID", Integer.class);
+		assertNotNull(taskID);
+		assertEquals(response.getResponseCode(), 200);
+		assertTrue(taskID >= 0);
+
+		Task newTask;
+		out.reset();
+		request.addPath("taskID", taskID.toString());
+		controller.getTask(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 200);
+
+		newTask = response.getBody("Task", Task.class);
+		assertNotNull(newTask);
+		assertEquals(newTask.getCreatorid(), context.getIdentity().getIdentityId());
+		out.reset();
+	}
+	@Test
+	public void createTaskWithoutValidLogin() throws InternalServerErrorException, IOException{
+		Task task = generateTestData();
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(task));
+		context.setIdentity("");
+		
+		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 401);
 	}
 	
 	@Test
-	public void updateWrongPermissionsTask(){
-		context.setIdentity("Alice");
-		try{
-			IDObject id = new IDObject();
-			id.setID(0);
-			Task task = controller.getTask(id, context);
-			task.setTitle("Update");
-			controller.updateTask(task, context);
-			fail("Excepton should have been thrown");
-		}
-		catch(UnauthorizedException e)
-		{
-			fail(e.getMessage());
-		} catch (NotFoundException e) {
-			fail(e.getMessage());
-		} catch (ForbiddenException e) {
-		}
-	}
-	@Test
-	public void updateNoPermissionsTask(){
+	public void createTaskWithoutLogin() throws InternalServerErrorException, IOException{
 		Task task = generateTestData();
 		context.clearIdentity();
-		try{
-			task.setID(0);
-			task.setCreatorid("Nobody");
-			task.setTitle("Update");
-			controller.updateTask(task, context);
-			assertTrue(false);
-		}
-		catch(UnauthorizedException e)
-		{
-		} catch (NotFoundException e) {
-			fail(e.getMessage());
-		} catch (ForbiddenException e) {
-			fail(e.getMessage());
-		}
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(task));
+		context.clearIdentity();
+		
+		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 401);
+	}
+	
+	@Test
+	public void getNonexistingTask() throws InternalServerErrorException, IOException{
+		createTask();
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("taskID", Integer.toString(9001));
+		controller.getTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 404);
+	}
+	
+	@Test
+	public void deleteTask()  throws InternalServerErrorException, IOException{
+		createTask();
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("taskID", "0");
+		controller.deleteTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 200);
+		
+		out.reset();
+		controller.getTask(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 404);
+	}
+	
+	@Test
+	public void deleteTaskCheckPermissions()  throws InternalServerErrorException, IOException{
+		createTask();
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("taskID", "0");
+		context.setIdentity("Jeiner22");
+		controller.deleteTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 403);
+	}
+	
+	@Test
+	public void deleteNonexistingTask()   throws InternalServerErrorException, IOException{
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("taskID", "5050050");
+		controller.deleteTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(404, response.getResponseCode());
+	}
+	
+	@Test
+	public void updateTaskIgnoreCreatorAndTaskIDField()   throws InternalServerErrorException, IOException{
+		createTask();
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("taskID", "0");
+		Task newData = generateTestData();
+		newData.setCreatorid("TotallyNotACreator");
+		newData.setID(50505);
+		request.setBody(mapper.writeValueAsString(newData));
+		controller.updateTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(200, response.getResponseCode());
+		
+		out.reset();
+		request.setBody("");
+		
+		controller.getTask(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 200);
+		Task newTask = response.getBody("Task", Task.class);
+		assertEquals(newTask.getTitle(), newData.getTitle());
+		assertNotEquals(newTask.getCreatorid(), newData.getCreatorid());
+		assertNotEquals(newTask.getID(), newData.getID());
+	}
+	@Test
+	public void updateNonExistingTask()   throws InternalServerErrorException, IOException{
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("taskID", "9000");
+		Task newData = generateTestData();
+		request.setBody(mapper.writeValueAsString(newData));
+		controller.updateTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 404);
+	}
+	
+	@Test
+	public void updateWrongPermissionsTask()   throws InternalServerErrorException, IOException{
+		createTask();
+		
+		context.setIdentity("Alice");
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("taskID", "0");
+		Task newData = generateTestData();
+		request.setBody(mapper.writeValueAsString(newData));
+		controller.updateTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(403, response.getResponseCode());
+	}
+	@Test
+	public void updateNoPermissionsTask()    throws InternalServerErrorException, IOException{
+		context.clearIdentity();
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("taskID", "0");
+		Task newData = generateTestData();
+		request.setBody(mapper.writeValueAsString(newData));
+		controller.updateTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 401);
 	}
 	
 
