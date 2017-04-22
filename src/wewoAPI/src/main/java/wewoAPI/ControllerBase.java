@@ -88,7 +88,12 @@ public class ControllerBase {
 			public Map<String, String> headers = new HashMap<String, String>();
 			@JsonProperty("queryStringParameters")
 			public Map<String, String> queryString = new HashMap<String, String>();
-			public Map<String, String> pathParameters = new HashMap<String, String>();			
+			public Map<String, String> pathParameters = new HashMap<String, String>();
+			void setBody(String content) throws JsonProcessingException, IOException{
+				ObjectMapper mapper = new ObjectMapper();
+				if(content != null && !content.isEmpty())
+					body = (ObjectNode)mapper.readTree(content);
+			}
 			public ObjectNode body;
 		}
 		
@@ -150,24 +155,29 @@ public class ControllerBase {
 	protected LambdaResponse response;
 	protected LambdaRequest request;
 	
+	
+	private class Error{
+		public Error(String s){
+			error = s;
+		}
+		public String error;
+	}
 	protected void raiseError(OutputStream out, int errorCode, String value) throws InternalServerErrorException{
 		//Discard current procress
 		request = null;
 		response = null;
-		
-		
-		//Write emergency data
-		LambdaResponse.LambdaResponseData data = new LambdaResponse.LambdaResponseData();
-		data.statusCode = errorCode;
-		data.body = value;
-		
 		try {
+			//Write emergency data
+			LambdaResponse.LambdaResponseData data = new LambdaResponse.LambdaResponseData();
+			data.statusCode = errorCode;
+			data.body = mapper.writeValueAsString(new Error(value));
 			JsonGenerator gen = factory.createGenerator(out);
-			gen.writeStartObject();
+			//gen.writeStartObject();
 			gen.writeObject(data);
-			gen.writeEndObject();
+			//gen.writeEndObject();
 			gen.flush();
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new InternalServerErrorException("Failed to write response");
 		}
 		

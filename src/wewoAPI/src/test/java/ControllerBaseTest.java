@@ -1,4 +1,4 @@
-package wewo.api.test;
+
 
 import static org.junit.Assert.*;
 
