@@ -54,7 +54,7 @@ public class CommentsControllerTest {
 		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		Integer commentID = response.getBody("CommentID", Integer.class);
-		Integer taskID = response.getBody("taskID", Integer.class);
+	//	Integer taskID = response.getBody("taskID", Integer.class);
 		assertNotNull(commentID);
 		assertEquals(200, response.getResponseCode());
 		assertTrue(commentID >= 0);
@@ -62,8 +62,7 @@ public class CommentsControllerTest {
 		Comment newComment;
 		out.reset();
 		request.addPath("commentID", commentID.toString());
-		request.addPath("taskID", taskID.toString());
-		System.out.println(new String(request.getContent()));
+		request.addPath("taskID", Integer.toString(5));
 		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
 		response = new ResponseData(out);
 		assertEquals(200, response.getResponseCode());
