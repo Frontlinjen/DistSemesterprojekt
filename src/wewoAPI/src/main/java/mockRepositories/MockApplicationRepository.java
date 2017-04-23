@@ -10,7 +10,7 @@ import DatabaseController.DALException;
 public class MockApplicationRepository implements ApplicationRepository {
 	
 	
-	private List<ApplicationDTO> database = ArrayList<ApplicationDTO>();
+	private List<ApplicationDTO> database = new ArrayList<ApplicationDTO>();
 
 	public ApplicationDTO getApplication(int id) throws DALException {
 		try{
@@ -25,6 +25,7 @@ public class MockApplicationRepository implements ApplicationRepository {
 	public List<String> getApplicationList(int id) throws DALException {
 		List<String> applicantList = new ArrayList<String>();
 		applicantList.addAll(applicantList);
+		return applicantList;
 	}
 
 	public int createApplication(ApplicationDTO app) throws DALException {

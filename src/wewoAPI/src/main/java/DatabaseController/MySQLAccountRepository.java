@@ -16,7 +16,7 @@ public class MySQLAccountRepository implements AccountRepository{
 									   "= '?', competences = '?' WHERE ID = '?';";
 	
 	
-	public MySQLAccountRepository(){
+	public MySQLAccountRepository() throws DALException{
 		DatabaseConnector.RegisterStatement("GET_ACCOUNT", GET_ACCOUNT);
 		DatabaseConnector.RegisterStatement("CREATE_ACOUNT", CREATE_ACCOUNT);
 		DatabaseConnector.RegisterStatement("UPDATE_ACCOUNT", UPDATE_ACCOUNT);
@@ -115,6 +115,11 @@ public class MySQLAccountRepository implements AccountRepository{
 
 	public int deleteAccount(int id) throws DALException {
 		return DatabaseConnector.doUpdate("DELETE FROM Account WHERE ID = " + id + ";");
+	}
+
+	public AccountDTO getAccount(String id) throws DALException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

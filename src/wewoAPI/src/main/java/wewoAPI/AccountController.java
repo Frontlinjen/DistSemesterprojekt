@@ -6,18 +6,27 @@ import DatabaseController.AccountDTO;
 import DatabaseController.AccountRepository;
 import DatabaseController.DALException;
 import DatabaseController.MySQLAccountRepository;
+import exceptions.InternalServerErrorException;
 import modelPOJO.Account;
 import modelPOJO.IDObject;
 import modelPOJO.JsonList;
 import modelPOJO.UserIDObject;
 
 public class AccountController {
-	public Account getAccount(UserIDObject userID, Context context)
+	private AccountRepository dao;
+	
+	public AccountController() throws InternalServerErrorException{
+		try {
+			dao =  new MySQLAccountRepository();
+		} catch (DALException e) {
+			throw new InternalServerErrorException("");
+		}
+	}
+	public Account getAccount(IDObject userid, Context context)
 	{
-		AccountRepository dao = new MySQLAccountRepository();
 		AccountDTO dto;
 		try {
-			dto = dao.getAccount(userID.getID());
+			dto = dao.getAccount("/* TODO: APPLY ACTUAL ID */");
 			Account account = new Account();
 				
 			account.setName(dto.getName());
@@ -37,7 +46,6 @@ public class AccountController {
 	}
 	void updateAccount(Account account, Context context)
 	{
-		AccountRepository dao = new MySQLAccountRepository();
 		try{
 			AccountDTO dto = dao.getAccount(account.getuserID());
 			dto = new AccountDTO()
@@ -61,8 +69,6 @@ public class AccountController {
 	
 	public void createAccount(Account account, Context context){
 		UserIDObject newUserID = new UserIDObject();
-		
-		AccountRepository dao = new MySQLAccountRepository();
 		AccountDTO dto = new AccountDTO(
 				newUserID.getID(),
 				account.getName(),
