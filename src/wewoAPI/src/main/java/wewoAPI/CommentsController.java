@@ -38,15 +38,11 @@ public class CommentsController extends ControllerBase{
 	public CommentsController()
 	{
 		repository = new MySQLCommentRepository();
-		taskRepo = new MySQLTaskRepository();
-		accountRepo = new MySQLAccountRepository();
 	}
 	
 	public CommentsController(CommentRepository repository)
 	{
 		this.repository = repository;
-		taskRepo = new MySQLTaskRepository();
-		accountRepo = new MySQLAccountRepository();
 	}
 	
 	public void createComment(InputStream in, OutputStream out, Context context) throws InternalServerErrorException{
@@ -59,7 +55,7 @@ public class CommentsController extends ControllerBase{
 			StartRequest(in);
 			Comment comment = request.getObject(Comment.class);
 			if(comment == null){
-				raiseError(out, 400, "Invalid Task Object");
+				raiseError(out, 400, "Invalid Comment Object");
 				return;
 			}
 			CommentDTO dto = CommentDTO.fromModel(comment);

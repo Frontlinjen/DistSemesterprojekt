@@ -44,8 +44,8 @@ public class CommentsControllerTest {
 	public void createComment() throws InternalServerErrorException, IOException {
 		Comment comment = generateTestData();
 
-		comment.setID(-1);
-		comment.setTaskID(-1);
+		comment.setID(0);
+		comment.setTaskID(5);
 		comment.setOwner("Nobody");
 
 		RequestDataMock request = new RequestDataMock();
@@ -54,16 +54,19 @@ public class CommentsControllerTest {
 		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		Integer commentID = response.getBody("CommentID", Integer.class);
+		Integer taskID = response.getBody("taskID", Integer.class);
 		assertNotNull(commentID);
-		assertEquals(response.getResponseCode(), 200);
+		assertEquals(200, response.getResponseCode());
 		assertTrue(commentID >= 0);
 
 		Comment newComment;
 		out.reset();
 		request.addPath("commentID", commentID.toString());
+		request.addPath("taskID", taskID.toString());
+		System.out.println(new String(request.getContent()));
 		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
 		response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 200);
+		assertEquals(200, response.getResponseCode());
 
 		newComment = response.getBody("Comment", Comment.class);
 		assertNotNull(newComment);

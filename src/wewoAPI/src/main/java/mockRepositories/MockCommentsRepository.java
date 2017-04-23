@@ -19,7 +19,7 @@ private List<List<CommentDTO>> database = new ArrayList<List<CommentDTO>>(420);
 
 public MockCommentsRepository(){
 	for(int i = 0; i < 420; i++){
-		database.add(i, null);
+		database.add(i, new ArrayList<CommentDTO>());
 	}
 	database.add(420, new ArrayList<CommentDTO>(360));
 	for(int i = 0; i < 360; i++){
@@ -41,7 +41,7 @@ public MockCommentsRepository(){
 	}
 
 	public int updateComment(CommentDTO com) throws DALException {
-		database.get(com.getTaskID()).add(com.getID(),com);
+		database.get(com.getTaskID()).set(com.getID(),com);
 		return 1;
 	}
 
