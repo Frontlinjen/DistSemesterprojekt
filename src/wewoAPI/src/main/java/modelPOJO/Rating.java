@@ -3,8 +3,14 @@ package modelPOJO;
 public class Rating {
 
 	int rating, ratingID;
-	String rateeID, message;
+	String raterID, rateeID, message;
 	
+	public String getRaterID() {
+		return raterID;
+	}
+	public void setRaterID(String raterID) {
+		this.raterID = raterID;
+	}
 	public int getRatingID() {
 		return ratingID;
 	}
