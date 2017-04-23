@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.InternalServerErrorException;
 import mockRepositories.MockCommentsRepository;
 import modelPOJO.Comment;
-import wewo.api.test.ContextTest;
 import wewoAPI.CommentsController;
 
 public class CommentsControllerTest {

@@ -1,7 +1,6 @@
 import modelPOJO.Rating;
 import modelPOJO.RatingIDObject;
 import modelPOJO.Task;
-import wewo.api.test.ContextTest;
 import wewoAPI.RatingController;
 
 import static org.junit.Assert.*;
