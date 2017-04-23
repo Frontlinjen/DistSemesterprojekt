@@ -13,7 +13,7 @@ public class MySQLCommentRepository implements CommentRepository{
 									 + "street, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 	private final String UPDATE_COMMENT = "UPDATE ansat SET  ID = '?', title =  '?', description = '?', price = '?', ECT = '?', supplies " +
 									   "= '?', urgent = '?', street = '?', zipcode = '?' WHERE ID = '?';";
-	public MySQLCommentRepository() throws DALException{
+	public MySQLCommentRepository(){
 		DatabaseConnector.RegisterStatement("GET_COMMENT", GET_COMMENT);
 		DatabaseConnector.RegisterStatement("CREATE_COMMENT", CREATE_COMMENT);
 		DatabaseConnector.RegisterStatement("UPDATE_COMMENT", UPDATE_COMMENT);

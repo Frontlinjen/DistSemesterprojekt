@@ -1,5 +1,7 @@
 package wewoAPI;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ import DatabaseController.MySQLTaskRepository;
 import DatabaseController.TaskDTO;
 import DatabaseController.TaskRespository;
 import exceptions.BadRequestException;
+import exceptions.InternalServerErrorException;
 import exceptions.NotFoundException;
 import exceptions.UnauthorizedException;
 import modelPOJO.Comment;
@@ -27,12 +30,12 @@ import modelPOJO.IDObject;
 import modelPOJO.JsonList;
 import modelPOJO.Task;
 
-public class CommentsController{
+public class CommentsController extends ControllerBase{
 	CommentRepository repository;
 	TaskRespository taskRepo;
 	AccountRepository accountRepo;
 	
-	public CommentsController() throws DALException
+	public CommentsController()
 	{
 		repository = new MySQLCommentRepository();
 		taskRepo = new MySQLTaskRepository();
@@ -42,228 +45,168 @@ public class CommentsController{
 	public CommentsController(CommentRepository repository)
 	{
 		this.repository = repository;
+		taskRepo = new MySQLTaskRepository();
+		accountRepo = new MySQLAccountRepository();
 	}
 	
-	private void verifyLogin(Context context) throws UnauthorizedException
-	{
-		if(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty())
+	public void createComment(InputStream in, OutputStream out, Context context) throws InternalServerErrorException{
+		try{
+			if(!verifyLogin(context)){
+				raiseError(out, 401, "Not logged in");
+				return;
+			}
+			
+			StartRequest(in);
+			Comment comment = request.getObject(Comment.class);
+			if(comment == null){
+				raiseError(out, 400, "Invalid Task Object");
+				return;
+			}
+			CommentDTO dto = CommentDTO.fromModel(comment);
+			dto.setOwnerId(context.getIdentity().getIdentityId());
+
+			try {
+				repository.createComment(dto);
+				response.addResponseObject("CommentID", dto.getID());
+				response.setStatusCode(200);
+				FinishRequest(out);
+				return;
+			} catch (DALException e) {
+				raiseError(out, 503, "Database unavailable");
+				return;
+			}
+
+		}
+		catch(Exception e)
 		{
-			throw new UnauthorizedException("Invalid login");
+			e.printStackTrace();
+			raiseError(out, 500, "(â•¯Â°â–¡Â°ï¼‰â•¯ï¸µ â”»â”�â”»");
+			return;
 		}	
 	}
 	
-	public IDObject createComment(Comment comment, Context context) throws UnauthorizedException{
-		 
-		verifyLogin(context);
-		
-		IDObject newCommentID = new IDObject();
-		
-		CommentDTO dto = CommentDTO.fromModel(comment);
-		try {
-			repository.createComment(dto);
-			newCommentID.setID(dto.getID());
-			return newCommentID;
-		}
-		catch(ForeignKeyException e)
-		{
-			//Is the task legit
-			try {
-				if(taskRepo.getTask(comment.getTaskID()) == null){
-					throw new exceptions.BadRequestException("No such task");
-				}
-			} catch (DALException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (BadRequestException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			//Is the user legit
-			try {
-				if(accountRepo.getAccount(comment.getOwner()) == null){
-					throw new exceptions.UnauthorizedException("Unauthorized");
-				}
-			} catch (DALException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		} catch (DALException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (BadRequestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return newCommentID;
-		
-	}
-	
 	public JsonList<Comment> getCommentList(IDObject taskId, Context context){
-		List<CommentDTO> dtoList;
-		List<Comment> commentList = new ArrayList<Comment>();
-		try {
-			dtoList = repository.getCommentList(taskId.getID());
-			for(CommentDTO dto: dtoList){
-				Comment com = new Comment();
-				com.setText(dto.getText());
-				com.setOwner(dto.getOwnerId());
-				com.setDate(dto.getDate());
-				commentList.add(com);
-			}
-			JsonList<Comment> resultJson = new JsonList<Comment>();
-			resultJson.setElements(commentList);
-			return resultJson;
-			
-		}catch(ForeignKeyException e)
-		{
-			//Is the task legit
-			try {
-				if(taskRepo.getTask(taskId.getID()) == null){
-					throw new exceptions.BadRequestException("No such task");
-				}
-			} catch (DALException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (BadRequestException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		} catch (DALException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (BadRequestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-		
-	}
-	
-	public Comment getComment(DoubleIDObject SharedId, Context context) throws NotFoundException
-	{
-		CommentDTO dto;
-		try {
-			dto = repository.getComment(SharedId.getFirstID(), SharedId.getSecondID());
-			Comment comment = new Comment();
-			comment.setText(dto.getText());
-			comment.setDate(dto.getDate());
-			comment.setOwner(dto.getOwnerId());
-			return comment;
-			
-		}catch(ForeignKeyException e)
-		{
-			//Is the task legit
-			try {
-				if(taskRepo.getTask(SharedId.getFirstID()) == null){
-					throw new exceptions.BadRequestException("No such task");
-				}
-			} catch (DALException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (BadRequestException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		} catch (DALException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (BadRequestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		return null;
 	}
 	
-	public void updateComment(Comment comment, Context context) throws UnauthorizedException, NotFoundException
+	public void getComment(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		verifyLogin(context);
 		
 		try {
-			CommentDTO dto = repository.getComment(comment.getTaskID(),comment.getID());
+			StartRequest(in);
+			
+			int commentID;
+			int taskID;
+			try{
+				commentID = Integer.parseInt(request.getPath("commentID"));		
+				taskID = Integer.parseInt(request.getPath("taskID"));
+			}
+			catch(NumberFormatException neg){
+				raiseError(out, 400, "No commentID specified on path");
+				return;
+			}
+			CommentDTO dto;
+			dto = repository.getComment(taskID, commentID);
 			if(dto==null)
 			{
-				throw new exceptions.NotFoundException("No such comment");
+				raiseError(out, 404, "No comment was found using ID " + commentID);
+				return;
 			}
-			if(dto.getOwnerId().equals(context.getIdentity().getIdentityId())){
-				dto = new CommentDTO()
-						.setText(comment.getText())
-						.setDate(comment.getDate())
-						.setOwnerId(comment.getOwner());
-				repository.updateComment(dto);
-			}
-		}catch(ForeignKeyException e)
-		{
-			//Is the task legit
-			try {
-				if(taskRepo.getTask(comment.getTaskID()) == null){
-					throw new exceptions.BadRequestException("No such task");
-				}
-			} catch (DALException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (BadRequestException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			//Is the user legit
-			try {
-				if(accountRepo.getAccount(comment.getOwner()) == null){
-					throw new exceptions.UnauthorizedException("Unauthorized");
-				}
-			} catch (DALException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		} catch (DALException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (BadRequestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Comment comment = dto.getModel();
+			response.addResponseObject("Comment", comment);
+			response.setStatusCode(200);
+			FinishRequest(out);
+		}catch (DALException e) {
+			raiseError(out, 503, "Database unavailable");
+			return;
 		}
 	}
 	
-	public int deleteComment(Comment comment, Context context) throws UnauthorizedException, NotFoundException
+	public void updateComment(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		verifyLogin(context);
+		if(!verifyLogin(context)){
+			raiseError(out, 401, "Not logged in");
+		}
 		
 		try {
-			CommentDTO commentDTO = repository.getComment(comment.getTaskID(), comment.getID());
-			if(commentDTO.getOwnerId().equals(context.getIdentity().getIdentityId())){
-				repository.deleteComment(comment.getTaskID(), comment.getID());
+			StartRequest(in);
+			Comment comment = request.getObject(Comment.class);
+			int commentID;
+			int taskID;
+			try{
+				commentID = Integer.parseInt(request.getPath("commentID"));
+				taskID = Integer.parseInt(request.getPath("taskID"));
 			}
-		}catch(ForeignKeyException e)
-		{
-			//Is the task legit
-			try {
-				if(taskRepo.getTask(comment.getTaskID()) == null){
-					throw new exceptions.BadRequestException("No such task");
-				}
-			} catch (DALException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (BadRequestException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			catch(Exception e)
+			{
+				raiseError(out, 400, "No commentID specified");
+				return;
 			}
-			//Is the user legit
-			try {
-				if(accountRepo.getAccount(comment.getOwner()) == null){
-					throw new exceptions.UnauthorizedException("Unauthorized");
-				}
-			} catch (DALException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			comment.setID(commentID);
+			comment.setTaskID(taskID);
+			CommentDTO dto = repository.getComment(comment.getTaskID(), comment.getID());
+			if(dto == null)
+			{
+				raiseError(out, 404, "No comment was found using ID " + comment.getID());
+				return;
+			}
+			if(dto.getOwnerId().equals(context.getIdentity().getIdentityId())){
+				dto = CommentDTO.fromModel(comment);
+				repository.updateComment(dto);
+				response.setStatusCode(200);
+				FinishRequest(out);
+				return;
+			}
+			else
+			{
+				raiseError(out, 403, "User does not own that comment");
+				return;
 			}
 		} catch (DALException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return 1;
-		} catch (BadRequestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			raiseError(out, 503, "Database unavailable");
+			return;
 		}
-		return 0;
+	}
+	
+	public void deleteComment(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
+	{
+		if(!verifyLogin(context)){
+			raiseError(out, 401, "Not logged in");
+		}	
+		try {
+			StartRequest(in);
+			int commentId;
+			int taskId;
+			try{
+				commentId = Integer.parseInt(request.getPath("commentID"));
+				taskId = Integer.parseInt(request.getPath("taskID"));
+			}
+			catch(NumberFormatException eng)
+			{
+				raiseError(out, 400, "No commentID specified");
+				return;
+			}
+			CommentDTO comment = repository.getComment(taskId, commentId);
+			if(comment == null)
+			{
+				raiseError(out, 404, "No such comment");
+				return;
+			}
+			
+			if(comment.getOwnerId().equals(context.getIdentity().getIdentityId())){
+				repository.deleteComment(taskId, commentId);
+				response.setStatusCode(200);
+				FinishRequest(out);
+				return;
+			}
+			else
+			{
+				raiseError(out, 403, "User does not own that task");
+				return;
+			}
+		} catch (DALException e) {
+			raiseError(out, 503, "Database unavailable");
+		}
 	}
 }
