@@ -27,6 +27,11 @@ import exceptions.UnauthorizedException;
 public class ControllerBase {
 	static public class LambdaResponse{
 		static public class LambdaResponseData{
+			public LambdaResponseData(){
+				//Must always include this header for client requests to work....
+				headers.put("Access-Control-Allow-Origin", "*");
+			}
+			
 			@JsonProperty("isBase64Encoded")
 			public boolean base64 = false;
 			public int statusCode;
