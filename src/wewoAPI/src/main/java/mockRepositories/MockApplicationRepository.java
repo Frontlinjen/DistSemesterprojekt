@@ -34,7 +34,7 @@ public class MockApplicationRepository implements ApplicationRepository {
 	}
 
 	public int updateApplication(ApplicationDTO app) throws DALException {
-		database.set(Integer.parseInt(app.getTaskid()), app);
+		database.set(app.getTaskid(), app);
 		return 1;
 	}
 

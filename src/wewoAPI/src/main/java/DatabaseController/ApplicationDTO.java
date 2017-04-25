@@ -11,7 +11,9 @@ public class ApplicationDTO implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	String taskid, applicationMessage, applierid;
+	int taskid;
+
+	String applicationMessage, applierid;
 
 	public ApplicationDTO(){
 		
@@ -31,7 +33,7 @@ public class ApplicationDTO implements Serializable {
 		return dto;
 	}
 	
-	Application getModel(){
+	public Application getModel(){
 		Application app = new Application();
 		app.setApplicationMessage(this.getApplicationMessage());
 		app.setTaskid(this.taskid);
@@ -47,12 +49,12 @@ public class ApplicationDTO implements Serializable {
 		return this;
 	}
 	
-	public String getTaskid() {
+	public int getTaskid() {
 		return taskid;
 	}
 
-	public ApplicationDTO setTaskid(String taskid) {
-		this.taskid = taskid;
+	public ApplicationDTO setTaskid(int i) {
+		this.taskid = i;
 		return this;
 	}
 

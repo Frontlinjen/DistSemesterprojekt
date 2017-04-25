@@ -1,20 +1,21 @@
 package modelPOJO;
 
 public class Application {
-	String taskid, applierid;
+	String applicationMessage;
+	int applierid, taskID;
 	
-	public String getApplierid() {
+	public int getApplierid(){
 		return applierid;
 	}
-	public void setApplierid(String applierid) {
-		this.applierid = applierid;
+	public void setApplierid(int applierID) {
+		this.applierid = applierID;
 	}
-	String applicationMessage;
-	public String getTaskid() {
-		return taskid;
+	
+	public int getTaskid() {
+		return taskID;
 	}
-	public void setTaskid(String taskid) {
-		this.taskid = taskid;
+	public void setTaskid(int taskid) {
+		this.taskID = taskid;
 	}
 	public String getApplicationMessage() {
 		return applicationMessage;

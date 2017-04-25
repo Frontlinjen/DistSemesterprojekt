@@ -55,7 +55,7 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 	public int createApplication(ApplicationDTO app) throws DALException {
 		try {
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("CREATE_APPLICATION");
-			statement.setString(1, app.taskid);
+			statement.setInt(1, app.taskid);
 			statement.setString(2, app.applierid);
 			statement.setString(3, app.applicationMessage);
 			
@@ -63,7 +63,7 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 
 			ResultSet rs = DatabaseConnector.doQuery("SELECT LAST_INSERT_ID();");
 			rs.first();
-			String ID = rs.getString("last_insert_id()");
+			int ID = rs.getInt("last_insert_id()");
 			app.taskid = ID;
 			return res;
 			
@@ -77,7 +77,7 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 	public int updateApplication(ApplicationDTO app) throws DALException {
 		try{
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("UPDATE_APPLICATION");
-			statement.setString(1, app.taskid);
+			statement.setInt(1, app.taskid);
 			statement.setString(2, app.applierid);
 			statement.setString(3, app.applicationMessage);
 			return statement.executeUpdate();
@@ -96,7 +96,7 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 	public ApplicationDTO generate(ResultSet rs) throws SQLException
 	{
 		ApplicationDTO app = new ApplicationDTO();
-		app.setTaskid(rs.getString("TaskID")).setApplierid(rs.getString("ApplierID")).setApplicationMessage(rs.getString("appliermessage"));
+		app.setTaskid(rs.getInt("TaskID")).setApplierid(rs.getString("ApplierID")).setApplicationMessage(rs.getString("appliermessage"));
 		return app;
 	}
 

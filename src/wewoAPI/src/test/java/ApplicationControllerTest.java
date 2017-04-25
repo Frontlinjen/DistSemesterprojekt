@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import mockRepositories.MockApplicationRepository;
 import modelPOJO.*;
-import wewo.api.test.*;
 import wewoAPI.ApplicationController;
 
 public class ApplicationControllerTest {
@@ -19,7 +18,7 @@ public class ApplicationControllerTest {
 	public void setUp() throws Exception {
 		controller = new ApplicationController(new MockApplicationRepository());
 		context = new ContextTest("TIM!");
-		controller.PostApplications(generateTestData(), context);
+	//	controller.PostApplications(generateTestData(), context);
 		
 	}
 
@@ -27,8 +26,8 @@ public class ApplicationControllerTest {
 	{
 		Application app = new Application();
 		app.setApplicationMessage("blabla");
-		app.setApplierid("1");
-		app.setTaskid("1");
+		app.setApplierid(1);
+		app.setTaskid(1);
 		return app;
 	}
 	
