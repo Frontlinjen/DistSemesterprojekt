@@ -17,7 +17,7 @@ public class MySQLRatingRepository implements RatingRepository{
 		DatabaseConnector.RegisterStatement("GET_RATER", GET_RATER);
 	}
 	
-	public String lookUpRater(String rateeID, int ratingID) throws DALException{
+	/*public String lookUpRater(String rateeID, int ratingID) throws DALException{
 		PreparedStatement statement;
 		try{
 			statement = DatabaseConnector.getPreparedStatement(GET_RATER);
@@ -33,20 +33,20 @@ public class MySQLRatingRepository implements RatingRepository{
 			throw new DALException(e);
 	}
 		
-	}
+	}*/
 	
-	public RatingDTO getRating(String raterID, String rateeID) throws DALException {
+	public RatingDTO getRating(int ratingID, String rateeID) throws DALException {
 		PreparedStatement statement;
 		try {
 			statement = DatabaseConnector.getPreparedStatement("GET_RATING");
-			statement.setString(1, raterID);
+			statement.setInt(1, ratingID);
 			statement.setString(2, rateeID);
 		
 
 			ResultSet rs = statement.executeQuery();
 
 			if (!rs.first()) 
-				throw new DALException("Rating med rateeID " + rateeID + " og/eller raterID " + raterID + " findes ikke");
+				throw new DALException("Rating med rateeID " + rateeID + " og/eller ratingID " + ratingID + " findes ikke");
 			
 			return generate(rs);	
 		}
@@ -65,7 +65,7 @@ public class MySQLRatingRepository implements RatingRepository{
 	public boolean createRating(RatingDTO rate) throws DALException {
 		try {
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("CREATE_RATING");
-			statement.setInt(1, rate.rating);
+			statement.setFloat(1, rate.rating);
 			statement.setString(2, rate.raterID);
 			statement.setString(3, rate.rateeID);
 			statement.setString(4, rate.message);
@@ -75,9 +75,11 @@ public class MySQLRatingRepository implements RatingRepository{
 			rs.first();
 			int ID = rs.getInt("last_insert_id()");
 			rate.ratingID = ID;
+			System.out.println("Rating created with ratingID:" + rate.ratingID);
 			return true;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
+			System.out.println("Rating didn't get created");
 			e.printStackTrace();
 		}
 		return false;
