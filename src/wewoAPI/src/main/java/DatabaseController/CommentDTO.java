@@ -21,6 +21,7 @@ public class CommentDTO implements Serializable{
 		dto.setOwnerId(comment.getOwner());
 		dto.setText(comment.getText());
 		dto.setID(comment.getID());
+		dto.setTaskID(comment.getTaskID());
 		return dto;
 	}
 	
@@ -30,6 +31,7 @@ public class CommentDTO implements Serializable{
 		comment.setOwner(this.getOwnerId());
 		comment.setText(this.getText());
 		comment.setID(this.getID());
+		comment.setTaskID(this.getTaskID());
 		return comment;
 	}
 

@@ -8,8 +8,8 @@ import java.util.List;
 
 public class MySQLApplicationRepository implements ApplicationRepository{
 
-	private final String GET_APPLICATION = "SELECT * FROM Application WHERE TaskID = ?;";
-	private final String CREATE_APPLICATION = "INSERT INTO Tasks(TaskID, ApplierID, appliermessage) VALUES (?, ?, ?);";
+	private final String GET_APPLICATION = "SELECT * FROM Application WHERE TaskID = '?', ApplierID = '?';";
+	private final String CREATE_APPLICATION = "INSERT INTO Application(TaskID, ApplierID, appliermessage) VALUES (?, ?, ?);";
 	private final String UPDATE_APPLICATION = "UPDATE Application SET  TaskID = '?', ApplierID =  '?', appliermessage = '?';";
 	
 	public MySQLApplicationRepository() throws DALException{
@@ -19,16 +19,17 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 		
 	}
 	
-	public ApplicationDTO getApplication(int id) throws DALException {
+	public ApplicationDTO getApplication(String applierID, int taskID) throws DALException {
 		PreparedStatement statement;
 		try {
 			statement = DatabaseConnector.getPreparedStatement("GET_APPLICATION");
-			statement.setInt(1, id);
+			statement.setInt(1, taskID);
+			statement.setString(1, applierID);
 
 			ResultSet rs = statement.executeQuery();
 
 			if (!rs.first()) 
-				throw new DALException("Application med applierid " + id + " findes ikke");
+				throw new DALException("Application med applierid " + applierID + " findes ikke");
 			
 			return generate(rs);
 			
@@ -38,11 +39,11 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 
 	public List<String> getApplicationList(int i) throws DALException {
 		List<String> list = new ArrayList<String>();
-		ResultSet rs = DatabaseConnector.doQuery("SELECT * FROM Appliers;");
+		ResultSet rs = DatabaseConnector.doQuery("SELECT * FROM Application WHERE TaskID = " +i+ ";");
 		try
 		{
 			ApplicationDTO dto = new ApplicationDTO();
-			String stringList = dto.applierid;
+			String stringList = dto.applierID;
 			while (rs.next()) 
 			{
 					list.add(stringList);
@@ -55,15 +56,15 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 	public int createApplication(ApplicationDTO app) throws DALException {
 		try {
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("CREATE_APPLICATION");
-			statement.setString(1, app.taskid);
-			statement.setString(2, app.applierid);
+			statement.setInt(1, app.taskid);
+			statement.setString(2, app.applierID);
 			statement.setString(3, app.applicationMessage);
 			
 			int res = statement.executeUpdate();
 
 			ResultSet rs = DatabaseConnector.doQuery("SELECT LAST_INSERT_ID();");
 			rs.first();
-			String ID = rs.getString("last_insert_id()");
+			int ID = rs.getInt("last_insert_id()");
 			app.taskid = ID;
 			return res;
 			
@@ -77,8 +78,8 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 	public int updateApplication(ApplicationDTO app) throws DALException {
 		try{
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("UPDATE_APPLICATION");
-			statement.setString(1, app.taskid);
-			statement.setString(2, app.applierid);
+			statement.setInt(1, app.taskid);
+			statement.setString(2, app.applierID);
 			statement.setString(3, app.applicationMessage);
 			return statement.executeUpdate();
 		
@@ -89,14 +90,14 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 		return 0;
 	}
 
-	public int deleteApplication(int id) throws DALException {
-		return DatabaseConnector.doUpdate("DELETE FROM Application WHERE ApplierID = " + id + ";");
+	public int deleteApplication(String applierID, int taskID) throws DALException {
+		return DatabaseConnector.doUpdate("DELETE FROM Application WHERE ApplierID = '" + applierID + "' AND TaskID = " + taskID + ";");
 	}
 	
 	public ApplicationDTO generate(ResultSet rs) throws SQLException
 	{
 		ApplicationDTO app = new ApplicationDTO();
-		app.setTaskid(rs.getString("TaskID")).setApplierid(rs.getString("ApplierID")).setApplicationMessage(rs.getString("appliermessage"));
+		app.setTaskid(rs.getInt("TaskID")).setApplierid(rs.getString("ApplierID")).setApplicationMessage(rs.getString("appliermessage"));
 		return app;
 	}
 

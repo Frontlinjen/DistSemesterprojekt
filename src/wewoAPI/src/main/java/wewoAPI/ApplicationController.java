@@ -1,8 +1,12 @@
 package wewoAPI;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import javax.print.attribute.standard.Finishings;
+
 import com.amazonaws.services.lambda.runtime.Context;
 
-import exceptions.BadRequestException;
-import exceptions.UnauthorizedException;
+import exceptions.*;
 import modelPOJO.Application;
 import modelPOJO.IDObject;
 import modelPOJO.JsonList;
@@ -12,28 +16,27 @@ import DatabaseController.ApplicationRepository;
 import DatabaseController.DALException;
 import DatabaseController.MySQLApplicationRepository;
 import DatabaseController.MySQLTaskRepository;
+import DatabaseController.TaskDTO;
+import wewoAPI.ControllerBase;
 
-public class ApplicationController {
+public class ApplicationController extends ControllerBase{
 	
-	ApplicationRepository repository;
+	ApplicationRepository repository;	
 	
-	
-	public ApplicationController() throws DALException
+	public ApplicationController() throws InternalServerErrorException
 	{
-		repository = new MySQLApplicationRepository();
+		try {
+			repository = new MySQLApplicationRepository(); 
+		} catch(DALException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException("Failed to connect to database");
+		}
+	
 	}
 	
 	public ApplicationController(ApplicationRepository repository)
 	{
 		this.repository = repository;
-	}
-	
-	private void verifyLogin(Context context) throws UnauthorizedException
-	{
-		if(context.getIdentity() == null || context.getIdentity().getIdentityId().isEmpty())
-		{
-			throw new UnauthorizedException("Invalid login");
-		}	
 	}
 		
 	public JsonList<String> GetApplicants(IDObject taskid, Context context) throws UnauthorizedException, DALException
@@ -48,15 +51,11 @@ public class ApplicationController {
 			}
 			
 		} catch (DALException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		try {
 			JsonList<String> applications = new JsonList<String>();
 			applications.setElements(app.getApplicationList(taskid.getID()));
-//			for (int i = 0; i < app.getApplicationList(taskid.getID()).size(); i++) {
-//				applications.getElements().addAll(i, app.getApplicationList(taskid.getID()));
-//			}
 			return applications;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -66,58 +65,161 @@ public class ApplicationController {
 		
 	}
 	
-	public void PostApplications(Application app, Context context) throws UnauthorizedException, NumberFormatException, DALException, BadRequestException
+	public void PostApplications(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		ApplicationDTO dto = ApplicationDTO.fromModel(app);
-//		IDObject newApplierID = new IDObject();
 		
-		verifyLogin(context);
-		
-		if(repository.getApplication(Integer.parseInt(app.getApplierid())) != null) {
-			throw new BadRequestException("Du har allerede en application på denne task.");
+		try{
+			if(!verifyLogin(context)){
+				raiseError(out, 401, "Not logged in");
+				return;
+			}
+			StartRequest(in);
+			Application app = request.getObject(Application.class);
+			if(app == null){
+				raiseError(out, 400, "Invalid Application Object");
+				return;
+			}
+			ApplicationDTO dto = ApplicationDTO.fromModel(app);
+			dto.setApplierid(context.getIdentity().getIdentityId());
+			
+			try {
+				repository.createApplication(dto);
+				response.addResponseObject("applierID", dto.getApplierid());
+				response.setStatusCode(200);
+				FinishRequest(out);
+				return;
+			} catch (DALException e) {
+				raiseError(out, 504, "Database unavailable");
+				return;
+			}
 		}
-		
-		dto.setApplierid(context.getIdentity().getIdentityId());
-		
-		try {
-			Application application = new Application();
-			application.setTaskid(dto.getTaskid());
-			application.setApplierid(dto.getApplierid());
-			application.setApplicationMessage(dto.getApplicationMessage());
-			repository.createApplication(dto);
-		} catch (DALException e) {
-			// TODO Auto-generated catch block
+		catch(Exception e)
+		{
 			e.printStackTrace();
-		}
-		
-//		return newApplierID;
-		
-		
+			raiseError(out, 500, "(╯°□°）╯︵ ┻━┻");
+			return;
+		}		
 	}
 	
-	public 	Application GetApplication(Task task, Application application, Context context) throws UnauthorizedException, DALException
+	public void GetApplication(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		ApplicationDTO dto = new ApplicationDTO();
-		MySQLTaskRepository tas = new MySQLTaskRepository();
-		MySQLApplicationRepository app = new MySQLApplicationRepository();
 		
-		verifyLogin(context);
 		try {
-			if(tas.getTask(task.getID()).getCreatorId() != context.getIdentity().getIdentityId() ||
-			   app.getApplication(Integer.parseInt(application.getTaskid())).getApplierid() != context.getIdentity().getIdentityId() )
+			StartRequest(in);
 			
-			application.setApplicationMessage(dto.getApplicationMessage());
-			application.setApplierid(dto.getApplierid());
-			application.setTaskid(dto.getTaskid());
-		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (DALException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			String applierID;
+			int taskID;
+			try{
+				taskID = Integer.parseInt(request.getPath("taskID"));
+				applierID = request.getPath("applierID");			
+			}
+			catch(NumberFormatException neg){
+				raiseError(out, 400, "No ApplierID specified on path");
+				return;
+			}
+			ApplicationDTO dto;
+			dto = repository.getApplication(applierID, taskID);
+			if(dto==null)
+			{
+				raiseError(out, 404, "No application was found using ID " + applierID);
+				return;
+			}
+			
+			Application app = dto.getModel();
+			response.addResponseObject("Application", app);
+			response.setStatusCode(200);
+			FinishRequest(out);
+		}catch (DALException e) {
+			raiseError(out, 503, "Database unavailable");
+			return;
 		}
-		
-		return application;
 	}
 
+	public void updateApplication(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
+	{
+		if(!verifyLogin(context)){
+			raiseError(out, 401, "Not logged in");
+			return;
+		}
+		
+		try {
+			StartRequest(in);
+			Application app = request.getObject(Application.class);
+			int taskID;
+			String applierID;
+			try{
+				taskID = Integer.parseInt(request.getPath("taskID"));
+				applierID = request.getPath("applierID");
+			}
+			catch(Exception e)
+			{
+				raiseError(out, 400, "No applierID specified");
+				return;
+			}
+			app.setApplierID(context.getIdentity().getIdentityId());
+			ApplicationDTO dto = repository.getApplication(applierID, taskID);
+	
+			if(dto == null)
+			{
+				raiseError(out, 404, "No application was found using ID " + app.getApplierid());
+				return;
+			}
+			if(dto.getApplierid().equals(context.getIdentity().getIdentityId())){
+				dto = ApplicationDTO.fromModel(app);
+				repository.updateApplication(dto);
+				response.setStatusCode(200);
+				FinishRequest(out);
+				return;
+			}
+			else
+			{
+				raiseError(out, 403, "User does not own that application");
+				return;
+			}
+		} catch (DALException e) {
+			raiseError(out, 503, "Database unavailable");
+			return;
+		}
+	}
+	
+	public void deleteApplication(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
+	{
+		if(!verifyLogin(context)){
+			raiseError(out, 401, "Not logged in");
+		}	
+		try {
+			StartRequest(in);
+			String applierID;
+			int taskID;
+			try{
+				applierID = request.getPath("applierID");
+				taskID = Integer.parseInt(request.getPath("taskID"));
+			}
+			catch(NumberFormatException eng)
+			{
+				raiseError(out, 400, "No applier specified");
+				return;
+			}
+			ApplicationDTO app = repository.getApplication(applierID, taskID);
+			if(app == null)
+			{
+				raiseError(out, 404, "No such application");
+				return;
+			}
+			
+			if(app.getApplierid().equals(context.getIdentity().getIdentityId())){
+				repository.deleteApplication(applierID, taskID);
+				response.setStatusCode(200);
+				FinishRequest(out);
+				return;
+			}
+			else
+			{
+				raiseError(out, 403, "User does not own that application");
+				return;
+			}
+		} catch (DALException e) {
+			raiseError(out, 503, "Database unavailable");
+		}
+	}
 }

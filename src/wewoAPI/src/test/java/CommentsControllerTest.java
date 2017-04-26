@@ -1,145 +1,206 @@
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import exceptions.NotFoundException;
-import exceptions.UnauthorizedException;
+import exceptions.InternalServerErrorException;
 import mockRepositories.MockCommentsRepository;
-import mockRepositories.MockTaskRepository;
 import modelPOJO.Comment;
-import modelPOJO.DoubleIDObject;
-import modelPOJO.IDObject;
-import modelPOJO.Task;
-import wewo.api.test.ContextTest;
 import wewoAPI.CommentsController;
 
-public class CommentsControllerTest {//Tests kan ikke se CommentsController?? Hænger meget sammen med tasks
-	
+public class CommentsControllerTest {
 	CommentsController controller;
-	Context context;
-
-	@Before
+	ContextTest context;
+	ObjectMapper mapper;
+	ByteArrayOutputStream out;
+	int dataCounter = 0;
 	
+	@Before
 	public void setUp() throws Exception {
 		controller = new CommentsController(new MockCommentsRepository());
-		context = new ContextTest("TestUser");
-		controller.createComment(generateTestData(), context);
+		context = new ContextTest("Jeiner");
+		mapper = new ObjectMapper();
+		out = new ByteArrayOutputStream();
 	}
-	
+
 	private Comment generateTestData()
 	{
 		Comment comment = new Comment();
-		comment.setText("10/10 would test again");
-		comment.setOwner("666");
-		comment.setDate(new Date(5));
-		comment.setTaskID(420);
-		comment.setID(360);
+		comment.setText("test");
+		comment.setDate(new Date(1));
 		return comment;
 	}
 	
 	@Test
-	public void createComment(){
+	public void createComment() throws InternalServerErrorException, IOException {
 		Comment comment = generateTestData();
-		try {
-			IDObject id = controller.createComment(comment, context);
-			assertNotNull(id);
-			assertTrue(id.getID() >= 0);
-			assertTrue(id.getID() == comment.getID());
-			
-			Comment newComment;
-			DoubleIDObject dido = new DoubleIDObject();
-			dido.setFirstID(comment.getTaskID());
-			dido.setSecondID(comment.getID());
-			try {
-				newComment = controller.getComment(dido, context);
-				assertTrue(newComment.getOwner().equals(context.getIdentity().getIdentityId()));
-				assertTrue(comment.equals(newComment));
-			} catch (Exception e) { //Replace with NotFoundException
-				fail("Task was not created");
-			}
-			
-		} catch (UnauthorizedException e) {
-			fail("User was not authorized");
-			e.printStackTrace();
-		}
+
+		comment.setID(0);
+		comment.setTaskID(5);
+		comment.setOwner("Bøllemis");
+
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(comment));
+		request.addPath("taskID", "5");
+		request.addPath("commentID", "0");
+		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		Integer commentID = response.getBody("CommentID", Integer.class);
+	//	Integer taskID = response.getBody("taskID", Integer.class);
+		assertNotNull(commentID);
+		assertEquals(200, response.getResponseCode());
+		assertTrue(commentID >= 0);
+
+		Comment newComment;
+		out.reset();
+		request.addPath("commentID", commentID.toString());
+		request.addPath("taskID", Integer.toString(5));
+		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
+		assertEquals(200, response.getResponseCode());
+
+		newComment = response.getBody("Comment", Comment.class);
+		assertNotNull(newComment);
+		//System.out.println(newComment.getOwner() + " " + context.getIdentity().getIdentityId());
+		assertEquals(newComment.getOwner(), context.getIdentity().getIdentityId());
+		out.reset();
 	}
 	
 	@Test
-	public void getComment(){
+	public void createCommentWithoutValidLogin() throws InternalServerErrorException, IOException{
 		Comment comment = generateTestData();
-		Comment comment2 = generateTestData();
-		comment2.setID(22);
-		try {
-			IDObject id = controller.createComment(comment, context);	
-			controller.createComment(comment2, context);
-			DoubleIDObject dido = new DoubleIDObject();
-			dido.setFirstID(comment.getTaskID());
-			dido.setSecondID(comment.getID());
-			assertTrue(controller.getComment(dido, context).equals(comment));
-			IDObject ido = new IDObject();
-			ido.setID(comment.getTaskID());
-			List<Comment> rList = new ArrayList<Comment>();
-			rList.add(comment);
-			rList.add(comment2);
-			assertTrue(((List<Comment>)controller.getCommentList(ido, context)).equals(rList));
-		} catch (NotFoundException e) {
-			fail("Task was not created");
-		} catch (UnauthorizedException e) {
-			fail("User was not authorized");
-			e.printStackTrace();
-		}
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(comment));
+		request.addPath("taskID", "5");
+		request.addPath("commentID", "0");
+		context.setIdentity("");
+		
+		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 401);
 	}
 	
 	@Test
-	public void updateComment(){
+	public void createCommentWithoutLogin() throws InternalServerErrorException, IOException{
 		Comment comment = generateTestData();
-		Comment comment2 = generateTestData();
-		comment2.setText("blah");
-		try {
-			IDObject id = controller.createComment(comment, context);
-			DoubleIDObject dido = new DoubleIDObject();
-			dido.setFirstID(comment.getTaskID());
-			dido.setSecondID(comment.getID());
-			Comment reComment1 = controller.getComment(dido, context);
-			controller.updateComment(comment2, context);
-			DoubleIDObject dido2 = new DoubleIDObject();
-			dido2.setFirstID(comment2.getTaskID());
-			dido2.setSecondID(comment2.getID());
-			Comment reComment2 = controller.getComment(dido2, context);
-			assertTrue(comment.equals(reComment1));
-			assertTrue(comment2.equals(reComment2));
-			assertFalse(reComment1.equals(reComment2));
-			assertTrue(reComment2.getText().equals("blah"));
-		} catch (NotFoundException e) {
-			fail("Task was not created");
-		} catch (UnauthorizedException e) {
-			fail("User was not authorized");
-			e.printStackTrace();
-		}
+		context.clearIdentity();
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(comment));
+		request.addPath("taskID", "5");
+		request.addPath("commentID", "0");
+		context.clearIdentity();
+		
+		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 401);
 	}
 	
 	@Test
-	public void deleteComment(){
-		Comment comment = generateTestData();
-		try {
-			controller.createComment(comment, context);
-			controller.deleteComment(comment, context);
-			DoubleIDObject dido = new DoubleIDObject();
-			controller.getComment(dido, context);
-			fail("Task was found");
-		} catch (NotFoundException e) {
-			e.printStackTrace();
-		} catch (UnauthorizedException e) {
-			fail("User was not authorized");
-			e.printStackTrace();
-		}
+	public void getNonexistingComment() throws InternalServerErrorException, IOException{
+		createComment();
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("commentID", Integer.toString(9001));
+		request.addPath("taskID", "5");
+		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 404);
+	}
+	
+	@Test
+	public void deleteComment()  throws InternalServerErrorException, IOException{
+		createComment();
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("commentID", "0");
+		request.addPath("taskID", "5");
+		controller.deleteComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 200);
+		
+		out.reset();
+		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 404);
+	}
+	
+	@Test
+	public void deleteCommentCheckPermissions()  throws InternalServerErrorException, IOException{
+		createComment();
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("commentID", "0");
+		request.addPath("taskID", "5");
+		context.setIdentity("Jeiner22");
+		controller.deleteComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 403);
+	}
+	
+	@Test
+	public void deleteNonexistingComment()   throws InternalServerErrorException, IOException{
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("commentID", "912038");
+		request.addPath("taskID", "5");
+		controller.deleteComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(404, response.getResponseCode());
+	}
+	
+	@Test
+	public void updateNonExistingComment()   throws InternalServerErrorException, IOException{
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("commentID", "9000");
+		request.addPath("taskID", "5");
+		Comment newData = generateTestData();
+		request.setBody(mapper.writeValueAsString(newData));
+		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 404);
+	}
+	
+	@Test
+	public void updateComment()   throws InternalServerErrorException, IOException{
+		createComment();
+		RequestDataMock request = new RequestDataMock();
+		Comment newData = generateTestData();
+		request.setBody(mapper.writeValueAsString(newData));
+		request.addPath("commentID", "0");
+		request.addPath("taskID", "5");
+		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(200, response.getResponseCode());
+	}
+	
+	@Test
+	public void updateWrongPermissionsComment()   throws InternalServerErrorException, IOException{
+		createComment();
+		
+		context.setIdentity("Alice");
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("commentID", "0");
+		request.addPath("taskID", "5");
+		Comment newData = generateTestData();
+		request.setBody(mapper.writeValueAsString(newData));
+		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(403, response.getResponseCode());
+	}
+	
+	@Test
+	public void updateNoPermissionsComment()    throws InternalServerErrorException, IOException{
+		context.clearIdentity();
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("commentID", "0");
+		request.addPath("taskID", "5");
+		Comment newData = generateTestData();
+		request.setBody(mapper.writeValueAsString(newData));
+		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 401);
 	}
 }

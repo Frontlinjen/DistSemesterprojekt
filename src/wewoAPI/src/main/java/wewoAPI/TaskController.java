@@ -3,6 +3,7 @@ package wewoAPI;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -19,9 +20,14 @@ import modelPOJO.FindDataObject;;
 public class TaskController extends ControllerBase{
 	TaskRespository repository;
 	
-	public TaskController()
+	public TaskController() throws InternalServerErrorException
 	{
-		repository = new MySQLTaskRepository();
+		try {
+			repository = new MySQLTaskRepository();
+		} catch (DALException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException("Failed to connect to database");
+		}
 	}
 	
 	public TaskController(TaskRespository repository)
@@ -51,7 +57,11 @@ public class TaskController extends ControllerBase{
 				response.setStatusCode(200);
 				FinishRequest(out);
 				return;
-			} catch (DALException e) {
+			} 
+			catch(DALException.ForeignKeyException e){
+				raiseError(out, 400, "Invalid tag specified");
+			}
+			catch (DALException e) {
 				raiseError(out, 503, "Database unavailable");
 				return;
 			}
@@ -67,10 +77,40 @@ public class TaskController extends ControllerBase{
 	}
 	
 	//See: https://github.com/Hjorthen/Bubble/blob/master/AuthTest/Repositories/TaskRepository.cs#L74
-	public List<Task> findTasks(FindDataObject findData, Context context)
+	public void findTasks(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		
-		return null;
+		try{
+			StartRequest(in);
+			String tags = request.getQuery("tags");
+			if(tags == null){
+				raiseError(out, 400, "No tags specified");
+				return;
+			}
+			
+				String[] tag = tags.split("+");
+				List<Integer> tagIds = new ArrayList<Integer>(tag.length);
+				
+				for (String tagStr : tag) {
+					try{
+						tagIds.add(Integer.parseInt(tagStr));
+					}
+					catch(java.lang.NumberFormatException e){
+						//Ignore invalid ids
+					}
+				}
+				if(tagIds.size()==0){
+					raiseError(out, 400, "No valid tagIds");
+					return;
+				}
+				List<TaskDTO> tasks = repository.queryTasks(tagIds);			
+				response.addResponseObject("Results", tasks);
+				response.setStatusCode(200);
+				FinishRequest(out);
+				return;
+		}catch (DALException e) {
+			raiseError(out, 503, "Database unavailable");
+			return;
+		}
 	}
 	
 	
@@ -111,6 +151,7 @@ public class TaskController extends ControllerBase{
 	{
 		if(!verifyLogin(context)){
 			raiseError(out, 401, "Not logged in");
+			return;
 		}
 		
 		try {
