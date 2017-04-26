@@ -7,6 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.javanet.NetHttpTransport;
 
 import DatabaseController.DALException;
 import DatabaseController.MySQLTaskRepository;
@@ -51,6 +59,40 @@ public class TaskController extends ControllerBase{
 			TaskDTO dto = TaskDTO.fromModel(task);
 			dto.setCreatorId(context.getIdentity().getIdentityId());
 
+			HttpRequestFactory factory = new NetHttpTransport().createRequestFactory();
+			
+			GenericUrl url = new GenericUrl("https://dawa.aws.dk/adresser");
+			url.put("postnr", dto.getZipaddress());
+			url.put("vejnavn", dto.getStreet());
+			HttpResponse addressLookupResponse = null;
+			try{
+				HttpRequest addressLookup = factory.buildGetRequest(url);
+				addressLookupResponse  = addressLookup.execute();
+			}catch(Exception e){
+				e.printStackTrace();
+				//Ignore the error and accept the address regardless
+			}
+			if(addressLookupResponse != null && addressLookupResponse.isSuccessStatusCode() && addressLookupResponse.getContent() != null){
+				InputStream stream = null;
+				try{
+					stream = addressLookupResponse.getContent();
+					ObjectMapper mapper = new ObjectMapper();
+					JsonNode n = mapper.readTree(stream);
+					if(n.isArray() && !n.elements().hasNext()){ //If format changes and we do not recieve an array, then we shouldn't disallow the user to create the task
+						raiseError(out, 400, "Invalid address specified");
+						return;
+					}
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				finally{
+					if(stream != null)
+						stream.close();
+				}
+			}
+			
 			try {
 				repository.createTask(dto);
 				response.addResponseObject("TaskID", dto.getId());

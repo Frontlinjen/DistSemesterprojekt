@@ -49,7 +49,8 @@ public class TaskControllerTest {
 		task.setTitle("Title" + dataCounter);
 		task.setETC(30);
 		task.setPrice(55);
-		task.setStreet("Nowhere");
+		task.setZipaddress(2000);
+		task.setStreet("Allegade");
 		task.setCreatorid("TestAcc666");
 		List<Integer> l = new ArrayList<Integer>();
 		l.add(1);
@@ -97,6 +98,23 @@ public class TaskControllerTest {
 		out.reset();
 	}
 	
+	@Test
+	public void createTaskNonExistingAddress() throws InternalServerErrorException, IOException {
+		Task task = generateTestData();
+
+		task.setID(-1);
+		task.setCreatorid("Nobody");
+		task.setZipaddress(10);
+		task.setStreet("Not a street");
+		
+		
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(task));
+
+		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 400);
+	}
 	@Test
 	public void createTaskUsingNonexistingTags() throws InternalServerErrorException, IOException {
 		Task task = generateTestData();

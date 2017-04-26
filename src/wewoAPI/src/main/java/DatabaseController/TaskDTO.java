@@ -43,6 +43,7 @@ public class TaskDTO implements Serializable {
 		//dto.setCreatorId(task.getCreatorid());
 		dto.setDescription(task.getDescription());
 		dto.setEct(task.getETC());
+		dto.setZipaddress(task.getZipaddress());
 		dto.setPrice(task.getPrice());
 		dto.setStreet(task.getStreet());
 		dto.setSupplies(task.isSupplies());
@@ -62,6 +63,7 @@ public class TaskDTO implements Serializable {
 		task.setSupplies(this.getSupplies());
 		task.setTags(this.getTags());
 		task.setTitle(this.getTitle());
+		task.setZipaddress(this.getZipaddress());
 		task.setUrgent(this.getUrgent());
 		return task;
 	}
