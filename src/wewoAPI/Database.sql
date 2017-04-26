@@ -5,15 +5,19 @@ DROP TABLE IF EXISTS TaskFlags;
 
 DROP TABLE IF EXISTS UserFlaggings;
 DROP TABLE IF EXISTS UserFlags;
+DROP TABLE IF EXISTS UserRatingMapper;
 DROP TABLE IF EXISTS UserRatings;
 DROP TABLE IF EXISTS Phone;
 DROP TABLE IF EXISTS Compentencies;
 DROP TABLE IF EXISTS Validations;
 DROP TABLE IF EXISTS TaskTags;
 DROP TABLE IF EXISTS Tags;
-DROP TABLE IF EXISTS Tasks;
 DROP TABLE IF EXISTS Login;
+DROP TABLE IF EXISTS Comments;
+DROP TABLE IF EXISTS Tasks;
 DROP TABLE IF EXISTS Users;
+
+
 
 CREATE TABLE Users (
     userID VARCHAR(50) NOT NULL,
@@ -69,14 +73,7 @@ CREATE TABLE Phone
 	foreign key(ownerID) REFERENCES Users(userID)
 );
  
- CREATE TABLE UserRatingMapper
- (
-	RatingID INTEGER NOT NULL AUTO_INCREMENT,
-    raterID VARCHAR(50) NOT NULL,
-    rateeID VARCHAR(50) NOT NULL,
-    foreign key(raterID) REFERENCES UserRatings(raterID),
-    foreign key(rateeID) REFERENCES UserRatings(raterID)
- );
+ 
  
 CREATE TABLE UserRatings
 (
@@ -88,6 +85,15 @@ CREATE TABLE UserRatings
     foreign key(rateeID) REFERENCES Users(userID)
 );
 
+CREATE TABLE UserRatingMapper
+ (
+	RatingID INTEGER NOT NULL AUTO_INCREMENT,
+    raterID VARCHAR(50) NOT NULL,
+    rateeID VARCHAR(50) NOT NULL,
+    primary key(RatingID),
+    foreign key(raterID) REFERENCES UserRatings(raterID),
+    foreign key(rateeID) REFERENCES UserRatings(raterID)
+ );
 CREATE TABLE UserFlags
 (
 	ID INTEGER(3) PRIMARY KEY NOT NULL,
@@ -142,11 +148,12 @@ CREATE TABLE Appliers
 
 CREATE TABLE Comments
 (
-	CommentID INTEGER(32) NOT NULL, 
-	Commenter VARCHAR(50) NOT NULL,
-    message VARCHAR(64) NOT NULL,
+    CommentID INTEGER(32) NOT NULL, 
+    Commenter VARCHAR(50) NOT NULL,
+    message VARCHAR(1024) NOT NULL,
     TaskID INTEGER(32) NOT NULL,
-    foreign key(respondentID) REFERENCES Users(userID),
+    submitDate DATE NOT NULL,
+    primary key(CommentID),
     foreign key(TaskID) REFERENCES Tasks(ID)
 );
 
@@ -169,19 +176,15 @@ CREATE TABLE TaskTags
     foreign key(TaskID) REFERENCES Tasks(ID) 
 );
 
-DROP TRIGGER IF EXISTS UpdateDate;
-DELIMITER \\
-CREATE TRIGGER UpdateDate BEFORE INSERT ON Tasks FOR EACH ROW
-BEGIN
-	SET NEW.edited = NOW();
-	SET NEW.created = NOW();
-END;\\
+#DROP TRIGGER IF EXISTS UpdateDate;
+#DELIMITER \\
+#CREATE TRIGGER UpdateDate BEFORE INSERT ON Tasks FOR EACH ROW
+#BEGIN
+#	SET NEW.edited = NOW();
+#	SET NEW.created = NOW();
+#END;\\
 
 
 #SET @handy := (SELECT LAST_INSERT_ID());
 #insert into Tags VALUES(null, "Handy", null), (null, "Move", null),(null, "Clean", null), (null, "Cook", null), (null, "Outdoor", null), (null, "Service", null), (null, "IT", null), (null, "Study", null), (null, "Other", null);
 #insert into Tags VALUES("Samle møbler", @handy), ("Ikea møbler", LAST_INSERTID()-1);
-
-
-
-

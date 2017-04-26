@@ -29,13 +29,19 @@ public class RatingController extends ControllerBase{
 		try{
 			if(!verifyLogin(context)){
 				raiseError(out, 401, "Not logged in");
+				return;
 			}
 			StartRequest(in);
+			//GET user/{userID}/ratings/{ratingsID}
+			String rateeID = request.getPath("rateeID");
 			Rating rate = request.getObject(Rating.class);
 			if(rate == null){
 				raiseError(out, 400, "Invalid Rating Object");
+				return;
 			}
+			
 			RatingDTO dto = RatingDTO.fromModel(rate);
+			dto.setRateeID(rateeID);
 			dto.setRaterID(context.getIdentity().getIdentityId());
 
 			try{
@@ -44,7 +50,7 @@ public class RatingController extends ControllerBase{
 				response.setStatusCode(200);
 				FinishRequest(out);
 			} catch (DALException e){
-				raiseError(out, 503, "Database unavailable");
+				raiseError(out, 503, "Database unavailable");		
 				return;
 			}
 		}
@@ -59,16 +65,23 @@ public class RatingController extends ControllerBase{
 	{
 		try{
 			StartRequest(in);
-			String raterID = request.getObject("RaterID", String.class);
+			Rating rate = request.getObject(Rating.class);
+			String raterID = request.getPath("raterID");
+			String rateeID = request.getPath("rateeID");
+			String foo = request.getPath("ratingID");
+			int ratingID = Integer.parseInt(foo);
 			RatingDTO dto;
-			dto = repository.getRating(raterID, context.getIdentity().getIdentityId());
+			
+			dto = repository.getRating(ratingID, rateeID);
 			if(dto==null){
 				raiseError(out, 404, "No rating was found using raterID " + raterID);
 				return;
 			}
 		
-			Rating rate = dto.getModel();
-			response.addResponseObject("Rating", rate);
+			rate = dto.getModel();
+			response.addResponseObject("message", rate.message);
+			response.addResponseObject("rating", rate.rating);
+			response.addResponseObject("ratingObject", rate);
 			response.setStatusCode(200);
 			FinishRequest(out);
 		} catch (DALException e){
@@ -77,24 +90,24 @@ public class RatingController extends ControllerBase{
 		}
 	}
 	
-	public void lookUpRater(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
+	/*public void lookUpRater(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
 		try{
 			StartRequest(in);
 			int ratingID = request.getObject("RatingID",Integer.class);
-			String rater;
-			rater = repository.lookUpRater(context.getIdentity().getIdentityId(), ratingID);
-			if(rater==null){
+			RatingDTO dto;
+			dto = repository.getRating(ratingID, context.getIdentity().getIdentityId());
+			if(dto==null){
 				raiseError(out, 404, "No rater was found with ratingID " + ratingID);
 				return;
 			}
 			
 			
-			response.addResponseObject("Rater", rater);
+			response.addResponseObject("Rater", dto.getRaterID());
 			response.setStatusCode(200);
 			FinishRequest(out);
 		} catch (DALException e) {
 			raiseError(out, 503, "Database unavailable");
 		}
-	}
+	}*/
 }

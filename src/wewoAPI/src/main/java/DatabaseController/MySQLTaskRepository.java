@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import DatabaseController.DALException.EntryNullException;
+import DatabaseController.DALException.ForeignKeyException;
+
 public class MySQLTaskRepository implements TaskRespository{
 	private final String GET_TASK = "SELECT * FROM Tasks WHERE id = ?;";
 	private final String CREATE_TASK = "INSERT INTO Tasks(creatorID, title, description, price, ECT, supplies, urgent,"
@@ -137,7 +140,7 @@ public class MySQLTaskRepository implements TaskRespository{
 		return DatabaseConnector.doUpdate("DELETE FROM Tasks WHERE ID = " + id + ";");
 	}
 
-	public List<TaskDTO> queryTasks(List<Integer> tags) {
+	public List<TaskDTO> queryTasks(List<Integer> tags) throws EntryNullException, ForeignKeyException, DALException {
 		int START = 0;
 		int END = 25;
 	
@@ -153,19 +156,17 @@ public class MySQLTaskRepository implements TaskRespository{
 		ResultSet rs  = DatabaseConnector.doQuery("select * from Tasks INNER JOIN from TaskTags " + 
 		"(select TaskID from TaskTags, Tags where Tags.ID in (" + TAGS  + ") GROUP BY TaskID)" + 
 		" AS TaskID ON Tasks.ID = TaskIDs.TaskID LIMIT " + START + ", " + END + ";");
+		
+		List<TaskDTO> tasks = new ArrayList<TaskDTO>();
 		while(rs.next())
 		{
-			
+			tasks.add(generate(rs));
 		}
+			return tasks;
 		}
 		catch(SQLException e)
 		{
-			
+			throw new DALException(e);
 		}
-		catch(DALException e)
-		{
-			
-		}
-		return null;
 	}
 }

@@ -16,28 +16,42 @@ public class MockRatingRepository implements RatingRepository{
 		public String rateeID;
 		
 		@Override
-		public int hashCode() {
-			return (raterID + rateeID).hashCode();
-		}	
+		public String toString() {
+			return (raterID + rateeID);
+		}
 	}
-	private HashMap<primary_key, RatingDTO> database1 = new HashMap<primary_key, RatingDTO>();
-	private List<String> database2 = new ArrayList<String>();
 	
-	public String lookUpRater(String ratee, int ratingID) throws DALException {
-		
-		return database2.get(ratingID);
-	}
+	//weak_key raterID + rateeID
+	private HashMap<String, RatingDTO> database1 = new HashMap<String, RatingDTO>();
+	//primary key ratingID
+	private List<String> database2 = new ArrayList<String>();
 
-	public RatingDTO getRating(String rater, String ratee) throws DALException {
+
+	public RatingDTO getRating(int ratingID, String ratee) throws DALException {
+		
+		if(ratingID > database2.size())
+		{
+			return null;
+		}
+		
+		String rater = database2.get(ratingID);
+		
 		primary_key key = new primary_key();
+		
 		key.rateeID = ratee;
 		key.raterID = rater;
-		return database1.get(key);
+		return database1.get(key.toString());
 	}
 
 	public boolean createRating(RatingDTO rate) throws DALException {
 		try{
-		    database2.add(rate.toString());
+			
+		    database2.add(rate.getRaterID());
+		    rate.setRatingID(database2.size()-1);
+		    primary_key key = new primary_key();
+		    key.raterID = rate.getRaterID();
+		    key.rateeID = rate.getRateeID();
+		    database1.put(key.toString(), rate);
 			return true;
 		}catch(Exception e){
 			return false;
