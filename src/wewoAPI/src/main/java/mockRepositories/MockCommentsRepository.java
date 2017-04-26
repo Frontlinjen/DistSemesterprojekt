@@ -47,12 +47,10 @@ public MockCommentsRepository(){
 
 	public int createComment(CommentDTO com) throws DALException {
 		database.get(com.getTaskID()).add(com.getID(),com);
-		System.out.println(database.toString());
 		return database.size() - 1;
 	}
 
 	public int updateComment(CommentDTO com) throws DALException {
-		System.out.println(com.getTaskID() + " " + com.getID());
 		database.get(com.getTaskID()).set(com.getID(),com);
 		return 1;
 	}

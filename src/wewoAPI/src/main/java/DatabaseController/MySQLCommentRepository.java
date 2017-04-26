@@ -7,17 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MySQLCommentRepository implements CommentRepository{
-	//TODO: Fix statements
-	private final String GET_COMMENT = "SELECT * FROM Tasks WHERE id = ?;";
-	private final String CREATE_COMMENT = "INSERT INTO Tasks(title, description, price, ECT, supplies, urgent"
-									 + "street, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
-	private final String UPDATE_COMMENT = "UPDATE ansat SET  ID = '?', title =  '?', description = '?', price = '?', ECT = '?', supplies " +
-									   "= '?', urgent = '?', street = '?', zipcode = '?' WHERE ID = '?';";
+	private final String GET_COMMENT = "SELECT * FROM Comments WHERE (taskId = ? AND commentId = ?);";
+	private final String DELETE_COMMENT = "DELETE * FROM Comments WHERE (taskId = ? AND commentId = ?);";
+	private final String CREATE_COMMENT = "INSERT INTO Comments(commentId, taskId, ownerId, text, date) VALUES (?, ?, ?, ?, ?);";
+	private final String UPDATE_COMMENT = "UPDATE Comments SET  commentId = '?', taskId =  '?', ownerId = '?', text = '?', date = '?' WHERE (taskId = ? AND commentId = ?);";
+	
 	public MySQLCommentRepository() throws DALException{
 		DatabaseConnector.RegisterStatement("GET_COMMENT", GET_COMMENT);
 		DatabaseConnector.RegisterStatement("CREATE_COMMENT", CREATE_COMMENT);
 		DatabaseConnector.RegisterStatement("UPDATE_COMMENT", UPDATE_COMMENT);
-		
+		DatabaseConnector.RegisterStatement("DELETE_COMMENT", DELETE_COMMENT);
 	}
 	
 	
@@ -41,7 +40,7 @@ public class MySQLCommentRepository implements CommentRepository{
 
 	public List<CommentDTO> getCommentList(int taskId) throws DALException {
 		List<CommentDTO> list = new ArrayList<CommentDTO>();
-		ResultSet rs = DatabaseConnector.doQuery("SELECT * FROM Tasks;"); //TODO FIX
+		ResultSet rs = DatabaseConnector.doQuery("SELECT * FROM Comments;");
 		try
 		{
 			while (rs.next()) 
@@ -54,23 +53,18 @@ public class MySQLCommentRepository implements CommentRepository{
 		return list;
 	}
 
+	//(commentId, taskId, ownerId, text, date)
 	public int createComment(CommentDTO com) throws DALException {
 		try {
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("CREATE_COMMENT");
+			statement.setInt(1, com.getID());
+			statement.setInt(1, com.getTaskID());
+			statement.setString(1, com.getOwnerId());
 			statement.setString(1, com.getText());
-			statement.setString(2, com.getOwnerId());
-			statement.setDate(3, com.getDate());
-			statement.setInt(4, com.getID());
-			statement.setInt(5, com.getTaskID());
+			statement.setDate(1, com.getDate());
 
 			int res = statement.executeUpdate();
 			
-			//TODO Not implementedyet
-			/*
-			ResultSet rs = DatabaseConnector.doQuery("SELECT LAST_INSERT_ID();");
-			rs.first();
-			int ID = rs.getInt("last_insert_id()");
-			com.id = ID; */
 			return res;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -79,14 +73,15 @@ public class MySQLCommentRepository implements CommentRepository{
 		return 0;
 	}
 
+	//(commentId, taskId, ownerId, text, date)
 	public int updateComment(CommentDTO com) throws DALException {
 		try{
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("UPDATE_COMMENT");
+			statement.setInt(1, com.getID());
+			statement.setInt(1, com.getTaskID());
+			statement.setString(1, com.getOwnerId());
 			statement.setString(1, com.getText());
-			statement.setString(2, com.getOwnerId());
-			statement.setDate(3, com.getDate());
-			statement.setInt(4, com.getID());
-			statement.setInt(5, com.getTaskID());
+			statement.setDate(1, com.getDate());
 			return statement.executeUpdate();
 		}
 		catch(SQLException e){
@@ -97,7 +92,7 @@ public class MySQLCommentRepository implements CommentRepository{
 
 	public int deleteComment(int taskId, int commentId) throws DALException {
 		try{
-			PreparedStatement statement = DatabaseConnector.getPreparedStatement("UPDATE_COMMENT");
+			PreparedStatement statement = DatabaseConnector.getPreparedStatement("DELETE_COMMENT");
 			statement.setInt(1, taskId);
 			statement.setInt(2, commentId);
 			return statement.executeUpdate();
