@@ -37,7 +37,7 @@ public class MockApplicationRepository implements ApplicationRepository {
 	}
 	public int createApplication(ApplicationDTO app) throws DALException {
 		if(database.containsKey(app.getTaskid())){
-			database.get(app.getTaskid()).get(app.getApplierid()).getApplicationMessage();
+			database.get(app.getTaskid()).put(app.getApplierid(), app);
 		}
 		return 0; //error
 		}

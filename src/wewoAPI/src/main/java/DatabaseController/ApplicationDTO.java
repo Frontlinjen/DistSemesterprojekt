@@ -28,7 +28,8 @@ public class ApplicationDTO implements Serializable {
 	public static ApplicationDTO fromModel(Application app)
 	{
 		ApplicationDTO dto = new ApplicationDTO();
-		dto.setTaskid(app.getTaskid());
+		dto.setApplierid(app.getApplierId());
+		dto.setTaskid(app.getTaskId());
 		dto.setApplicationMessage(app.getApplicationMessage());
 		return dto;
 	}
@@ -36,7 +37,8 @@ public class ApplicationDTO implements Serializable {
 	public Application getModel(){
 		Application app = new Application();
 		app.setApplicationMessage(this.getApplicationMessage());
-		app.setTaskid(this.taskid);
+		app.setTaskId(this.taskid);
+		app.setApplierId(this.getApplierid());
 		return app;
 	}
 	
