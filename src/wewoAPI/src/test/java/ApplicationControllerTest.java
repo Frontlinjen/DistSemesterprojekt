@@ -57,10 +57,11 @@ public class ApplicationControllerTest {
 		request.setBody(mapper.writeValueAsString(app));
 		
 		controller.PostApplications(new ByteArrayInputStream(request.getContent()), out, context);
+		System.out.println(new String(out.toByteArray()));
 		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 200);
 		String applierID = response.getBody("applierID", String.class);
 		assertNotNull(applierID);
-		assertEquals(response.getResponseCode(), 200);
 		assertTrue(applierID == "BORIS!");
 		
 		Application newApp;
@@ -68,7 +69,7 @@ public class ApplicationControllerTest {
 		request.addPath("applierID", applierID);
 		controller.GetApplication(new ByteArrayInputStream(request.getContent()), out, context);
 		response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 200);
+		assertEquals(200, response.getResponseCode());
 		
 		newApp = response.getBody("Application", Application.class);
 		assertEquals(app.getApplicationMessage(), newApp.getApplicationMessage());
