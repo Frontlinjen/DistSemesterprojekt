@@ -144,7 +144,6 @@ public class CommentsController extends ControllerBase{
 				raiseError(out, 400, "No commentID specified");
 				return;
 			}
-			System.out.println(taskID + ", " + commentID);
 			CommentDTO dto = repository.getComment(taskID, commentID);
 			if(dto == null)
 			{
