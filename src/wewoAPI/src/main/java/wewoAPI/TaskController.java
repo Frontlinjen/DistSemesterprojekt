@@ -60,6 +60,7 @@ public class TaskController extends ControllerBase{
 			} 
 			catch(DALException.ForeignKeyException e){
 				raiseError(out, 400, "Invalid tag specified");
+				return;
 			}
 			catch (DALException e) {
 				raiseError(out, 503, "Database unavailable");
@@ -86,8 +87,8 @@ public class TaskController extends ControllerBase{
 				raiseError(out, 400, "No tags specified");
 				return;
 			}
-			
-				String[] tag = tags.split("+");
+				
+				String[] tag = tags.split("\\+");
 				List<Integer> tagIds = new ArrayList<Integer>(tag.length);
 				
 				for (String tagStr : tag) {
@@ -102,8 +103,17 @@ public class TaskController extends ControllerBase{
 					raiseError(out, 400, "No valid tagIds");
 					return;
 				}
-				List<TaskDTO> tasks = repository.queryTasks(tagIds);			
-				response.addResponseObject("Results", tasks);
+				List<TaskDTO> tasks = repository.queryTasks(tagIds);
+				if(tasks == null || tasks.isEmpty())
+				{
+					raiseError(out, 404, "No tasks were found");
+					return;
+				}
+				List<Task> models = new ArrayList<Task>(tasks.size());
+				for (int i = 0; i < tasks.size(); i++) {
+					models.add(tasks.get(i).getModel());
+				}
+				response.addResponseObject("Results", models);
 				response.setStatusCode(200);
 				FinishRequest(out);
 				return;
