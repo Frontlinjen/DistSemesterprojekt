@@ -86,6 +86,15 @@ public class DatabaseConnector {
 				Constant.username, Constant.password);
 	}
 	
+	public static void StartTransaction() throws SQLException{
+		conn.setAutoCommit(false);
+	}
+	
+	public static void EndTransaction() throws SQLException {
+		conn.commit();
+		conn.setAutoCommit(true);
+	}
+	
 	public static PreparedStatement getPreparedStatement(String identifier) throws SQLException
 	{
 		PreparedStatementWrapper ret = statements.get(identifier);

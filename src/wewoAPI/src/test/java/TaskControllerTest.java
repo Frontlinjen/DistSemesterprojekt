@@ -4,6 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +35,7 @@ public class TaskControllerTest {
 	int dataCounter = 0;
 	@Before
 	public void setUp() throws Exception {
-		controller = new TaskController(/*new MockTaskRepository() */);
+		controller = new TaskController(/*new MockTaskRepository()*/);
 		context = new ContextTest("Jeiner");
 		mapper = new ObjectMapper();
 		out = new ByteArrayOutputStream();
@@ -48,9 +51,13 @@ public class TaskControllerTest {
 		task.setPrice(55);
 		task.setStreet("Nowhere");
 		task.setCreatorid("TestAcc666");
+		List<Integer> l = new ArrayList<Integer>();
+		l.add(1);
+		l.add(2);
+		l.add(4);
+		task.setTags(l);
 		return task;
 	}
-	
 	
 	@Test
 	public void createTask() throws InternalServerErrorException, IOException {
@@ -84,10 +91,34 @@ public class TaskControllerTest {
 		assertEquals(task.getDescription(), newTask.getDescription());
 		assertEquals(task.getStreet(), newTask.getStreet());
 		assertEquals(task.getZipaddress(), newTask.getZipaddress());
+		assertTrue(task.getTags().contains(4));
 		assertNotNull(newTask);
 		assertEquals(newTask.getCreatorid(), context.getIdentity().getIdentityId());
 		out.reset();
 	}
+	
+	@Test
+	public void createTaskUsingNonexistingTags() throws InternalServerErrorException, IOException {
+		Task task = generateTestData();
+
+		task.setID(-1);
+		task.setCreatorid("Nobody");
+		List<Integer> tags = new ArrayList<Integer>();
+		tags.add(Integer.MAX_VALUE);
+		tags.add(Integer.MAX_VALUE - 1);
+		tags.add(Integer.MAX_VALUE - 2);
+		task.setTags(tags);
+
+
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(task));
+
+		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(400, response.getResponseCode());
+		out.reset();
+	}
+	
 	@Test
 	public void createTaskWithoutValidLogin() throws InternalServerErrorException, IOException{
 		Task task = generateTestData();
@@ -99,6 +130,7 @@ public class TaskControllerTest {
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 401);
 	}
+	
 	
 	@Test
 	public void createTaskWithoutLogin() throws InternalServerErrorException, IOException{
@@ -216,7 +248,6 @@ public class TaskControllerTest {
 		controller.updateTask(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 401);
-	}
-	
+	}	
 
 }

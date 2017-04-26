@@ -50,6 +50,5 @@ public class MockTaskRepository implements TaskRespository {
 	public int deleteTask(int id) throws DALException {
 		database.remove(id);
 		return 1;
-	}
-	
+	}	
 }
