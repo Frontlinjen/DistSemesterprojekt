@@ -2,7 +2,7 @@ package DatabaseController;
 
 import java.util.List;
 
-import DatabaseController.MySQLException.ForeignKeyException;
+import DatabaseController.DALException.ForeignKeyException;
 import exceptions.BadRequestException;
 
 public interface CommentRepository {

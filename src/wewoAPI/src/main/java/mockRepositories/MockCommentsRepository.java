@@ -8,7 +8,7 @@ import java.util.Map;
 import DatabaseController.CommentDTO;
 import DatabaseController.CommentRepository;
 import DatabaseController.DALException;
-import DatabaseController.MySQLException.ForeignKeyException;
+import DatabaseController.DALException.ForeignKeyException;
 import DatabaseController.TaskDTO;
 import exceptions.BadRequestException;
 
