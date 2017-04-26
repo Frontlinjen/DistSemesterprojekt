@@ -142,11 +142,11 @@ CREATE TABLE Appliers
 
 CREATE TABLE Comments
 (
-	CommentID INTEGER(32) NOT NULL, 
-	Commenter VARCHAR(50) NOT NULL,
-    message VARCHAR(64) NOT NULL,
+    CommentID INTEGER(32) NOT NULL, 
+    Commenter VARCHAR(50) NOT NULL,
+    message VARCHAR(1024) NOT NULL,
     TaskID INTEGER(32) NOT NULL,
-    foreign key(respondentID) REFERENCES Users(userID),
+    submitDate DATE NOT NULL,
     foreign key(TaskID) REFERENCES Tasks(ID)
 );
 
