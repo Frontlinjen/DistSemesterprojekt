@@ -139,12 +139,11 @@ public class CommentsController extends ControllerBase{
 				raiseError(out, 400, "No commentID specified");
 				return;
 			}
-			comment.setID(commentID);
-			comment.setTaskID(taskID);
-			CommentDTO dto = repository.getComment(comment.getTaskID(), comment.getID());
+			System.out.println(taskID + ", " + commentID);
+			CommentDTO dto = repository.getComment(taskID, commentID);
 			if(dto == null)
 			{
-				raiseError(out, 404, "No comment was found using ID " + comment.getID());
+				raiseError(out, 404, "No comment was found using ID " + commentID);
 				return;
 			}
 			if(dto.getOwnerId().equals(context.getIdentity().getIdentityId())){

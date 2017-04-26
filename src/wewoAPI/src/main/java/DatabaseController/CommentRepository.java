@@ -6,7 +6,7 @@ import DatabaseController.MySQLException.ForeignKeyException;
 import exceptions.BadRequestException;
 
 public interface CommentRepository {
-	
+	//Task/{id}/comments/{commentID}
 	CommentDTO getComment(int taskId, int commentId) throws DALException;
 	List<CommentDTO> getCommentList(int taskId) throws DALException;
 	int createComment(CommentDTO com) throws DALException;
