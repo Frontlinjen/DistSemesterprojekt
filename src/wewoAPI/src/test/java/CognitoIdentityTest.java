@@ -1,4 +1,4 @@
-package wewo.api.test;
+
 
 public class CognitoIdentityTest implements com.amazonaws.services.lambda.runtime.CognitoIdentity{
 	String identityId;

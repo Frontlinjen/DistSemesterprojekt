@@ -1,0 +1,1707 @@
+---
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: "WEWO"
+host: "70r7hyxz72.execute-api.eu-west-1.amazonaws.com"
+basePath: "/development"
+schemes:
+- "https"
+paths:
+  /account:
+    put:
+      summary: "Updates the user's account"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "Account"
+        required: true
+        schema:
+          $ref: "#/definitions/Account"
+      security:
+      - sigv4: []
+      responses:
+        200:
+          description: "User's account was successfully updated"
+        400:
+          description: "Bad field entry"
+        401:
+          description: "User is not logged in"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "put"
+        type: "aws"
+  /account/applied:
+    get:
+      operationId: "getTasksAppliedToByID"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Not Found].*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:GetUserAppliedTasks/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+  /account/{ID}:
+    get:
+      operationId: "getUserByID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Account"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\r\n{\r\n  \"\
+                Message\" : \"$inputRoot.errorMessage\"\r\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Not Found].*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\r\n{\r\n  \"\
+                Message\" : \"$inputRoot.errorMessage\"\r\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:GetAccount/invocations"
+        requestTemplates:
+          application/json: "{\n   \"ID\" : \"$input.path('ID')\"\n}"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+  /account/{ID}/tasks:
+    get:
+      operationId: "getTasksCreateByID"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        400:
+          description: "400 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Not Found].*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        requestTemplates:
+          application/json: "{\n   \"ID\" : \"$input.path('ID')\"\n}"
+        passthroughBehavior: "when_no_match"
+        type: "aws"
+  /login:
+    post:
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:JavabogAuthorizer/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+  /ratings/{ID}:
+    get:
+      operationId: "getRatingsForID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/ArrayOfRatings"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Not Found].*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:GetRating/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    post:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:CreateRating/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+  /tasks:
+    get:
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Task"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Not Found].*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:GetTask/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "Task"
+        required: true
+        schema:
+          $ref: "#/definitions/Task"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/MODEL932157"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::*:user/*"
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:CreateTask/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+  /tasks/{taskID}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Task"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::*:user/*"
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Not Found].*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        requestTemplates:
+          application/json: "{\n    \"ID\" : \"$input.params('taskID')\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:GetTask/invocations"
+        passthroughBehavior: "when_no_templates"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    put:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "Task"
+        required: true
+        schema:
+          $ref: "#/definitions/Task"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        403:
+          description: "403 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::*:user/*"
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Forbidden].*:
+            statusCode: "403"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Not Found].*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:UpdateTask/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    delete:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        403:
+          description: "403 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::*:user/*"
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Forbidden].*:
+            statusCode: "403"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Not Found].*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthrized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:DeleteTask/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+  /tasks/{taskID}/applicants:
+    get:
+      operationId: "getApplicationsForID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::*:user/*"
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Not Found].*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:GetApplicants/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "MODELd602cd"
+        required: true
+        schema:
+          $ref: "#/definitions/MODELd602cd"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::*:user/*"
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:CreateApplication/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+  /tasks/{taskID}/applicants/{applierID}:
+    get:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "applierID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/String"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Not Found].*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:GetApplication/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+  /tasks/{taskID}/comments:
+    get:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Not Found].*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:GetComments/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "MODEL5cf7a6"
+        required: true
+        schema:
+          $ref: "#/definitions/MODEL5cf7a6"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+          ^[Internal Server Error].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Unauthorized].*:
+            statusCode: "401"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+          ^[Bad Request].*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{\n  \"Message\"\
+                \ : \"$inputRoot.errorMessage\"\n}"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:619517212226:function:CreateComment/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+  /tasks/{taskID}/comments/{commentID}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "commentID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        404:
+          description: "404 response"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+    put:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "commentID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "MODEL918c77"
+        required: true
+        schema:
+          $ref: "#/definitions/MODEL918c77"
+      responses:
+        200:
+          description: "200 response"
+        404:
+          description: "404 response"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+    delete:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "commentID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        404:
+          description: "404 response"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /tasks/{taskID}/images:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        404:
+          description: "404 response"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+securityDefinitions:
+  sigv4:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    x-amazon-apigateway-authtype: "awsSigv4"
+definitions:
+  Account:
+    type: "object"
+    properties:
+      userID:
+        type: "string"
+      name:
+        type: "string"
+      email:
+        type: "string"
+      phone:
+        type: "string"
+      sex:
+        type: "boolean"
+      aboutMe:
+        type: "string"
+      competences:
+        type: "array"
+        items:
+          type: "string"
+  MODEL918c77:
+    type: "string"
+  MODEL5cf7a6:
+    type: "string"
+  MODEL932157:
+    type: "object"
+    properties:
+      taskID:
+        type: "integer"
+  Task:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "the ID identifying this task"
+      title:
+        type: "string"
+        maxLength: 256
+      description:
+        type: "string"
+        maxLength: 512
+      price:
+        type: "number"
+        description: "The price for completion of the task"
+      ECT:
+        type: "integer"
+        description: "The estimated completion time in minutes"
+      supplies:
+        type: "boolean"
+        description: "Are relevant supplies available for the task"
+      urgent:
+        type: "boolean"
+        description: "Is the task urgent(expires after six hours)"
+      views:
+        type: "integer"
+        description: "How many views has this task had?"
+      street:
+        type: "string"
+        maxLength: 128
+      zipaddress:
+        type: "integer"
+      creatorid:
+        type: "string"
+        description: "The userID of the creator if this task"
+      tags:
+        type: "array"
+        items:
+          type: "integer"
+          minimum: 3.0
+          maximum: 63.0
+  ArrayOfRatings:
+    type: "array"
+    items:
+      $ref: "#/definitions/Ratings"
+  StringArray:
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        status:
+          type: "string"
+  String:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+  MODELd602cd:
+    type: "integer"
+  Ratings:
+    type: "object"
+    properties:
+      rating:
+        type: "integer"
+      description:
+        type: "string"
+---
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: "WEWO"
+host: "70r7hyxz72.execute-api.eu-west-1.amazonaws.com"
+basePath: "/development"
+schemes:
+- "https"
+paths:
+  /account:
+    post:
+      summary: Updates account informations such as email or address
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "Account"
+        required: true
+        schema:
+          $ref: "#/definitions/Account"
+      responses:
+        200:
+          description: "Account was created"
+        400:
+          description: "An invalid field was specified"
+        401:
+          description: "User is not logged in"
+  /account/applied:
+    get:
+      operationId: "getTasksAppliedTo"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "A list of the tasks(can be empty)"
+          schema:
+            $ref: "#/definitions/StringArray"
+        500:
+          description: "Internal server error(most likely that we lost database access)"
+        401:
+          description: "User is not logged in"
+      security:
+      - sigv4: []
+  /account/{ID}:
+    get:
+      operationId: "getUserByID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Account was found and has been retrieved"
+          schema:
+            $ref: "#/definitions/Account"
+        400:
+          description: "Account not found by that ID"
+        500:
+          description: "Internal server error"
+        401:
+          description: "You must be logged in to view other user's accounts"
+        404:
+          description: "No such account"
+      security:
+      - sigv4: []
+  /account/{ID}/tasks:
+    get:
+      summary: "Gets the ids of all tasks created by user ID"
+      operationId: "getTasksCreateByID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        401:
+          description: "You must be logged in to view other users' information"
+        404:
+          description: "The user does not exists"
+      security:
+      - sigv4: []
+  /login:
+    post:
+      summary: "Accepts javabog.dk login information and returns login token"
+      parameters:
+      - name: "username"
+        in: "body"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "body"
+        required: true
+        type: string
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Successful login"
+        400:
+          description: "Login informations were invalid"
+        500:
+          description: "Login server down"
+  /ratings/{ID}:
+    get:
+      operationId: "getRatingsForID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/ArrayOfRatings"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+    post:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+  /tasks:
+    get:
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Task"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "Task"
+        required: true
+        schema:
+          $ref: "#/definitions/Task"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/MODEL932157"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+  /tasks/{taskID}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Task"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+    put:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "Task"
+        required: true
+        schema:
+          $ref: "#/definitions/Task"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        403:
+          description: "403 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+    delete:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        403:
+          description: "403 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+  /tasks/{taskID}/applicants:
+    get:
+      operationId: "getApplicationsForID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "MODELd602cd"
+        required: true
+        schema:
+          $ref: "#/definitions/MODELd602cd"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+  /tasks/{taskID}/applicants/{applierID}:
+    get:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "applierID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/String"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+  /tasks/{taskID}/comments:
+    get:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "MODEL5cf7a6"
+        required: true
+        schema:
+          $ref: "#/definitions/MODEL5cf7a6"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+  /tasks/{taskID}/comments/{commentID}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "commentID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        404:
+          description: "404 response"
+    put:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "commentID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "MODEL918c77"
+        required: true
+        schema:
+          $ref: "#/definitions/MODEL918c77"
+      responses:
+        200:
+          description: "200 response"
+        404:
+          description: "404 response"
+    delete:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "commentID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        404:
+          description: "404 response"
+  /tasks/{taskID}/images:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        404:
+          description: "404 response"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+securityDefinitions:
+  sigv4:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    x-amazon-apigateway-authtype: "awsSigv4"
+definitions:
+  Account:
+    type: "object"
+    properties:
+      userID:
+        type: "string"
+      name:
+        type: "string"
+      email:
+        type: "string"
+      phone:
+        type: "string"
+      sex:
+        type: "boolean"
+      aboutMe:
+        type: "string"
+      competences:
+        type: "array"
+        items:
+          type: "string"
+  MODEL918c77:
+    type: "string"
+  MODEL5cf7a6:
+    type: "string"
+  MODEL932157:
+    type: "object"
+    properties:
+      taskID:
+        type: "integer"
+  Task:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "the ID identifying this task"
+      title:
+        type: "string"
+        maxLength: 256
+      description:
+        type: "string"
+        maxLength: 512
+      price:
+        type: "number"
+        description: "The price for completion of the task"
+      ECT:
+        type: "integer"
+        description: "The estimated completion time in minutes"
+      supplies:
+        type: "boolean"
+        description: "Are relevant supplies available for the task"
+      urgent:
+        type: "boolean"
+        description: "Is the task urgent(expires after six hours)"
+      views:
+        type: "integer"
+        description: "How many views has this task had?"
+      street:
+        type: "string"
+        maxLength: 128
+      zipaddress:
+        type: "integer"
+      creatorid:
+        type: "string"
+        description: "The userID of the creator if this task"
+      tags:
+        type: "array"
+        items:
+          type: "integer"
+          minimum: 3.0
+          maximum: 63.0
+  ArrayOfRatings:
+    type: "array"
+    items:
+      $ref: "#/definitions/Ratings"
+  StringArray:
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        status:
+          type: "string"
+  String:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+  MODELd602cd:
+    type: "integer"
+  Ratings:
+    type: "object"
+    properties:
+      rating:
+        type: "integer"
+      description:
+        type: "string"

@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface AccountRepository {
 
-	AccountDTO getAccount(String id) throws DALException;
+	AccountDTO getAccount(String string) throws DALException;
 	List<AccountDTO> queryAccount(List<Integer> tags) throws DALException;
 	List<AccountDTO> getAccountList() throws DALException;
 	int createAccount(AccountDTO acc) throws DALException;

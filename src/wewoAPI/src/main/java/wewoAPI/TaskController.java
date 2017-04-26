@@ -19,9 +19,14 @@ import modelPOJO.FindDataObject;;
 public class TaskController extends ControllerBase{
 	TaskRespository repository;
 	
-	public TaskController()
+	public TaskController() throws InternalServerErrorException
 	{
-		repository = new MySQLTaskRepository();
+		try {
+			repository = new MySQLTaskRepository();
+		} catch (DALException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException("Failed to connect to database");
+		}
 	}
 	
 	public TaskController(TaskRespository repository)
@@ -111,6 +116,7 @@ public class TaskController extends ControllerBase{
 	{
 		if(!verifyLogin(context)){
 			raiseError(out, 401, "Not logged in");
+			return;
 		}
 		
 		try {

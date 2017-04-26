@@ -35,9 +35,14 @@ public class CommentsController extends ControllerBase{
 	TaskRespository taskRepo;
 	AccountRepository accountRepo;
 	
-	public CommentsController()
+	public CommentsController() throws InternalServerErrorException
 	{
-		repository = new MySQLCommentRepository();
+		try {
+			repository = new MySQLCommentRepository();
+		} catch (DALException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException("");
+		}
 	}
 	
 	public CommentsController(CommentRepository repository)

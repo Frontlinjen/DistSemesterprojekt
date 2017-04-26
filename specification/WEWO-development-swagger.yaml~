@@ -1,0 +1,596 @@
+---
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: "WEWO"
+host: "70r7hyxz72.execute-api.eu-west-1.amazonaws.com"
+basePath: "/development"
+schemes:
+- "https"
+paths:
+  /account:
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "Account"
+        required: true
+        schema:
+          $ref: "#/definitions/Account"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        401:
+          description: "401 response"
+  /account/applied:
+    get:
+      operationId: "getTasksAppliedToByID"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+  /account/{ID}:
+    get:
+      operationId: "getUserByID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Account"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+  /account/{ID}/tasks:
+    get:
+      operationId: "getTasksCreateByID"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        400:
+          description: "400 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+  /login:
+    post:
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+  /ratings/{ID}:
+    get:
+      operationId: "getRatingsForID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/ArrayOfRatings"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+    post:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "ID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+  /tasks:
+    get:
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Task"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "Task"
+        required: true
+        schema:
+          $ref: "#/definitions/Task"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/MODEL932157"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+  /tasks/{taskID}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Task"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+    put:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "Task"
+        required: true
+        schema:
+          $ref: "#/definitions/Task"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        403:
+          description: "403 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+    delete:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        403:
+          description: "403 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+  /tasks/{taskID}/applicants:
+    get:
+      operationId: "getApplicationsForID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+      security:
+      - sigv4: []
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "MODELd602cd"
+        required: true
+        schema:
+          $ref: "#/definitions/MODELd602cd"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+  /tasks/{taskID}/applicants/{applierID}:
+    get:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "applierID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/String"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+  /tasks/{taskID}/comments:
+    get:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+        404:
+          description: "404 response"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "MODEL5cf7a6"
+        required: true
+        schema:
+          $ref: "#/definitions/MODEL5cf7a6"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        500:
+          description: "500 response"
+        401:
+          description: "401 response"
+      security:
+      - sigv4: []
+  /tasks/{taskID}/comments/{commentID}:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "commentID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        404:
+          description: "404 response"
+    put:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "commentID"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "MODEL918c77"
+        required: true
+        schema:
+          $ref: "#/definitions/MODEL918c77"
+      responses:
+        200:
+          description: "200 response"
+        404:
+          description: "404 response"
+    delete:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "commentID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+        404:
+          description: "404 response"
+  /tasks/{taskID}/images:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/StringArray"
+        404:
+          description: "404 response"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskID"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "200 response"
+securityDefinitions:
+  sigv4:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    x-amazon-apigateway-authtype: "awsSigv4"
+definitions:
+  Account:
+    type: "object"
+    properties:
+      userID:
+        type: "string"
+      name:
+        type: "string"
+      email:
+        type: "string"
+      phone:
+        type: "string"
+      sex:
+        type: "boolean"
+      aboutMe:
+        type: "string"
+      competences:
+        type: "array"
+        items:
+          type: "string"
+  MODEL918c77:
+    type: "string"
+  MODEL5cf7a6:
+    type: "string"
+  MODEL932157:
+    type: "object"
+    properties:
+      taskID:
+        type: "integer"
+  Task:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "the ID identifying this task"
+      title:
+        type: "string"
+        maxLength: 256
+      description:
+        type: "string"
+        maxLength: 512
+      price:
+        type: "number"
+        description: "The price for completion of the task"
+      ECT:
+        type: "integer"
+        description: "The estimated completion time in minutes"
+      supplies:
+        type: "boolean"
+        description: "Are relevant supplies available for the task"
+      urgent:
+        type: "boolean"
+        description: "Is the task urgent(expires after six hours)"
+      views:
+        type: "integer"
+        description: "How many views has this task had?"
+      street:
+        type: "string"
+        maxLength: 128
+      zipaddress:
+        type: "integer"
+      creatorid:
+        type: "string"
+        description: "The userID of the creator if this task"
+      tags:
+        type: "array"
+        items:
+          type: "integer"
+          minimum: 3.0
+          maximum: 63.0
+  ArrayOfRatings:
+    type: "array"
+    items:
+      $ref: "#/definitions/Ratings"
+  StringArray:
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        status:
+          type: "string"
+  String:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+  MODELd602cd:
+    type: "integer"
+  Ratings:
+    type: "object"
+    properties:
+      rating:
+        type: "integer"
+      description:
+        type: "string"

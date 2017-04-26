@@ -21,7 +21,6 @@ import exceptions.UnauthorizedException;
 import mockRepositories.MockTaskRepository;
 import modelPOJO.IDObject;
 import modelPOJO.Task;
-import wewo.api.test.ContextTest;
 import wewoAPI.ControllerBase;
 import wewoAPI.TaskController;
 
@@ -33,7 +32,7 @@ public class TaskControllerTest {
 	int dataCounter = 0;
 	@Before
 	public void setUp() throws Exception {
-		controller = new TaskController(new MockTaskRepository());
+		controller = new TaskController(/*new MockTaskRepository() */);
 		context = new ContextTest("Jeiner");
 		mapper = new ObjectMapper();
 		out = new ByteArrayOutputStream();
@@ -80,6 +79,11 @@ public class TaskControllerTest {
 		assertEquals(response.getResponseCode(), 200);
 
 		newTask = response.getBody("Task", Task.class);
+		assertEquals(task.getTitle(), newTask.getTitle());
+		assertEquals(task.getPrice(), newTask.getPrice());
+		assertEquals(task.getDescription(), newTask.getDescription());
+		assertEquals(task.getStreet(), newTask.getStreet());
+		assertEquals(task.getZipaddress(), newTask.getZipaddress());
 		assertNotNull(newTask);
 		assertEquals(newTask.getCreatorid(), context.getIdentity().getIdentityId());
 		out.reset();
