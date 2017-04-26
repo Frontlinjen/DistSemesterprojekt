@@ -195,7 +195,7 @@ public class ApplicationControllerTest {
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateApplication(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(403, response.getResponseCode());
+		assertEquals(404, response.getResponseCode());
 	}
 	
 	@Test
