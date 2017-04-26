@@ -4,6 +4,9 @@ import com.amazonaws.services.lambda.runtime.Context;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import modelPOJO.Rating;
 import DatabaseController.RatingDTO;
 import DatabaseController.RatingRepository;
@@ -90,6 +93,30 @@ public class RatingController extends ControllerBase{
 		}
 	}
 	
+	public void getLastRatings(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
+	{
+		try{
+			StartRequest(in);
+			List<Rating> rate = new ArrayList<Rating>();
+			String rateeID = request.getPath("rateeID");
+			List<RatingDTO> dto;
+			
+			dto = repository.getLastRatings(rateeID);
+			if(dto==null){
+				raiseError(out, 404, "No rating was found using rateeID " + rateeID);
+				return;
+			}
+			for(int i = 0; dto.size()>i; i++){
+				rate.add(dto.get(i).getModel());
+				//rate.set(i, dto.get(i).getModel());
+			}
+			response.setStatusCode(200);
+			FinishRequest(out);
+		} catch (DALException e){
+			raiseError(out, 503, "Database unavailable");
+			return;
+		}
+	}
 	/*public void lookUpRater(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
 		try{

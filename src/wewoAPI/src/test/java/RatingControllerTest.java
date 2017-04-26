@@ -1,8 +1,6 @@
 import modelPOJO.Rating;
-import wewo.api.test.ContextTest;
-import modelPOJO.RatingIDObject;
-import modelPOJO.Task;
 import wewoAPI.RatingController;
+
 
 import static org.junit.Assert.*;
 
@@ -71,9 +69,23 @@ public class RatingControllerTest {
 	}
 	
 	@Test
-	public void getRating() throws InternalServerErrorException, IOException{
+	public void getLastRatings() throws InternalServerErrorException, IOException{
+		Rating rate = generateTestData();
 		
-
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(rate));
+		request.addPath("rateeID", "rateeIDTest");
+		
+		createRating();
+		context.setIdentity("test2");
+		createRating();
+		context.setIdentity("test3");
+		createRating();
+		
+		controller.getLastRatings(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 200);
+		
 	}
 	
 }
