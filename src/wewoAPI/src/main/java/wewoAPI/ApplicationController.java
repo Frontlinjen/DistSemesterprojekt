@@ -84,7 +84,7 @@ public class ApplicationController extends ControllerBase{
 			
 			try {
 				repository.createApplication(dto);
-				response.addResponseObject("ApplicationID", dto.getApplierid());
+				response.addResponseObject("applierID", dto.getApplierid());
 				response.setStatusCode(200);
 				FinishRequest(out);
 				return;
@@ -107,16 +107,18 @@ public class ApplicationController extends ControllerBase{
 		try {
 			StartRequest(in);
 			
-			int applierID;
+			String applierID;
+			int taskID;
 			try{
-				applierID = Integer.parseInt(request.getPath("applierID"));			
+				taskID = Integer.parseInt(request.getPath("taskID"));
+				applierID = request.getPath("applierID");			
 			}
 			catch(NumberFormatException neg){
 				raiseError(out, 400, "No ApplierID specified on path");
 				return;
 			}
 			ApplicationDTO dto;
-			dto = repository.getApplication(applierID);
+			dto = repository.getApplication(applierID, taskID);
 			if(dto==null)
 			{
 				raiseError(out, 404, "No application was found using ID " + applierID);
@@ -143,17 +145,19 @@ public class ApplicationController extends ControllerBase{
 		try {
 			StartRequest(in);
 			Application app = request.getObject(Application.class);
-			int applierID;
+			int taskID;
+			String applierID;
 			try{
-				applierID = Integer.parseInt(request.getPath("applierID"));
+				taskID = Integer.parseInt(request.getPath("taskID"));
+				applierID = request.getPath("applierID");
 			}
 			catch(Exception e)
 			{
 				raiseError(out, 400, "No applierID specified");
 				return;
 			}
-			app.setApplierid(applierID);
-			ApplicationDTO dto = repository.getApplication(app.getTaskid());
+			app.setApplierID(context.getIdentity().getIdentityId());
+			ApplicationDTO dto = repository.getApplication(applierID, taskID);
 	
 			if(dto == null)
 			{
@@ -185,16 +189,18 @@ public class ApplicationController extends ControllerBase{
 		}	
 		try {
 			StartRequest(in);
-			int applierID;
+			String applierID;
+			int taskID;
 			try{
-				applierID = Integer.parseInt(request.getPath("applierID"));
+				applierID = request.getPath("applierID");
+				taskID = Integer.parseInt(request.getPath("taskID"));
 			}
 			catch(NumberFormatException eng)
 			{
 				raiseError(out, 400, "No applier specified");
 				return;
 			}
-			ApplicationDTO app = repository.getApplication(applierID);
+			ApplicationDTO app = repository.getApplication(applierID, taskID);
 			if(app == null)
 			{
 				raiseError(out, 404, "No such application");
@@ -202,7 +208,7 @@ public class ApplicationController extends ControllerBase{
 			}
 			
 			if(app.getApplierid().equals(context.getIdentity().getIdentityId())){
-				repository.deleteApplication(applierID);
+				repository.deleteApplication(applierID, taskID);
 				response.setStatusCode(200);
 				FinishRequest(out);
 				return;
