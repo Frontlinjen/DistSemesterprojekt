@@ -153,6 +153,7 @@ CREATE TABLE Comments
     message VARCHAR(1024) NOT NULL,
     TaskID INTEGER(32) NOT NULL,
     submitDate DATE NOT NULL,
+    primary key(CommentID),
     foreign key(TaskID) REFERENCES Tasks(ID)
 );
 
@@ -175,13 +176,13 @@ CREATE TABLE TaskTags
     foreign key(TaskID) REFERENCES Tasks(ID) 
 );
 
-DROP TRIGGER IF EXISTS UpdateDate;
-DELIMITER \\
-CREATE TRIGGER UpdateDate BEFORE INSERT ON Tasks FOR EACH ROW
-BEGIN
-	SET NEW.edited = NOW();
-	SET NEW.created = NOW();
-END;\\
+#DROP TRIGGER IF EXISTS UpdateDate;
+#DELIMITER \\
+#CREATE TRIGGER UpdateDate BEFORE INSERT ON Tasks FOR EACH ROW
+#BEGIN
+#	SET NEW.edited = NOW();
+#	SET NEW.created = NOW();
+#END;\\
 
 
 #SET @handy := (SELECT LAST_INSERT_ID());
