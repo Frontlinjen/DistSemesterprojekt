@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,15 +12,15 @@ public class MySQLTaskRepository implements TaskRespository{
 	private final String GET_TASK = "SELECT * FROM Tasks WHERE id = ?;";
 	private final String CREATE_TASK = "INSERT INTO Tasks(creatorID, title, description, price, ECT, supplies, urgent,"
 									 + "street, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+	private final String CREATE_TASK_TAGS = "INSERT INTO TaskTags(TagID, TaskID) VALUES (?, (select LAST_INSERT_ID()));";
 	private final String UPDATE_TASK = "UPDATE ansat SET  ID = '?', title =  '?', description = '?', price = '?', ECT = '?', supplies " +
 									   "= '?', urgent = '?', street = '?', zipcode = '?' WHERE ID = '?';";
-	
 	
 	public MySQLTaskRepository() throws DALException{
 		DatabaseConnector.RegisterStatement("GET_TASK", GET_TASK);
 		DatabaseConnector.RegisterStatement("CREATE_TASK", CREATE_TASK);
 		DatabaseConnector.RegisterStatement("UPDATE_TASK", UPDATE_TASK);
-		
+		DatabaseConnector.RegisterStatement("CREATE_TASK_TAGS", CREATE_TASK_TAGS); 
 	}
 	public TaskDTO getTask(int id) throws DALException {
 		PreparedStatement statement;
@@ -64,32 +65,51 @@ public class MySQLTaskRepository implements TaskRespository{
 	}
 
 	public int createTask(TaskDTO tas) throws DALException {
-		try {
-			PreparedStatement statement = DatabaseConnector.getPreparedStatement("CREATE_TASK");
-			statement.setString(1, tas.creatorid);
-			statement.setString(2, tas.title);
-			statement.setString(3, tas.description);
-			statement.setInt(4,  tas.price);
-			statement.setInt(5, tas.ect);
-			statement.setInt(6, tas.supplies);
-			statement.setInt(7, tas.urgent);
-			statement.setString(8, tas.street);
-			statement.setInt(9, tas.zipaddress);
-
-
-			int res = statement.executeUpdate();
-
-
+		try { 
+			PreparedStatement taskStatement = DatabaseConnector.getPreparedStatement("CREATE_TASK");
+			taskStatement.setString(1, tas.creatorid);
+			taskStatement.setString(2, tas.title);
+			taskStatement.setString(3, tas.description);
+			taskStatement.setInt(4,  tas.price);
+			taskStatement.setInt(5, tas.ect);
+			taskStatement.setInt(6, tas.supplies);
+			taskStatement.setInt(7, tas.urgent);
+			taskStatement.setString(8, tas.street);
+			taskStatement.setInt(9, tas.zipaddress);
+			HashSet<Integer> set = new HashSet<Integer>();
+			for (int i = 0; i < tas.tags.size(); i++) {
+				set.add(tas.tags.get(i));
+			}
+			PreparedStatement addTagStatement = DatabaseConnector.getPreparedStatement("CREATE_TASK_TAGS");
+			//We are ready to execute
+			DatabaseConnector.StartTransaction();
+			int taskResult = taskStatement.executeUpdate();
+			for (Integer tag : set) {
+				addTagStatement.setInt(1, tag);
+				//addTagStatement.setInt(2, ID);
+				addTagStatement.addBatch();
+			}
+			int[] tagResults = addTagStatement.executeBatch();
+			DatabaseConnector.EndTransaction();
+			
+			int error = 0;
+			for (int i = 0; i < tagResults.length; i++) {
+				error |= tagResults[i];
+			}
+			error |= taskResult;
+			
 			ResultSet rs = DatabaseConnector.doQuery("SELECT LAST_INSERT_ID();");
+			
 			rs.first();
 			int ID = rs.getInt("last_insert_id()");
+			
 			tas.id = ID;
-			return res;
+			return error;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new DALException(e);
 		}
-		return 0;
 	}
 
 	public int updateTask(TaskDTO tas) throws DALException {
@@ -148,5 +168,4 @@ public class MySQLTaskRepository implements TaskRespository{
 		}
 		return null;
 	}
-
 }
