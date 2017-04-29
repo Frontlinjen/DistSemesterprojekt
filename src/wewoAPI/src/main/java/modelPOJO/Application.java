@@ -1,21 +1,22 @@
 package modelPOJO;
-
+//POST api/tasks/{ID}/applications
+//Body { taskID = 22; }
 public class Application {
-	String applicationMessage, applierID;
-	int taskID;
+	private String applicationMessage, applierID;
+	private int taskID;
 	
-	public String getApplierid(){
+	public String getApplierId(){
 		return applierID;
 	}
-	public void setApplierID(String applierID) {
+	public void setApplierId(String applierID) {
 		this.applierID = applierID;
 	}
 	
-	public int getTaskid() {
+	public int getTaskId() {
 		return taskID;
 	}
-	public void setTaskid(int taskid) {
-		this.taskID = taskid;
+	public void setTaskId(int taskID) {
+		this.taskID = taskID;
 	}
 	public String getApplicationMessage() {
 		return applicationMessage;

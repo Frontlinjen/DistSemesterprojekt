@@ -35,7 +35,7 @@ public class TaskControllerTest {
 	int dataCounter = 0;
 	@Before
 	public void setUp() throws Exception {
-		controller = new TaskController(/*new MockTaskRepository()*/);
+		controller = new TaskController(new MockTaskRepository());
 		context = new ContextTest("Jeiner");
 		mapper = new ObjectMapper();
 		out = new ByteArrayOutputStream();
@@ -49,7 +49,8 @@ public class TaskControllerTest {
 		task.setTitle("Title" + dataCounter);
 		task.setETC(30);
 		task.setPrice(55);
-		task.setStreet("Nowhere");
+		task.setZipaddress(2000);
+		task.setStreet("Allegade");
 		task.setCreatorid("TestAcc666");
 		List<Integer> l = new ArrayList<Integer>();
 		l.add(1);
@@ -97,6 +98,23 @@ public class TaskControllerTest {
 		out.reset();
 	}
 	
+	@Test
+	public void createTaskNonExistingAddress() throws InternalServerErrorException, IOException {
+		Task task = generateTestData();
+
+		task.setID(-1);
+		task.setCreatorid("Nobody");
+		task.setZipaddress(10);
+		task.setStreet("Not a street");
+		
+		
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(task));
+
+		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 400);
+	}
 	@Test
 	public void createTaskUsingNonexistingTags() throws InternalServerErrorException, IOException {
 		Task task = generateTestData();
@@ -248,6 +266,81 @@ public class TaskControllerTest {
 		controller.updateTask(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 401);
-	}	
+	}
+	
+	@Test
+	public void queryTagsTest() throws InternalServerErrorException, IOException {
+		createTask();
+		
+		RequestDataMock request = new RequestDataMock();
+		request.addQuery("tags", "4+22");
+		
+		controller.findTasks(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		//List<Task> tasks = new ArrayList<Task>();
+		assertEquals(200, response.getResponseCode());
+		List<Task> tasks = response.getBody("Results", ArrayList.class);
+		assertEquals(1, tasks.size());
+		
+		out.reset();
+	}
+	
+	@Test
+	public void queryEmptyTagsTest() throws InternalServerErrorException, IOException {
+		createTask();
+		
+		RequestDataMock request = new RequestDataMock();
+		
+		controller.findTasks(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		//List<Task> tasks = new ArrayList<Task>();
+		assertEquals(400, response.getResponseCode());
+		out.reset();
+	}
+	
+	@Test
+	public void queryInvalidTagsTest() throws InternalServerErrorException, IOException {
+		createTask();
+		
+		RequestDataMock request = new RequestDataMock();
+		request.addQuery("tags", "ilvalid+tasks");
+		controller.findTasks(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		//List<Task> tasks = new ArrayList<Task>();
+		assertEquals(400, response.getResponseCode());
+		out.reset();
+	}
+	
+	@Test
+	public void queryNonExistingTagsTest() throws InternalServerErrorException, IOException {
+		createTask();
+		
+		RequestDataMock request = new RequestDataMock();
+		request.addQuery("tags", "9000000");
+		controller.findTasks(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		//List<Task> tasks = new ArrayList<Task>();
+		assertEquals(404, response.getResponseCode());
+		out.reset();
+	}
+	
+
+	@Test
+	public void queryTagsTestMultipleResults() throws InternalServerErrorException, IOException {
+		createTask();
+		createTask();
+		createTask();
+		
+		RequestDataMock request = new RequestDataMock();
+		request.addQuery("tags", "4");
+		controller.findTasks(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		//List<Task> tasks = new ArrayList<Task>();
+		assertEquals(200, response.getResponseCode());
+		List<Task> tasks = response.getBody("Results", ArrayList.class);
+		assertEquals(3, tasks.size());
+		out.reset();
+	}
+
 
 }

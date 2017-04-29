@@ -1,15 +1,16 @@
 package mockRepositories;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import DatabaseController.DALException;
 import DatabaseController.TaskDTO;
 import DatabaseController.TaskRespository;
 
 public class MockTaskRepository implements TaskRespository {
-	private List<TaskDTO> database = new ArrayList<TaskDTO>();
-	
+	private List<TaskDTO> database = new ArrayList<TaskDTO>();	
 	public TaskDTO getTask(int id) throws DALException {
 		try{
 			return database.get(id);
@@ -38,7 +39,15 @@ public class MockTaskRepository implements TaskRespository {
 	}
 
 	public int createTask(TaskDTO tas) throws DALException {
+		List<Integer> tags = tas.getTags();
+		for (int i = 0; i < tags.size(); i++) {
+			if(tags.get(i) > Integer.MAX_VALUE*0.5)
+			{
+				throw new DALException.ForeignKeyException(null);
+			}
+		}
 		database.add(tas);
+		tas.setId(database.size() - 1);
 		return database.size() - 1;
 	}
 

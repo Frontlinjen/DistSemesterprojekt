@@ -31,7 +31,7 @@ public class ApplicationControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		controller = new ApplicationController(new MockApplicationRepository());
-		context = new ContextTest("TIM");
+		context = new ContextTest("Tim");
 		mapper = new ObjectMapper();
 		out = new ByteArrayOutputStream();
 	}
@@ -40,8 +40,6 @@ public class ApplicationControllerTest {
 	{
 		Application app = new Application();
 		app.setApplicationMessage("blabla");
-		app.setApplierID("TOM");
-		app.setTaskid(1);
 		return app;
 	}
 	
@@ -50,32 +48,31 @@ public class ApplicationControllerTest {
 	public void createApplication() throws IOException, InternalServerErrorException{
 		Application app = generateTestData();
 		
-		app.setApplierID("BORIS!");
-		app.setApplicationMessage("BlaBla");
+		app.setApplierId("Boris");
 		
 		RequestDataMock request = new RequestDataMock();
+		request.addPath("taskID", Integer.toString(5));
 		request.setBody(mapper.writeValueAsString(app));
-		
+		System.out.println(new String(request.getContent()));
+
 		controller.PostApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		String applierID = response.getBody("applierID", String.class);
-		assertNotNull(applierID);
-		assertEquals(response.getResponseCode(), 200);
-		assertTrue(applierID == "BORIS!");
-		
+		assertEquals(200, response.getResponseCode());		
 		Application newApp;
 		out.reset();
-		request.addPath("applierID", applierID);
+		request.addPath("taskID", "5");
+		request.addPath("applierID", context.getIdentity().getIdentityId());
+		
+		
 		controller.GetApplication(new ByteArrayInputStream(request.getContent()), out, context);
 		response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 200);
+		assertEquals(200, response.getResponseCode());
 		
 		newApp = response.getBody("Application", Application.class);
-		assertEquals(app.getApplicationMessage(), newApp.getApplicationMessage());
-		assertEquals(app.getApplierid(), newApp.getApplierid());
-		assertEquals(app.getTaskid(), newApp.getTaskid());
 		assertNotNull(newApp);
-		assertEquals(newApp.getApplierid(), context.getIdentity().getIdentityId());
+		assertEquals(app.getApplicationMessage(), newApp.getApplicationMessage());
+		assertEquals(context.getIdentity().getIdentityId(), newApp.getApplierId());
+		assertEquals(5, newApp.getTaskId());
 		out.reset();
 	}
 	
@@ -109,7 +106,7 @@ public class ApplicationControllerTest {
 		
 		createApplication();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("applierID", "SHITFUCK!");
+		request.addPath("taskID", "2");
 		controller.GetApplication(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 404);
@@ -119,7 +116,7 @@ public class ApplicationControllerTest {
 	public void deleteApplication()  throws InternalServerErrorException, IOException{
 		createApplication();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("applierID", "ØV");
+		request.addPath("taskID", "5");
 		controller.deleteApplication(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 200);
@@ -131,11 +128,11 @@ public class ApplicationControllerTest {
 	}
 
 	@Test
-	public void deleteTaskCheckPermissions()  throws InternalServerErrorException, IOException{
+	public void deleteApplicaitonCheckPermissions()  throws InternalServerErrorException, IOException{
 		createApplication();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("applierID", "");
-		context.setIdentity("TIM");
+		request.addPath("taskID", "5");
+		context.setIdentity("Tims");
 		controller.deleteApplication(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 403);
@@ -144,20 +141,21 @@ public class ApplicationControllerTest {
 	@Test
 	public void deleteNonexistingApplication() throws InternalServerErrorException, IOException{
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("applierID", "5050050");
+		request.addPath("taskID", "50");
 		controller.deleteApplication(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(404, response.getResponseCode());
 	}
 	
 	@Test
-	public void updateTaskIgnoreCreatorAndTaskIDField()   throws InternalServerErrorException, IOException{
+	public void updateApplicationIgnoreIDField()   throws InternalServerErrorException, IOException{
 		createApplication();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("applierID", "0");
+		request.addPath("taskID", "5");
 		Application newData = generateTestData();
-		newData.setApplierID("CUNT!");
-		newData.setTaskid(99);
+		newData.setApplierId("CUNT!");
+		newData.setTaskId(99);
+		newData.setApplicationMessage("Meh");
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateApplication(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
@@ -170,15 +168,15 @@ public class ApplicationControllerTest {
 		response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 200);
 		Application newApp = response.getBody("Application", Application.class);
-		assertEquals(newApp.getApplierid(), newData.getApplierid());
+		assertEquals(newApp.getApplierId(), newData.getApplierId());
 		assertEquals(newApp.getApplicationMessage(), newData.getApplicationMessage());
-		assertEquals(newApp.getTaskid(), newData.getTaskid());
+		assertEquals(newApp.getTaskId(), newData.getTaskId());
 	}
 	
 	@Test
 	public void updateNonExistingTask()   throws InternalServerErrorException, IOException{
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("applierID", "POUL");
+		request.addPath("taskID", "5");
 		Application newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateApplication(new ByteArrayInputStream(request.getContent()), out, context);
@@ -190,21 +188,21 @@ public class ApplicationControllerTest {
 	public void updateWrongPermissionsTask()   throws InternalServerErrorException, IOException{
 		createApplication();
 		
-		context.setIdentity("TOBI");
+		context.setIdentity("Tim");
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("applierID", "BRIAN");
+		request.addPath("taskID", "5");
 		Application newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateApplication(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(403, response.getResponseCode());
+		assertEquals(404, response.getResponseCode());
 	}
 	
 	@Test
 	public void updateNoPermissionsTask()    throws InternalServerErrorException, IOException{
 		context.clearIdentity();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("applierID", "IVAN");
+		request.addPath("taskID", "5");
 		Application newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateApplication(new ByteArrayInputStream(request.getContent()), out, context);

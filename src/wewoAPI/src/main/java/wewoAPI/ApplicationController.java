@@ -74,17 +74,30 @@ public class ApplicationController extends ControllerBase{
 				return;
 			}
 			StartRequest(in);
+			
+			String taskStr = request.getPath("taskID");
+			if(taskStr == null || taskStr.isEmpty()){
+				raiseError(out, 400, "No taskID specified");
+				return;
+			}
+			int taskId;
+			try{
+				taskId = Integer.parseInt(taskStr);
+			}catch(NumberFormatException e){
+				raiseError(out, 400, "Invalid taskID specified");
+				return;
+			}
 			Application app = request.getObject(Application.class);
 			if(app == null){
 				raiseError(out, 400, "Invalid Application Object");
 				return;
 			}
 			ApplicationDTO dto = ApplicationDTO.fromModel(app);
+			dto.setTaskid(taskId);
 			dto.setApplierid(context.getIdentity().getIdentityId());
 			
 			try {
 				repository.createApplication(dto);
-				response.addResponseObject("applierID", dto.getApplierid());
 				response.setStatusCode(200);
 				FinishRequest(out);
 				return;
@@ -156,12 +169,12 @@ public class ApplicationController extends ControllerBase{
 				raiseError(out, 400, "No applierID specified");
 				return;
 			}
-			app.setApplierID(context.getIdentity().getIdentityId());
+			app.setApplierId(context.getIdentity().getIdentityId());
 			ApplicationDTO dto = repository.getApplication(applierID, taskID);
 	
 			if(dto == null)
 			{
-				raiseError(out, 404, "No application was found using ID " + app.getApplierid());
+				raiseError(out, 404, "No application was found using ID " + app.getApplierId());
 				return;
 			}
 			if(dto.getApplierid().equals(context.getIdentity().getIdentityId())){

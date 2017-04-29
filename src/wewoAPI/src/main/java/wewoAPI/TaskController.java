@@ -7,6 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.javanet.NetHttpTransport;
 
 import DatabaseController.DALException;
 import DatabaseController.MySQLTaskRepository;
@@ -51,6 +59,40 @@ public class TaskController extends ControllerBase{
 			TaskDTO dto = TaskDTO.fromModel(task);
 			dto.setCreatorId(context.getIdentity().getIdentityId());
 
+			HttpRequestFactory factory = new NetHttpTransport().createRequestFactory();
+			
+			GenericUrl url = new GenericUrl("https://dawa.aws.dk/adresser");
+			url.put("postnr", dto.getZipaddress());
+			url.put("vejnavn", dto.getStreet());
+			HttpResponse addressLookupResponse = null;
+			try{
+				HttpRequest addressLookup = factory.buildGetRequest(url);
+				addressLookupResponse  = addressLookup.execute();
+			}catch(Exception e){
+				e.printStackTrace();
+				//Ignore the error and accept the address regardless
+			}
+			if(addressLookupResponse != null && addressLookupResponse.isSuccessStatusCode() && addressLookupResponse.getContent() != null){
+				InputStream stream = null;
+				try{
+					stream = addressLookupResponse.getContent();
+					ObjectMapper mapper = new ObjectMapper();
+					JsonNode n = mapper.readTree(stream);
+					if(n.isArray() && !n.elements().hasNext()){ //If format changes and we do not recieve an array, then we shouldn't disallow the user to create the task
+						raiseError(out, 400, "Invalid address specified");
+						return;
+					}
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				finally{
+					if(stream != null)
+						stream.close();
+				}
+			}
+			
 			try {
 				repository.createTask(dto);
 				response.addResponseObject("TaskID", dto.getId());
@@ -60,6 +102,7 @@ public class TaskController extends ControllerBase{
 			} 
 			catch(DALException.ForeignKeyException e){
 				raiseError(out, 400, "Invalid tag specified");
+				return;
 			}
 			catch (DALException e) {
 				raiseError(out, 503, "Database unavailable");
@@ -86,8 +129,8 @@ public class TaskController extends ControllerBase{
 				raiseError(out, 400, "No tags specified");
 				return;
 			}
-			
-				String[] tag = tags.split("+");
+				
+				String[] tag = tags.split("\\+");
 				List<Integer> tagIds = new ArrayList<Integer>(tag.length);
 				
 				for (String tagStr : tag) {
@@ -102,8 +145,17 @@ public class TaskController extends ControllerBase{
 					raiseError(out, 400, "No valid tagIds");
 					return;
 				}
-				List<TaskDTO> tasks = repository.queryTasks(tagIds);			
-				response.addResponseObject("Results", tasks);
+				List<TaskDTO> tasks = repository.queryTasks(tagIds);
+				if(tasks == null || tasks.isEmpty())
+				{
+					raiseError(out, 404, "No tasks were found");
+					return;
+				}
+				List<Task> models = new ArrayList<Task>(tasks.size());
+				for (int i = 0; i < tasks.size(); i++) {
+					models.add(tasks.get(i).getModel());
+				}
+				response.addResponseObject("Results", models);
 				response.setStatusCode(200);
 				FinishRequest(out);
 				return;
