@@ -110,6 +110,7 @@ public class RatingController extends ControllerBase{
 				rate.add(dto.get(i).getModel());
 				//rate.set(i, dto.get(i).getModel());
 			}
+			response.addResponseObject("Ratings", rate);
 			response.setStatusCode(200);
 			FinishRequest(out);
 		} catch (DALException e){
