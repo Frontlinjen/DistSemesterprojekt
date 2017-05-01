@@ -1,6 +1,5 @@
 package mockRepositories;
 
-import java.awt.RenderingHints.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,13 +30,12 @@ public class MockRatingRepository implements RatingRepository{
 
 	public boolean createRating(RatingDTO rate) throws DALException {
 		try{
-			
-		    database2.add(rate.getRaterID());
-		    rate.setRatingID(database2.size()-1);
-		    primary_key key = new primary_key();
-		    key.raterID = rate.getRaterID();
-		    key.rateeID = rate.getRateeID();
-		    database1.put(key.toString(), rate);
+			database2.add(rate.getRaterID());
+			rate.setRatingID(database2.size()-1);
+			primary_key key = new primary_key();
+			key.raterID = rate.getRaterID();
+			key.rateeID = rate.getRateeID();
+			database1.put(key.toString(), rate);
 			return true;
 		}catch(Exception e){
 			return false;
@@ -73,6 +71,14 @@ public class MockRatingRepository implements RatingRepository{
 	        }
 	    }
 		return container;
+	}
+	
+	public boolean hasRelation(String ratee, String rater) throws DALException{
+		if(ratee.equals("rateeIDTest") && rater.equals("Test2"))
+			return true;
+		else
+			return false;
+		
 	}
 
 }
