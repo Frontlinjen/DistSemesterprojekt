@@ -74,7 +74,7 @@ public class MockRatingRepository implements RatingRepository{
 	}
 	
 	public boolean hasRelation(String ratee, String rater) throws DALException{
-		if(ratee.equals("rateeIDTest") && rater.equals("Test2"))
+		if(!ratee.isEmpty() && !rater.isEmpty())
 			return true;
 		else
 			return false;

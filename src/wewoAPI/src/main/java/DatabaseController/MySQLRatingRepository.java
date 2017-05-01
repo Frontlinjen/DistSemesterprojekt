@@ -3,6 +3,7 @@ package DatabaseController;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class MySQLRatingRepository implements RatingRepository{
 
@@ -82,6 +83,16 @@ public class MySQLRatingRepository implements RatingRepository{
 			System.out.println("Rating didn't get created");
 			e.printStackTrace();
 		}
+		return false;
+	}
+
+	public List<RatingDTO> getLastRatings(String ratee) throws DALException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public boolean hasRelation(String ratee, String rater) throws DALException {
+		// TODO Auto-generated method stub
 		return false;
 	}
 	

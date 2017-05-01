@@ -45,7 +45,7 @@ public class RatingController extends ControllerBase{
 			
 			RatingDTO dto = RatingDTO.fromModel(rate);
 			if(!repository.hasRelation(rateeID, context.getIdentity().getIdentityId())){
-				raiseError(out, 404, "No relation between target person and you");
+				raiseError(out, 401, "No relation between target person and you");
 				return;
 			}
 			
