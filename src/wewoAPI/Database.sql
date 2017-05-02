@@ -42,11 +42,11 @@ CREATE TABLE Tasks
     ECT INTEGER(8) NOT NULL, -- Estimated complition time(minutes)
 	supplies BOOLEAN NOT NULL,
     urgent BOOLEAN NOT NULL,
-    views INTEGER(8) NOT NULL,
+    views INTEGER(8) NOT NULL default(0),
 	street VARCHAR(128) NOT NULL,
     zipcode INTEGER(8) NOT NULL,
-    created TIMESTAMP,
-    edited TIMESTAMP,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    edited TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     creatorID VARCHAR(50) NOT NULL
    -- foreign key(creatorID) REFERENCES Users(userID)
 );
