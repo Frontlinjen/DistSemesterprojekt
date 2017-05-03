@@ -2,8 +2,10 @@ package mockRepositories;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.mysql.cj.core.exceptions.MysqlErrorNumbers;
 
@@ -17,7 +19,7 @@ public class MockApplicationRepository implements ApplicationRepository {
 	private Map<Integer, HashMap<String, ApplicationDTO>> database = new HashMap<Integer, HashMap<String, ApplicationDTO>>();
 
 	public MockApplicationRepository(){
-		database.put(5,  new HashMap<String, ApplicationDTO>());
+		database.put(0,  new HashMap<String, ApplicationDTO>());
 	}
 	
 	public ApplicationDTO getApplication(String id, int i) throws DALException {
@@ -32,8 +34,17 @@ public class MockApplicationRepository implements ApplicationRepository {
 
 	public List<String> getApplicationList(int id) throws DALException {
 		List<String> applicantList = new ArrayList<String>();
-		applicantList.addAll(applicantList);
-		return applicantList;
+		if(database.containsKey(id)){
+			HashMap<String, ApplicationDTO> applicants = database.get(id);
+			Iterator<Entry<String, ApplicationDTO>> it = applicants.entrySet().iterator();
+			while(it.hasNext()) {
+				Entry<String, ApplicationDTO> entry = it.next();
+				applicantList.add(entry.getKey());
+				System.out.println(entry.getKey());
+			}
+			return applicantList;
+		}
+		return null; //error
 	}
 	public int createApplication(ApplicationDTO app) throws DALException {
 		if(database.containsKey(app.getTaskid())){
@@ -44,7 +55,7 @@ public class MockApplicationRepository implements ApplicationRepository {
 
 	public int updateApplication(ApplicationDTO app) throws DALException {
 		if(database.containsKey(app.getTaskid())){
-			database.get(app.getApplierid()).get(app.getApplierid()).getApplicationMessage();
+			database.get(app.getTaskid()).get(app.getApplierid()).setApplicationMessage(app.getApplicationMessage());
 		}
 		return 0; //error
 	}

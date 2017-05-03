@@ -32,7 +32,7 @@ public class TaskControllerTest {
 	ContextTest context;
 	ObjectMapper mapper;
 	ByteArrayOutputStream out;
-	int dataCounter = 0;
+	static int dataCounter = 0;
 	@Before
 	public void setUp() throws Exception {
 		controller = new TaskController(new MockTaskRepository());
@@ -42,7 +42,7 @@ public class TaskControllerTest {
 	}
 
 	
-	private Task generateTestData()
+	public static Task generateTestData()
 	{
 		Task task = new Task();
 		task.setDescription("Test" + dataCounter++);
