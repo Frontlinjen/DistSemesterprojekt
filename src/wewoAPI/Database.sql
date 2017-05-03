@@ -200,7 +200,7 @@ INSERT INTO `RejectReasons` (`ID`,`reason`) VALUES (2,'No');
 INSERT INTO `RejectReasons` (`ID`,`reason`) VALUES (3,'Yes');
 INSERT INTO `Appliers` (`TaskID`,`ApplierID`,`applierMessage`,`status`,`reason`) VALUES (1,'2','come at me bro','Applied',3);
 INSERT INTO `Appliers` (`TaskID`,`ApplierID`,`applierMessage`,`status`,`reason`) VALUES (2,'1','get rekt m8','Rejected',2);
-INSERT INTO `Appliers` (`TaskID`,`ApplierID`,`applierMessage`,`status`,`reason`) VALUES (3,'1','???','Accepted',1);
+INSERT INTO `Appliers` (`TaskID`,`ApplierID`,`applierMessage`,`status`,`reason`) VALUES (2,'1','???','Accepted',1);
 INSERT INTO `TaskFlags` (`flagID`,`description`) VALUES (2,'ITS A TRAP');
 INSERT INTO `TaskFlags` (`flagID`,`description`) VALUES (1,'This task sux');
 INSERT INTO `TaskFlags` (`flagID`,`description`) VALUES (3,'TOO EZ');
