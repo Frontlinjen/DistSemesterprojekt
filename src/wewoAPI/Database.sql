@@ -42,7 +42,7 @@ CREATE TABLE Tasks
     ECT INTEGER(8) NOT NULL, -- Estimated complition time(minutes)
 	supplies BOOLEAN NOT NULL,
     urgent BOOLEAN NOT NULL,
-    views INTEGER(8) NOT NULL default(0),
+    views INTEGER(8) NOT NULL default 0,
 	street VARCHAR(128) NOT NULL,
     zipcode INTEGER(8) NOT NULL,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -140,7 +140,7 @@ CREATE TABLE Appliers
     ApplierID VARCHAR(50) NOT NULL,
     applierMessage VARCHAR(256),
     status ENUM('Applied', 'Rejected', 'Accepted', 'Closed') NOT NULL,
-    reason INTEGER(3),
+    reason INTEGER(32),
 	foreign key(TaskID) REFERENCES Tasks(ID),
     foreign key(ApplierID) REFERENCES Users(userid),
     foreign key(reason) REFERENCES RejectReasons(ID)
@@ -164,7 +164,6 @@ CREATE TABLE Tags
 	parentTagID INTEGER(16),
     foreign key(parentTagID) REFERENCES Tags(ID)
 );
-insert into Tags VALUES(1, 'cleaning', null), (2, 'carpentry', null), (3, 'compute', null), (4, 'transport', null);
 
 
 CREATE TABLE TaskTags
@@ -175,16 +174,54 @@ CREATE TABLE TaskTags
     foreign key(TagID) REFERENCES Tags(ID),
     foreign key(TaskID) REFERENCES Tasks(ID) 
 );
-
-#DROP TRIGGER IF EXISTS UpdateDate;
-#DELIMITER \\
-#CREATE TRIGGER UpdateDate BEFORE INSERT ON Tasks FOR EACH ROW
-#BEGIN
-#	SET NEW.edited = NOW();
-#	SET NEW.created = NOW();
-#END;\\
-
-
-#SET @handy := (SELECT LAST_INSERT_ID());
-#insert into Tags VALUES(null, "Handy", null), (null, "Move", null),(null, "Clean", null), (null, "Cook", null), (null, "Outdoor", null), (null, "Service", null), (null, "IT", null), (null, "Study", null), (null, "Other", null);
-#insert into Tags VALUES("Samle møbler", @handy), ("Ikea møbler", LAST_INSERTID()-1);
+INSERT INTO `Users` (`userID`,`firstName`,`middleName`,`lastName`,`avatarS3path`,`street`,`zipcode`,`email`,`sex`,`aboutme`) VALUES ('23',',awæd','kamldaw','kamwld','klamwdlk','lkmwad',0,'klmawd','','klmawd');
+INSERT INTO `Users` (`userID`,`firstName`,`middleName`,`lastName`,`avatarS3path`,`street`,`zipcode`,`email`,`sex`,`aboutme`) VALUES ('1','Thomas','Bech','Madsen','odkwapwod','akdmwwakl',3460,'dkmakdal','male','Min krop er i smerte');
+INSERT INTO `Users` (`userID`,`firstName`,`middleName`,`lastName`,`avatarS3path`,`street`,`zipcode`,`email`,`sex`,`aboutme`) VALUES ('2','oakdopaw','oakdpowa','okmadwkl','kfmlksef','apowdk',0492,'adkmawk','female','poakwdpowakpdkaowdkopwakdpwkaodkwakdpoawkdopkawopdkaskgoimroijgroeijrekg');
+INSERT INTO `Users` (`userID`,`firstName`,`middleName`,`lastName`,`avatarS3path`,`street`,`zipcode`,`email`,`sex`,`aboutme`) VALUES ('3','Gunnery','Sergeant','Hartmann','oakwdp','okaapowd',5678,'opkaowkd','male','TEXAS! Holy cow! Only steers and queers come from Texas, and you dont look like a steer to me so that kind of narrows it down!');
+INSERT INTO `Users` (`userID`,`firstName`,`middleName`,`lastName`,`avatarS3path`,`street`,`zipcode`,`email`,`sex`,`aboutme`) VALUES ('4','l,daæld,wal','kmawdklmawd','klmawdklmawldk','akwldmawlkdm','dkawmlkad',3456,'jdiwajio','dgsrdgrdrd','awdawdawdawd');
+INSERT INTO `Phone` (`ownerID`,`number`,`type`) VALUES ('1',210389021,'bby plz holla');
+INSERT INTO `Phone` (`ownerID`,`number`,`type`) VALUES ('3',128397,'phone');
+INSERT INTO `Phone` (`ownerID`,`number`,`type`) VALUES ('2',9128309,'fax');
+INSERT INTO `Validations` (`userID`) VALUES ('1');
+INSERT INTO `Validations` (`userID`) VALUES ('2');
+INSERT INTO `Validations` (`userID`) VALUES ('3');
+INSERT INTO `Validations` (`userID`) VALUES ('4');
+INSERT INTO `Tags` (`ID`,`name`,`parentTagID`) VALUES (1,'cleaning',NULL);
+INSERT INTO `Tags` (`ID`,`name`,`parentTagID`) VALUES (2,'carpentry',NULL);
+INSERT INTO `Tags` (`ID`,`name`,`parentTagID`) VALUES (3,'compute',NULL);
+INSERT INTO `Tags` (`ID`,`name`,`parentTagID`) VALUES (4,'transport',NULL);
+INSERT INTO `Tags` (`ID`,`name`,`parentTagID`) VALUES (5,'unicycling',4);
+INSERT INTO `Tasks` (`ID`,`title`,`description`,`price`,`ECT`,`supplies`,`urgent`,`Views`,`street`,`zipcode`,`created`,`edited`,`creatorID`) VALUES (5,'kawmdl','lkamwd',0,0,0,0,0,'kawd',0,NULL,NULL,'klaw');
+INSERT INTO `Tasks` (`ID`,`title`,`description`,`price`,`ECT`,`supplies`,`urgent`,`Views`,`street`,`zipcode`,`created`,`edited`,`creatorID`) VALUES (6,'Title1','Test0',55,30,0,0,0,'Allegade',2000,NULL,NULL,'Jeiner');
+INSERT INTO `Tasks` (`ID`,`title`,`description`,`price`,`ECT`,`supplies`,`urgent`,`Views`,`street`,`zipcode`,`created`,`edited`,`creatorID`) VALUES (7,'Title1','Test0',55,30,0,0,0,'Allegade',2000,NULL,NULL,'Jeiner');
+INSERT INTO `Tasks` (`ID`,`title`,`description`,`price`,`ECT`,`supplies`,`urgent`,`Views`,`street`,`zipcode`,`created`,`edited`,`creatorID`) VALUES (1,'Slå naboens græs','Slå min nabos græs',200,9,1,0,1,'awdawd',1234,NULL,NULL,'1');
+INSERT INTO `Tasks` (`ID`,`title`,`description`,`price`,`ECT`,`supplies`,`urgent`,`Views`,`street`,`zipcode`,`created`,`edited`,`creatorID`) VALUES (2,'Bring pizza','Peperoni og med ekstra ost',100,8,0,1,3,'awdwad',4321,NULL,NULL,'2');
+INSERT INTO `Tasks` (`ID`,`title`,`description`,`price`,`ECT`,`supplies`,`urgent`,`Views`,`street`,`zipcode`,`created`,`edited`,`creatorID`) VALUES (3,'Lav en ikk noget joke','På Mikkel',5,6,0,1,789,'awdawd',2231,NULL,NULL,'3');
+INSERT INTO `Comments` (`CommentID`,`Commenter`,`message`,`TaskID`,`submitDate`) VALUES (1,'2','Texas!? Holy cow! Only steers and queers come from Texas and you don\'t look much like a steer so that kind of narrows it down!',3,'1970-01-01');
+INSERT INTO `Comments` (`CommentID`,`Commenter`,`message`,`TaskID`,`submitDate`) VALUES (2,'3','Oh SPAM, why dont you love me for who I am?',2,'1970-01-01');
+INSERT INTO `Comments` (`CommentID`,`Commenter`,`message`,`TaskID`,`submitDate`) VALUES (3,'1','Hallo?',1,'1970-01-01');
+INSERT INTO `Comments` (`CommentID`,`Commenter`,`message`,`TaskID`,`submitDate`) VALUES (4,'3','Hvad?',1,'0');
+INSERT INTO `Comments` (`CommentID`,`Commenter`,`message`,`TaskID`,`submitDate`) VALUES (5,'1','Ikk noget',1,'1970-01-01');
+INSERT INTO `RejectReasons` (`ID`,`reason`) VALUES (1,'EZ LYFE');
+INSERT INTO `RejectReasons` (`ID`,`reason`) VALUES (2,'No');
+INSERT INTO `RejectReasons` (`ID`,`reason`) VALUES (3,'Yes');
+INSERT INTO `Appliers` (`TaskID`,`ApplierID`,`applierMessage`,`status`,`reason`) VALUES (1,'2','come at me bro','Applied',3);
+INSERT INTO `Appliers` (`TaskID`,`ApplierID`,`applierMessage`,`status`,`reason`) VALUES (2,'1','get rekt m8','Rejected',2);
+INSERT INTO `Appliers` (`TaskID`,`ApplierID`,`applierMessage`,`status`,`reason`) VALUES (3,'1','???','Accepted',1);
+INSERT INTO `TaskFlags` (`flagID`,`description`) VALUES (2,'ITS A TRAP');
+INSERT INTO `TaskFlags` (`flagID`,`description`) VALUES (1,'This task sux');
+INSERT INTO `TaskFlags` (`flagID`,`description`) VALUES (3,'TOO EZ');
+INSERT INTO `TaskFlaggings` (`TaskID`,`flaggerID`,`description`,`flagID`) VALUES (1,'1',',adwådl',2);
+INSERT INTO `TaskFlaggings` (`TaskID`,`flaggerID`,`description`,`flagID`) VALUES (1,'2','fmoeioeo',3);
+INSERT INTO `Compentencies` (`userID`) VALUES ('1');
+INSERT INTO `Compentencies` (`userID`) VALUES ('2');
+INSERT INTO `UserRatings` (`rating`,`raterID`,`rateeID`,`description`) VALUES (10,'1','2','10/10 would do again');
+INSERT INTO `UserRatings` (`rating`,`raterID`,`rateeID`,`description`) VALUES (0,'3','2','0/10 the common cold sux');
+INSERT INTO `UserRatings` (`rating`,`raterID`,`rateeID`,`description`) VALUES (5,'1','4','What does this button do?');
+INSERT INTO `UserRatingMapper` (`RatingID`,`raterID`,`rateeID`) VALUES (1,'1','2');
+INSERT INTO `UserRatingMapper` (`RatingID`,`raterID`,`rateeID`) VALUES (2,'3','2');
+INSERT INTO `UserRatingMapper` (`RatingID`,`raterID`,`rateeID`) VALUES (3,'1','4');
+INSERT INTO `UserFlags` (`ID`,`description`) VALUES (1,'I am flag, yes');
+INSERT INTO `UserFlags` (`ID`,`description`) VALUES (2,'Fliggity flaggity, you are a faggotty');
+INSERT INTO `UserFlaggings` (`userID`,`flaggerID`,`description`,`flagID`) VALUES ('1','2','I AM REPORTING YOU TO THEADMINS',1);
+INSERT INTO `UserFlaggings` (`userID`,`flaggerID`,`description`,`flagID`) VALUES ('2','1','WELL GUESS WHAT',2);
