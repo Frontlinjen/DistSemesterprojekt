@@ -4,20 +4,22 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import DatabaseController.DALException;
+import DatabaseController.TaskDTO;
 import exceptions.InternalServerErrorException;
+import exceptions.UnauthorizedException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
 
 import org.junit.Before;
-import org.junit.Test;
 
 import mockRepositories.MockApplicationRepository;
+import mockRepositories.MockTaskRepository;
 import modelPOJO.*;
 import wewoAPI.ApplicationController;
 
@@ -30,7 +32,11 @@ public class ApplicationControllerTest {
 	int dataCounter = 0;
 	@Before
 	public void setUp() throws Exception {
-		controller = new ApplicationController(new MockApplicationRepository());
+		MockTaskRepository taskRepo = new MockTaskRepository();
+		TaskDTO taskdto = TaskDTO.fromModel(TaskControllerTest.generateTestData());
+		taskdto.setCreatorId("Ib");
+		taskRepo.createTask(taskdto);
+		controller = new ApplicationController(new MockApplicationRepository(), taskRepo);
 		context = new ContextTest("Tim");
 		mapper = new ObjectMapper();
 		out = new ByteArrayOutputStream();
@@ -45,26 +51,26 @@ public class ApplicationControllerTest {
 	
 	
 	@Test
-	public void createApplication() throws IOException, InternalServerErrorException{
+	public void createApplication() throws IOException, InternalServerErrorException, UnauthorizedException, DALException{
 		Application app = generateTestData();
 		
 		app.setApplierId("Boris");
 		
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("taskID", Integer.toString(5));
+		request.addPath("taskID", Integer.toString(0));
 		request.setBody(mapper.writeValueAsString(app));
 		System.out.println(new String(request.getContent()));
 
-		controller.PostApplications(new ByteArrayInputStream(request.getContent()), out, context);
+		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(200, response.getResponseCode());		
 		Application newApp;
 		out.reset();
-		request.addPath("taskID", "5");
+		
+		request.addPath("taskID", "0");
 		request.addPath("applierID", context.getIdentity().getIdentityId());
 		
-		
-		controller.GetApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		controller.getApplication(new ByteArrayInputStream(request.getContent()), out, context);
 		response = new ResponseData(out);
 		assertEquals(200, response.getResponseCode());
 		
@@ -72,7 +78,7 @@ public class ApplicationControllerTest {
 		assertNotNull(newApp);
 		assertEquals(app.getApplicationMessage(), newApp.getApplicationMessage());
 		assertEquals(context.getIdentity().getIdentityId(), newApp.getApplierId());
-		assertEquals(5, newApp.getTaskId());
+		assertEquals(0, newApp.getTaskId());
 		out.reset();
 	}
 	
@@ -83,7 +89,7 @@ public class ApplicationControllerTest {
 		request.setBody(mapper.writeValueAsString(app));
 		context.setIdentity("");
 		
-		controller.PostApplications(new ByteArrayInputStream(request.getContent()), out, context);
+		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 401);
 	}
@@ -96,46 +102,80 @@ public class ApplicationControllerTest {
 		request.setBody(mapper.writeValueAsString(app));
 		context.clearIdentity();
 		
-		controller.PostApplications(new ByteArrayInputStream(request.getContent()), out, context);
+		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 401);
 	}
 	
 	@Test
-	public void getNonexistingTask() throws InternalServerErrorException, IOException{
+	public void getNonexistingTask() throws InternalServerErrorException, IOException, UnauthorizedException, DALException{
 		
 		createApplication();
 		RequestDataMock request = new RequestDataMock();
 		request.addPath("taskID", "2");
-		controller.GetApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		try {
+			controller.getApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		} catch (UnauthorizedException e) {
+			e.printStackTrace();
+		} catch (DALException e) {
+			e.printStackTrace();
+		}
 		ResponseData response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 404);
+		assertEquals(403, response.getResponseCode());
 	}
 	
 	@Test
-	public void deleteApplication()  throws InternalServerErrorException, IOException{
-		createApplication();
+	public void deleteApplication()  throws InternalServerErrorException, IOException, UnauthorizedException, DALException{
+		Application app = generateTestData();
+		
+		app.setApplierId("Boris");
+		context.setIdentity("Boris");
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("taskID", "5");
-		controller.deleteApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		request.addPath("taskID", Integer.toString(0));
+		request.setBody(mapper.writeValueAsString(app));
+		System.out.println(new String(request.getContent()));
+
+		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 200);
+		assertEquals(200, response.getResponseCode());
+		
+		controller.deleteApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
+		assertEquals(200, response.getResponseCode());
 		
 		out.reset();
-		controller.GetApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		try {
+			controller.getApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		} catch (UnauthorizedException e) {
+			e.printStackTrace();
+		} catch (DALException e) {
+			e.printStackTrace();
+		}
 		response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 404);
+		assertEquals(403, response.getResponseCode());
 	}
 
 	@Test
-	public void deleteApplicaitonCheckPermissions()  throws InternalServerErrorException, IOException{
-		createApplication();
+	public void deleteApplicaitonCheckPermissions()  throws InternalServerErrorException, IOException, UnauthorizedException, DALException{
+		Application app = generateTestData();
+		
+		app.setApplierId("Boris");
+		context.setIdentity("Boris");
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("taskID", "5");
-		context.setIdentity("Tims");
-		controller.deleteApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		request.addPath("taskID", Integer.toString(0));
+		request.setBody(mapper.writeValueAsString(app));
+		System.out.println(new String(request.getContent()));
+
+		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 403);
+		assertEquals(200, response.getResponseCode());
+		out.reset();
+		
+		context.setIdentity("Tims");
+		request.addPath("applierID", "Boris");
+		controller.deleteApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
+		assertEquals(403, response.getResponseCode());
 	}
 
 	@Test
@@ -148,29 +188,46 @@ public class ApplicationControllerTest {
 	}
 	
 	@Test
-	public void updateApplicationIgnoreIDField()   throws InternalServerErrorException, IOException{
-		createApplication();
+	public void updateApplicationIgnoreIDField()   throws InternalServerErrorException, IOException, UnauthorizedException, DALException{
+		Application app = generateTestData();
+		
+		app.setApplierId("Boris");
+		context.setIdentity("Boris");
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("taskID", "5");
-		Application newData = generateTestData();
-		newData.setApplierId("CUNT!");
-		newData.setTaskId(99);
-		newData.setApplicationMessage("Meh");
-		request.setBody(mapper.writeValueAsString(newData));
-		controller.updateApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		request.addPath("taskID", Integer.toString(0));
+		request.addPath("applierID", "Boris");
+		request.setBody(mapper.writeValueAsString(app));
+		System.out.println(new String(request.getContent()));
+
+		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
+		assertEquals(200, response.getResponseCode());
+		out.reset();
+		app.setApplierId("CUNT!");
+		app.setTaskId(99);
+		app.setApplicationMessage("Meh");
+		request.setBody(mapper.writeValueAsString(app));
+		controller.updateApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
 		assertEquals(200, response.getResponseCode());
 		
 		out.reset();
 		request.setBody("");
 		
-		controller.GetApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		try {
+			controller.getApplication(new ByteArrayInputStream(request.getContent()), out, context);
+		} catch (UnauthorizedException e) {
+			e.printStackTrace();
+		} catch (DALException e) {
+			e.printStackTrace();
+		}
 		response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 200);
+		assertEquals(200, response.getResponseCode());
+		response.getBody("Application", Application.class);
 		Application newApp = response.getBody("Application", Application.class);
-		assertEquals(newApp.getApplierId(), newData.getApplierId());
-		assertEquals(newApp.getApplicationMessage(), newData.getApplicationMessage());
-		assertEquals(newApp.getTaskId(), newData.getTaskId());
+		assertEquals("Boris", newApp.getApplierId());
+		assertEquals("Meh", newApp.getApplicationMessage());
+		assertEquals(0, newApp.getTaskId());
 	}
 	
 	@Test
@@ -185,7 +242,7 @@ public class ApplicationControllerTest {
 	}
 	
 	@Test
-	public void updateWrongPermissionsTask()   throws InternalServerErrorException, IOException{
+	public void updateWrongPermissionsTask()   throws InternalServerErrorException, IOException, UnauthorizedException, DALException{
 		createApplication();
 		
 		context.setIdentity("Tim");
@@ -210,5 +267,49 @@ public class ApplicationControllerTest {
 		assertEquals(response.getResponseCode(), 401);
 	}
 	
+	@Test
+	public void seeApplicationListWithoutPermission() throws InternalServerErrorException, IOException, UnauthorizedException, DALException {
+		Application app = generateTestData();
+		Application app1 = generateTestData();
+		
+		app.setApplierId("Boris");
+		app1.setApplierId("Tim");
+		context.setIdentity("Boris");
+		RequestDataMock request = new RequestDataMock();
+		RequestDataMock re = new RequestDataMock();
+		request.addPath("taskID", Integer.toString(0));
+		request.addPath("applierID", "Boris");
+		request.setBody(mapper.writeValueAsString(app));
+		System.out.println(new String(request.getContent()));
+
+		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(200, response.getResponseCode());
+		out.reset();
+		context.setIdentity("Tim");
+		re.addPath("taskID", Integer.toString(0));
+		re.addPath("applierID", "Tim");
+		re.setBody(mapper.writeValueAsString(app1));
+		System.out.println(new String(re.getContent()));
+		
+		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
+		assertEquals(200, response.getResponseCode());
+		out.reset();
+		
+		context.setIdentity("Ib");
+		controller.getApplicants(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
+		ArrayList<String> sl = new ArrayList<String>();
+		sl.add("Boris");
+		sl.add("Tim");
+		assertEquals(sl, response.getBody("applicants", ArrayList.class));
+		out.reset();
+		context.setIdentity("Hacker");
+		controller.getApplicants(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
+		assertEquals(401, response.getResponseCode());
+		out.reset();
+	}
 
 }

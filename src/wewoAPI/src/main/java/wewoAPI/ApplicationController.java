@@ -1,6 +1,7 @@
 package wewoAPI;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 import javax.print.attribute.standard.Finishings;
 
@@ -17,16 +18,19 @@ import DatabaseController.DALException;
 import DatabaseController.MySQLApplicationRepository;
 import DatabaseController.MySQLTaskRepository;
 import DatabaseController.TaskDTO;
+import DatabaseController.TaskRespository;
 import wewoAPI.ControllerBase;
 
 public class ApplicationController extends ControllerBase{
 	
-	ApplicationRepository repository;	
+	ApplicationRepository repository;
+	TaskRespository taskRepository;
 	
 	public ApplicationController() throws InternalServerErrorException
 	{
 		try {
-			repository = new MySQLApplicationRepository(); 
+			repository = new MySQLApplicationRepository();
+			taskRepository = new MySQLTaskRepository();
 		} catch(DALException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException("Failed to connect to database");
@@ -34,38 +38,62 @@ public class ApplicationController extends ControllerBase{
 	
 	}
 	
-	public ApplicationController(ApplicationRepository repository)
+	public ApplicationController(ApplicationRepository repository, TaskRespository taskRep)
 	{
 		this.repository = repository;
+		this.taskRepository = taskRep;
 	}
 		
-	public JsonList<String> GetApplicants(IDObject taskid, Context context) throws UnauthorizedException, DALException
+	public void getApplicants(InputStream in, OutputStream out, Context context) throws UnauthorizedException, DALException, InternalServerErrorException
 	{
-		MySQLTaskRepository tas = new MySQLTaskRepository();
-		MySQLApplicationRepository app = new MySQLApplicationRepository();
 		
-		verifyLogin(context);
+		if(!verifyLogin(context)){
+			raiseError(out, 401, "Not logged in");
+			return;
+		}
+		StartRequest(in);
+		String taskStr = request.getPath("taskID");
+		int taskid;
+		String applierID;
+			try{
+				taskid = Integer.parseInt(taskStr);
+				applierID = request.getPath("applierID");
+			}catch(NumberFormatException e){
+				raiseError(out, 400, "Invalid taskID or applierID specified");					
+				return;
+			}
+				
 		try {
-			if(tas.getTask(taskid.getID()).getCreatorId() != context.getIdentity().getIdentityId()){
-				throw new UnauthorizedException("Du har ikke adgang til dette.");
+			TaskDTO task = taskRepository.getTask(taskid);
+			if(task == null){
+				raiseError(out, 400, "Task does not exists");
+				return;
+			}
+			if(!task.getCreatorId().equals(context.getIdentity().getIdentityId())){
+				raiseError(out, 401, "Du har ikke adgang til dette.");
+				return;
+			}
+			else{
+				try {
+					List<String> applicants = repository.getApplicationList(taskid);
+					response.addResponseObject("applicants", applicants);
+					response.setStatusCode(200);
+					FinishRequest(out);
+					return;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			
 		} catch (DALException e1) {
 			e1.printStackTrace();
 		}
-		try {
-			JsonList<String> applications = new JsonList<String>();
-			applications.setElements(app.getApplicationList(taskid.getID()));
-			return applications;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+		return;
 		
 		
 	}
 	
-	public void PostApplications(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
+	public void createApplications(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
 		
 		try{
@@ -114,7 +142,7 @@ public class ApplicationController extends ControllerBase{
 		}		
 	}
 	
-	public void GetApplication(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
+	public void getApplication(InputStream in, OutputStream out, Context context) throws InternalServerErrorException, UnauthorizedException, DALException
 	{
 		
 		try {
@@ -122,26 +150,43 @@ public class ApplicationController extends ControllerBase{
 			
 			String applierID;
 			int taskID;
+			if(!verifyLogin(context)){
+				raiseError(out, 401, "Not logged in");
+				return;
+			}
 			try{
 				taskID = Integer.parseInt(request.getPath("taskID"));
 				applierID = request.getPath("applierID");			
 			}
 			catch(NumberFormatException neg){
-				raiseError(out, 400, "No ApplierID specified on path");
+				raiseError(out, 400, "");
 				return;
 			}
 			ApplicationDTO dto;
 			dto = repository.getApplication(applierID, taskID);
 			if(dto==null)
 			{
-				raiseError(out, 404, "No application was found using ID " + applierID);
+				raiseError(out, 403, "Application does not exist.");
 				return;
 			}
-			
-			Application app = dto.getModel();
-			response.addResponseObject("Application", app);
-			response.setStatusCode(200);
-			FinishRequest(out);
+			try{
+				TaskDTO task = taskRepository.getTask(taskID);
+				if(task == null){
+					raiseError(out, 400, "Task does not exists");
+					return;
+				}
+				if(!task.getCreatorId().equals(context.getIdentity().getIdentityId()) && !applierID.equals(context.getIdentity().getIdentityId())){
+					raiseError(out, 401, "Du har ikke adgang til dette.");
+					return;
+				}
+				Application app = dto.getModel();
+				response.addResponseObject("Application", app);
+				response.setStatusCode(200);
+				FinishRequest(out);
+			}
+			catch(Exception e){
+				e.printStackTrace();
+			}
 		}catch (DALException e) {
 			raiseError(out, 503, "Database unavailable");
 			return;
@@ -170,6 +215,7 @@ public class ApplicationController extends ControllerBase{
 				return;
 			}
 			app.setApplierId(context.getIdentity().getIdentityId());
+			app.setTaskId(taskID);
 			ApplicationDTO dto = repository.getApplication(applierID, taskID);
 	
 			if(dto == null)
@@ -179,10 +225,20 @@ public class ApplicationController extends ControllerBase{
 			}
 			if(dto.getApplierid().equals(context.getIdentity().getIdentityId())){
 				dto = ApplicationDTO.fromModel(app);
-				repository.updateApplication(dto);
-				response.setStatusCode(200);
-				FinishRequest(out);
-				return;
+				if(dto.getApplierid().equals(app.getApplierId()) && dto.getTaskid() == app.getTaskId()){
+					repository.updateApplication(dto);
+					response.setStatusCode(200);
+					FinishRequest(out);
+					return;
+				} else{
+					dto.setApplicationMessage(app.getApplicationMessage());
+					dto.setApplierid(applierID);
+					dto.setTaskid(taskID);
+					repository.updateApplication(dto);
+					response.setStatusCode(200);
+					FinishRequest(out);
+					return;
+				}
 			}
 			else
 			{
