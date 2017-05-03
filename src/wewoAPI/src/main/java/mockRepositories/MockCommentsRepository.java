@@ -32,8 +32,6 @@ public MockCommentsRepository(){
 
 	public CommentDTO getComment(int taskId, int commentId) throws DALException {
 		try{
-			System.out.println(database.toString());
-			System.out.println(taskId + " " + commentId);
 			return database.get(taskId).get(commentId);
 		}
 		catch(IndexOutOfBoundsException e){
@@ -42,7 +40,12 @@ public MockCommentsRepository(){
 	}
 
 	public List<CommentDTO> getCommentList(int taskId) throws DALException {
-		return new ArrayList<CommentDTO>(database.get(taskId));
+		if(database.size() < taskId){
+			return database.get(taskId);
+		}
+		else{
+			return null;
+		}
 	}
 
 	public int createComment(CommentDTO com) throws DALException {
