@@ -77,23 +77,16 @@ CREATE TABLE Phone
  
 CREATE TABLE UserRatings
 (
+	RatingID INTEGER(32) NOT NULL AUTO_INCREMENT,
 	rating INTEGER(1) NOT NULL, 
     raterID VARCHAR(50) NOT NULL,
     rateeID VARCHAR(50) NOT NULL,
     description VARCHAR(256),
+	primary key(RatingID),
     foreign key(raterID) REFERENCES Users(userID),
     foreign key(rateeID) REFERENCES Users(userID)
 );
 
-CREATE TABLE UserRatingMapper
- (
-	RatingID INTEGER NOT NULL AUTO_INCREMENT,
-    raterID VARCHAR(50) NOT NULL,
-    rateeID VARCHAR(50) NOT NULL,
-    primary key(RatingID),
-    foreign key(raterID) REFERENCES UserRatings(raterID),
-    foreign key(rateeID) REFERENCES UserRatings(raterID)
- );
 CREATE TABLE UserFlags
 (
 	ID INTEGER(3) PRIMARY KEY NOT NULL,
@@ -207,7 +200,7 @@ INSERT INTO `RejectReasons` (`ID`,`reason`) VALUES (2,'No');
 INSERT INTO `RejectReasons` (`ID`,`reason`) VALUES (3,'Yes');
 INSERT INTO `Appliers` (`TaskID`,`ApplierID`,`applierMessage`,`status`,`reason`) VALUES (1,'2','come at me bro','Applied',3);
 INSERT INTO `Appliers` (`TaskID`,`ApplierID`,`applierMessage`,`status`,`reason`) VALUES (2,'1','get rekt m8','Rejected',2);
-INSERT INTO `Appliers` (`TaskID`,`ApplierID`,`applierMessage`,`status`,`reason`) VALUES (3,'1','???','Accepted',1);
+INSERT INTO `Appliers` (`TaskID`,`ApplierID`,`applierMessage`,`status`,`reason`) VALUES (2,'1','???','Accepted',1);
 INSERT INTO `TaskFlags` (`flagID`,`description`) VALUES (2,'ITS A TRAP');
 INSERT INTO `TaskFlags` (`flagID`,`description`) VALUES (1,'This task sux');
 INSERT INTO `TaskFlags` (`flagID`,`description`) VALUES (3,'TOO EZ');
@@ -218,9 +211,6 @@ INSERT INTO `Compentencies` (`userID`) VALUES ('2');
 INSERT INTO `UserRatings` (`rating`,`raterID`,`rateeID`,`description`) VALUES (10,'1','2','10/10 would do again');
 INSERT INTO `UserRatings` (`rating`,`raterID`,`rateeID`,`description`) VALUES (0,'3','2','0/10 the common cold sux');
 INSERT INTO `UserRatings` (`rating`,`raterID`,`rateeID`,`description`) VALUES (5,'1','4','What does this button do?');
-INSERT INTO `UserRatingMapper` (`RatingID`,`raterID`,`rateeID`) VALUES (1,'1','2');
-INSERT INTO `UserRatingMapper` (`RatingID`,`raterID`,`rateeID`) VALUES (2,'3','2');
-INSERT INTO `UserRatingMapper` (`RatingID`,`raterID`,`rateeID`) VALUES (3,'1','4');
 INSERT INTO `UserFlags` (`ID`,`description`) VALUES (1,'I am flag, yes');
 INSERT INTO `UserFlags` (`ID`,`description`) VALUES (2,'Fliggity flaggity, you are a faggotty');
 INSERT INTO `UserFlaggings` (`userID`,`flaggerID`,`description`,`flagID`) VALUES ('1','2','I AM REPORTING YOU TO THEADMINS',1);
