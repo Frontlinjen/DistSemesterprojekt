@@ -8,15 +8,18 @@ import java.util.List;
 
 public class MySQLApplicationRepository implements ApplicationRepository{
 
-	private final String GET_APPLICATION = "SELECT * FROM Application WHERE TaskID = '?', ApplierID = '?';";
-	private final String CREATE_APPLICATION = "INSERT INTO Application(TaskID, ApplierID, appliermessage) VALUES (?, ?, ?);";
-	private final String UPDATE_APPLICATION = "UPDATE Application SET  TaskID = '?', ApplierID =  '?', appliermessage = '?';";
+	private final String GET_APPLICATION = "SELECT * FROM Appliers WHERE TaskID = ? AND ApplierID = ?;";
+	private final String CREATE_APPLICATION = "INSERT INTO Appliers(TaskID, ApplierID, appliermessage) VALUES (?, ?, ?);";
+	private final String UPDATE_APPLICATION = "UPDATE Appliers SET  TaskID = ?, ApplierID =  ?, appliermessage = ?;";
+	private final String GET_APPLICATION_LIST = "SELECT * FROM Appliers WHERE TaskID = ?;";
+	private final String DELETE_APPLICATION = "DELETE FROM Application WHERE TaskID = ? AND ApplierID = ?;";
 	
 	public MySQLApplicationRepository() throws DALException{
 		DatabaseConnector.RegisterStatement("GET_APPLICATION", GET_APPLICATION);
 		DatabaseConnector.RegisterStatement("CREATE_APPLICATION", CREATE_APPLICATION);
 		DatabaseConnector.RegisterStatement("UPDATE_APPLICATION", UPDATE_APPLICATION);
-		
+		DatabaseConnector.RegisterStatement("GET_APPLICATION_LIST", GET_APPLICATION_LIST);
+		DatabaseConnector.RegisterStatement("DELETE_APPLICATION", DELETE_APPLICATION);
 	}
 	
 	public ApplicationDTO getApplication(String applierID, int taskID) throws DALException {
@@ -24,12 +27,12 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 		try {
 			statement = DatabaseConnector.getPreparedStatement("GET_APPLICATION");
 			statement.setInt(1, taskID);
-			statement.setString(1, applierID);
+			statement.setString(2, applierID);
 
 			ResultSet rs = statement.executeQuery();
 
 			if (!rs.first()) 
-				throw new DALException("Application med applierid " + applierID + " findes ikke");
+				return null;
 			
 			return generate(rs);
 			
@@ -37,16 +40,17 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 		catch (SQLException e) {throw new DALException(e); }
 	}
 
-	public List<String> getApplicationList(int i) throws DALException {
+	public List<String> getApplicationList(int taskID) throws DALException {
 		List<String> list = new ArrayList<String>();
-		ResultSet rs = DatabaseConnector.doQuery("SELECT * FROM Application WHERE TaskID = " +i+ ";");
+		PreparedStatement statement;
 		try
 		{
-			ApplicationDTO dto = new ApplicationDTO();
-			String stringList = dto.applierID;
+			statement = DatabaseConnector.getPreparedStatement("GET_APPLICATION_LIST");
+			statement.setInt(1,  taskID);
+			ResultSet rs = statement.executeQuery();
 			while (rs.next()) 
 			{
-					list.add(stringList);
+				list.add(generate(rs).getApplierid());
 			}
 		} 
 		catch (SQLException e) { throw new DALException(e.getMessage()); }
@@ -61,11 +65,6 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 			statement.setString(3, app.applicationMessage);
 			
 			int res = statement.executeUpdate();
-
-			ResultSet rs = DatabaseConnector.doQuery("SELECT LAST_INSERT_ID();");
-			rs.first();
-			int ID = rs.getInt("last_insert_id()");
-			app.taskid = ID;
 			return res;
 			
 		} catch (SQLException e) {
@@ -91,7 +90,17 @@ public class MySQLApplicationRepository implements ApplicationRepository{
 	}
 
 	public int deleteApplication(String applierID, int taskID) throws DALException {
-		return DatabaseConnector.doUpdate("DELETE FROM Application WHERE ApplierID = '" + applierID + "' AND TaskID = " + taskID + ";");
+		try{
+			PreparedStatement statement = DatabaseConnector.getPreparedStatement("DELETE_APPLICATION");
+			statement.setInt(1, taskID);
+			statement.setString(2, applierID);
+			return statement.executeUpdate();
+		
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+		}
+		return 0;
 	}
 	
 	public ApplicationDTO generate(ResultSet rs) throws SQLException

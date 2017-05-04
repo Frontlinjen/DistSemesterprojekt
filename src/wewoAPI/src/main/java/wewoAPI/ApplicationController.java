@@ -54,10 +54,8 @@ public class ApplicationController extends ControllerBase{
 		StartRequest(in);
 		String taskStr = request.getPath("taskID");
 		int taskid;
-		String applierID;
 			try{
 				taskid = Integer.parseInt(taskStr);
-				applierID = request.getPath("applierID");
 			}catch(NumberFormatException e){
 				raiseError(out, 400, "Invalid taskID or applierID specified");					
 				return;
@@ -216,7 +214,7 @@ public class ApplicationController extends ControllerBase{
 			}
 			app.setApplierId(context.getIdentity().getIdentityId());
 			app.setTaskId(taskID);
-			ApplicationDTO dto = repository.getApplication(applierID, taskID);
+			ApplicationDTO dto = repository.getApplication(context.getIdentity().getIdentityId(), taskID);
 	
 			if(dto == null)
 			{
