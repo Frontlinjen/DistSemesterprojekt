@@ -53,7 +53,7 @@ public class TaskController extends ControllerBase{
 			StartRequest(in);
 			Task task = request.getObject(Task.class);
 			if(task == null){
-				raiseError(out, 400, "Invalid Task Object");
+				raiseError(out, 400, "Invalid Task Object\n Got: " + request.getObject(String.class));
 				return;
 			}
 			TaskDTO dto = TaskDTO.fromModel(task);
