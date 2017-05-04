@@ -34,12 +34,7 @@ public class ApplicationControllerTest {
 	int dataCounter = 0;
 	@Before
 	public void setUp() throws Exception {
-		//MockTaskRepository taskRepo = new MockTaskRepository();
-		//TaskDTO taskdto = TaskDTO.fromModel(TaskControllerTest.generateTestData());
-		//taskdto.setCreatorId("Ib");
-		//taskRepo.createTask(taskdto);
 		controller = new ApplicationController();
-		//controller = new ApplicationController(new MockApplicationRepository(), taskRepo);
 		context = new ContextTest("Boris");
 		con = new ContextTest("Tim");
 		c = new ContextTest("Ib");

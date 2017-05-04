@@ -1,8 +1,7 @@
 package DatabaseController;
 
-import java.util.List;
+import java.util.HashMap;
 
 public interface TagsRepository {
-	List<TagsDTO> getTags() throws DALException;
-
+	HashMap<String, Integer> getTags() throws DALException;
 }

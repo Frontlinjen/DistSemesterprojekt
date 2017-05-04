@@ -1,17 +1,15 @@
 package mockRepositories;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import DatabaseController.DALException;
-import DatabaseController.TagsDTO;
 import DatabaseController.TagsRepository;
 
 
 public class MockTagsRepository implements TagsRepository {
-	private List<TagsDTO> database = new ArrayList<TagsDTO>();	
+	private HashMap<String, Integer> database = new HashMap<String, Integer>();	
 
-	public List<TagsDTO> getTags() throws DALException {
+	public HashMap<String, Integer> getTags() throws DALException {
 		return database;
 	}
 }
