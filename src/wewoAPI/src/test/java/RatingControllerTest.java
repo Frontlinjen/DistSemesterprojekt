@@ -45,7 +45,7 @@ public class RatingControllerTest {
 	public void createRating() throws InternalServerErrorException, IOException{
 		Rating rate = generateTestData();
 		
-		
+		context.setIdentity(null);
 		RequestDataMock request = new RequestDataMock();
 		request.setBody(mapper.writeValueAsString(rate));
 		request.addPath("rateeID", "rateeIDTest");

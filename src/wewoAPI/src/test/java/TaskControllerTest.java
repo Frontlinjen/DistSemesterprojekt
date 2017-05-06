@@ -98,6 +98,15 @@ public class TaskControllerTest {
 		out.reset();
 	}
 	
+	
+	@Test
+	public void createTaskNoBody()  throws InternalServerErrorException, IOException {
+		RequestDataMock request = new RequestDataMock();
+		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 400);
+		System.out.println(response.getBody());
+	}
 	@Test
 	public void createTaskNonExistingAddress() throws InternalServerErrorException, IOException {
 		Task task = generateTestData();
