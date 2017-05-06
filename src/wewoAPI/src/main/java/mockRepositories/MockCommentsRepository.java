@@ -39,22 +39,22 @@ public MockCommentsRepository(){
 		}
 	}
 
-	public List<CommentDTO> getCommentList(int taskId) throws DALException {
-		if(database.size() < taskId){
-			return database.get(taskId);
-		}
-		else{
+	public HashMap<String, String> getCommentList(int taskId) throws DALException {
+		//if(database.size() < taskId){
+		//	return database.get(taskId);
+		//}
+		//else{
 			return null;
-		}
+		//}
 	}
 
 	public int createComment(CommentDTO com) throws DALException {
-		database.get(com.getTaskID()).add(com.getID(),com);
+		database.get(com.getTaskID()).add(com.getCommentID(),com);
 		return database.size() - 1;
 	}
 
 	public int updateComment(CommentDTO com) throws DALException {
-		database.get(com.getTaskID()).set(com.getID(),com);
+		database.get(com.getTaskID()).set(com.getCommentID(),com);
 		return 1;
 	}
 

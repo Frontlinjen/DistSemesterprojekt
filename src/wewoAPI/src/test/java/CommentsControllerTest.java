@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import DatabaseController.MySQLCommentRepository;
 import exceptions.InternalServerErrorException;
 import mockRepositories.MockCommentsRepository;
 import modelPOJO.Comment;
@@ -24,8 +25,8 @@ public class CommentsControllerTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		controller = new CommentsController(new MockCommentsRepository());
-		context = new ContextTest("Jeiner");
+		controller = new CommentsController(new MySQLCommentRepository());
+		context = new ContextTest("Boris");
 		mapper = new ObjectMapper();
 		out = new ByteArrayOutputStream();
 	}
@@ -33,8 +34,7 @@ public class CommentsControllerTest {
 	private Comment generateTestData()
 	{
 		Comment comment = new Comment();
-		comment.setText("test");
-		comment.setDate(new Date(1));
+		comment.setMessage("test");
 		return comment;
 	}
 	
@@ -42,34 +42,29 @@ public class CommentsControllerTest {
 	public void createComment() throws InternalServerErrorException, IOException {
 		Comment comment = generateTestData();
 
-		comment.setID(0);
-		comment.setTaskID(5);
-		comment.setOwner("Bøllemis");
-
 		RequestDataMock request = new RequestDataMock();
+		request.addPath("TaskID", Integer.toString(1));
+		request.addPath("CommentID", Integer.toString(6));
 		request.setBody(mapper.writeValueAsString(comment));
-		request.addPath("taskID", "5");
-		request.addPath("commentID", "0");
+		System.out.println(new String(request.getContent()));
+		
 		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		Integer commentID = response.getBody("CommentID", Integer.class);
-	//	Integer taskID = response.getBody("taskID", Integer.class);
-		assertNotNull(commentID);
 		assertEquals(200, response.getResponseCode());
-		assertTrue(commentID >= 0);
-
-		Comment newComment;
+		Comment newCom;
 		out.reset();
-		request.addPath("commentID", commentID.toString());
-		request.addPath("taskID", Integer.toString(5));
+	//	Integer taskID = response.getBody("taskID", Integer.class);
+		request.addPath("TaskID", "1");
+		request.addPath("CommentID", "6");
+
 		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
 		response = new ResponseData(out);
 		assertEquals(200, response.getResponseCode());
 
-		newComment = response.getBody("Comment", Comment.class);
-		assertNotNull(newComment);
-		//System.out.println(newComment.getOwner() + " " + context.getIdentity().getIdentityId());
-		assertEquals(newComment.getOwner(), context.getIdentity().getIdentityId());
+		newCom = response.getBody("Comment", Comment.class);
+		assertNotNull(newCom);
+		assertEquals(comment.getMessage(), newCom.getMessage());
+		assertEquals(comment.getCommenter(), newCom.getCommenter());
 		out.reset();
 	}
 	
@@ -78,8 +73,7 @@ public class CommentsControllerTest {
 		Comment comment = generateTestData();
 		RequestDataMock request = new RequestDataMock();
 		request.setBody(mapper.writeValueAsString(comment));
-		request.addPath("taskID", "5");
-		request.addPath("commentID", "0");
+		request.addPath("TaskID", "1");
 		context.setIdentity("");
 		
 		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
@@ -93,8 +87,7 @@ public class CommentsControllerTest {
 		context.clearIdentity();
 		RequestDataMock request = new RequestDataMock();
 		request.setBody(mapper.writeValueAsString(comment));
-		request.addPath("taskID", "5");
-		request.addPath("commentID", "0");
+		request.addPath("TaskID", "1");
 		context.clearIdentity();
 		
 		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
@@ -106,8 +99,8 @@ public class CommentsControllerTest {
 	public void getNonexistingComment() throws InternalServerErrorException, IOException{
 		createComment();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("commentID", Integer.toString(9001));
-		request.addPath("taskID", "5");
+		request.addPath("CommentID", Integer.toString(9001));
+		request.addPath("TaskID", "1");
 		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 404);
@@ -115,13 +108,14 @@ public class CommentsControllerTest {
 	
 	@Test
 	public void deleteComment()  throws InternalServerErrorException, IOException{
+		
 		createComment();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("commentID", "0");
-		request.addPath("taskID", "5");
+		request.addPath("CommentID", "0");
+		request.addPath("TaskID", "1");
 		controller.deleteComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 200);
+		assertEquals(200, response.getResponseCode());
 		
 		out.reset();
 		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
@@ -133,8 +127,8 @@ public class CommentsControllerTest {
 	public void deleteCommentCheckPermissions()  throws InternalServerErrorException, IOException{
 		createComment();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("commentID", "0");
-		request.addPath("taskID", "5");
+		request.addPath("CommentID", "0");
+		request.addPath("TaskID", "1");
 		context.setIdentity("Jeiner22");
 		controller.deleteComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
@@ -144,8 +138,8 @@ public class CommentsControllerTest {
 	@Test
 	public void deleteNonexistingComment()   throws InternalServerErrorException, IOException{
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("commentID", "912038");
-		request.addPath("taskID", "5");
+		request.addPath("CommentID", "912038");
+		request.addPath("TaskID", "5");
 		controller.deleteComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(404, response.getResponseCode());
@@ -154,8 +148,8 @@ public class CommentsControllerTest {
 	@Test
 	public void updateNonExistingComment()   throws InternalServerErrorException, IOException{
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("commentID", "9000");
-		request.addPath("taskID", "5");
+		request.addPath("CommentID", "9000");
+		request.addPath("TaskID", "5");
 		Comment newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
@@ -169,8 +163,8 @@ public class CommentsControllerTest {
 		RequestDataMock request = new RequestDataMock();
 		Comment newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
-		request.addPath("commentID", "0");
-		request.addPath("taskID", "5");
+		request.addPath("CommentID", "0");
+		request.addPath("TaskID", "1");
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(200, response.getResponseCode());
@@ -178,12 +172,10 @@ public class CommentsControllerTest {
 	
 	@Test
 	public void updateWrongPermissionsComment()   throws InternalServerErrorException, IOException{
-		createComment();
-		
 		context.setIdentity("Alice");
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("commentID", "0");
-		request.addPath("taskID", "5");
+		request.addPath("CommentID", "1");
+		request.addPath("TaskID", "3");
 		Comment newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
@@ -195,8 +187,8 @@ public class CommentsControllerTest {
 	public void updateNoPermissionsComment()    throws InternalServerErrorException, IOException{
 		context.clearIdentity();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("commentID", "0");
-		request.addPath("taskID", "5");
+		request.addPath("CommentID", "0");
+		request.addPath("TaskID", "1");
 		Comment newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
