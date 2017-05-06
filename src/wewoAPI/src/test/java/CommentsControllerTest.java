@@ -44,7 +44,7 @@ public class CommentsControllerTest {
 
 		comment.setID(0);
 		comment.setTaskID(5);
-		comment.setOwner("Bøllemis");
+		comment.setOwner("Bï¿½llemis");
 
 		RequestDataMock request = new RequestDataMock();
 		request.setBody(mapper.writeValueAsString(comment));

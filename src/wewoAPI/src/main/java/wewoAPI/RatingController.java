@@ -30,6 +30,7 @@ public class RatingController extends ControllerBase{
 	public void createRating(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
 		try{
+			context.getIdentity().getIdentityId();
 			if(!verifyLogin(context)){
 				raiseError(out, 401, "Not logged in");
 				return;
@@ -71,7 +72,12 @@ public class RatingController extends ControllerBase{
 
 	public void getRating(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
+		
 		try{
+			if(!verifyLogin(context)){
+				raiseError(out, 401, "Not logged in");
+				return;
+			}
 			StartRequest(in);
 			Rating rate = request.getObject(Rating.class);
 			String raterID = request.getPath("raterID");
