@@ -94,13 +94,10 @@ public class ControllerBase {
 			@JsonProperty("queryStringParameters")
 			public Map<String, String> queryString = new HashMap<String, String>();
 			public Map<String, String> pathParameters = new HashMap<String, String>();
-			/*public void setBody(String content) throws JsonProcessingException, IOException{
+			void setBody(String content) throws JsonProcessingException, IOException{
 				ObjectMapper mapper = new ObjectMapper();
 				if(content != null && !content.isEmpty())
 					body = (ObjectNode)mapper.readTree(content);
-			}*/
-			public void setBody(ObjectNode node){
-				body = node;
 			}
 			public ObjectNode body;
 		}

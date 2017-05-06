@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,12 +15,12 @@ public class RequestDataMock {
 		@JsonProperty("queryStringParameters")
 		public Map<String, String> queryString = new HashMap<String, String>();
 		public Map<String, String> pathParameters = new HashMap<String, String>();			
-		public ObjectNode body;
+		public String body;
 	}
 	
 	
-	public void setBody(String content) throws IOException{
-		data.body = (ObjectNode) mapper.readTree(content);
+	public void setBody(String content){
+		data.body = content;
 	}
 	
 	public void addHeader(String name, String value){
