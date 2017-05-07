@@ -9,11 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MySQLCommentRepository implements CommentRepository{
-	private final String GET_COMMENT = "SELECT * FROM Comments WHERE TaskID = ? AND CommentId = ?;";
+	private final String GET_COMMENT = "SELECT * FROM Comments WHERE TaskID = ? AND CommentID = ?;";
 	private final String GET_COMMENT_LIST = "SELECT * FROM Comments WHERE TaskID = ?;";
-	private final String DELETE_COMMENT = "DELETE * FROM Comments WHERE TaskID = ? AND CommentId = ?;";
+	private final String DELETE_COMMENT = "DELETE FROM Comments WHERE TaskID = ? AND CommentID = ?;";
 	private final String CREATE_COMMENT = "INSERT INTO Comments(CommentID, TaskID, Commenter, message, submitDate) VALUES (?, ?, ?, ?, CURDATE());";
-	private final String UPDATE_COMMENT = "UPDATE Comments SET  CommentID = ?, TaskID =  ?, Commenter = ?, message = ?, submitDate = CURDATE() WHERE TaskID = ? AND CommentID = ?;";
+	private final String UPDATE_COMMENT = "UPDATE Comments SET message = ?, submitDate = CURDATE() WHERE TaskID = ? AND CommentID = ?;";
 	
 	public MySQLCommentRepository() throws DALException{
 		DatabaseConnector.RegisterStatement("GET_COMMENT", GET_COMMENT);
@@ -24,18 +24,18 @@ public class MySQLCommentRepository implements CommentRepository{
 	}
 	
 	
-	public CommentDTO getComment(int taskId, int commentId) throws DALException {
+	public CommentDTO getComment(int taskID, int commentID) throws DALException {
 		PreparedStatement statement;
 		try {
 			statement = DatabaseConnector.getPreparedStatement("GET_COMMENT");
-			statement.setInt(1, taskId);
-			statement.setInt(2, commentId);
+			statement.setInt(1, taskID);
+			statement.setInt(2, commentID);
 
 			ResultSet rs = statement.executeQuery();
 
-			if (!rs.first()) 
-				throw new DALException("Task med id " + taskId + " har ikke en kommentar med id " + commentId);
-			
+			if (!rs.first()) {
+				return null;
+			}
 			return generate(rs);
 			
 		}
@@ -61,6 +61,7 @@ public class MySQLCommentRepository implements CommentRepository{
 	//(commentId, taskId, ownerId, text, date)
 	public int createComment(CommentDTO com) throws DALException {
 		try {
+			//"INSERT INTO Comments(CommentID, TaskID, Commenter, message, submitDate) VALUES (?, ?, ?, ?, CURDATE());";
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("CREATE_COMMENT");
 			statement.setInt(1, com.getCommentID());
 			statement.setInt(2, com.getTaskID());
@@ -81,11 +82,9 @@ public class MySQLCommentRepository implements CommentRepository{
 	public int updateComment(CommentDTO com) throws DALException {
 		try{
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("UPDATE_COMMENT");
-			statement.setInt(1, com.getCommentID());
-			statement.setInt(1, com.getTaskID());
-			statement.setString(1, com.getCommenter());
 			statement.setString(1, com.getMessage());
-			statement.setDate(1, com.getSubmitDate());
+			statement.setInt(2, com.getCommentID());
+			statement.setInt(3, com.getTaskID());
 			return statement.executeUpdate();
 		}
 		catch(SQLException e){

@@ -60,17 +60,15 @@ public class CommentsController extends ControllerBase{
 			}
 			
 			StartRequest(in);
-			
-			String taskStr = request.getPath("TaskID");
-			if(taskStr == null || taskStr.isEmpty()){
-				raiseError(out, 400, "No taskID specified");
-				return;
-			}
-			int taskId;
+			int taskID;
 			try{
-				taskId = Integer.parseInt(taskStr);
+				taskID = Integer.parseInt(request.getPath("TaskID"));
 			}catch(NumberFormatException e){
 				raiseError(out, 400, "Invalid taskID specified");
+				return;
+			}
+			if(taskID < 0){
+				raiseError(out, 400, "No taskID specified");
 				return;
 			}
 			Comment com = request.getObject(Comment.class);
@@ -79,7 +77,7 @@ public class CommentsController extends ControllerBase{
 				return;
 			}
 			CommentDTO dto = CommentDTO.fromModel(com);
-			dto.setTaskID(taskId);
+			dto.setTaskID(taskID);
 			dto.setCommenter(context.getIdentity().getIdentityId());
 			
 			try {
@@ -88,7 +86,7 @@ public class CommentsController extends ControllerBase{
 				response.addResponseObject("Commenter", dto.getCommenter());
 				response.addResponseObject("TaskID", dto.getTaskID());
 				response.setStatusCode(201);
-				response.addHeader("Created", "/tasks/"+dto.getTaskID()+"/comments/"+dto.getCommentID());
+				response.addHeader("Created", "/task/"+dto.getTaskID()+"/comments/"+dto.getCommentID());
 				FinishRequest(out);
 				return;
 			} catch (DALException e) {
@@ -143,7 +141,7 @@ public class CommentsController extends ControllerBase{
 				raiseError(out, 400, "No commentID specified on path");
 				return;
 			}
-			CommentDTO dto;
+			CommentDTO dto = null;
 			dto = repository.getComment(taskID, commentID);
 			if(dto==null)
 			{
@@ -152,6 +150,7 @@ public class CommentsController extends ControllerBase{
 			}
 			
 			Comment comment = dto.getModel();
+			comment.setCommenter(context.getIdentity().getIdentityId());
 			response.addResponseObject("Comment", comment);
 			response.setStatusCode(200);
 			FinishRequest(out);
@@ -165,6 +164,7 @@ public class CommentsController extends ControllerBase{
 	{
 		if(!verifyLogin(context)){
 			raiseError(out, 401, "Not logged in");
+			return;
 		}
 		
 		try {
@@ -230,8 +230,8 @@ public class CommentsController extends ControllerBase{
 			int commentId;
 			int taskId;
 			try{
-				commentId = Integer.parseInt(request.getPath("commentID"));
-				taskId = Integer.parseInt(request.getPath("taskID"));
+				commentId = Integer.parseInt(request.getPath("CommentID"));
+				taskId = Integer.parseInt(request.getPath("TaskID"));
 			}
 			catch(NumberFormatException eng)
 			{
