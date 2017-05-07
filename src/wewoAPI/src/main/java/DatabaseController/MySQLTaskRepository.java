@@ -155,7 +155,7 @@ public class MySQLTaskRepository implements TaskRespository{
 		
 		//Potential risk of SQL Injection
 		ResultSet rs  = DatabaseConnector.doQuery("select * from Tasks INNER JOIN" + 
-		"(select TaskID from TaskTags, Tags where Tags.ID in (" + TAGS  + ") GROUP BY TaskID)" + 
+		"(select TaskID from TaskTags inner join Tags on TaskTags.TagID = Tags.ID where Tags.ID in (" + TAGS  + ") GROUP BY TaskID)" + 
 		" AS TaskIDs ON Tasks.ID = TaskIDs.TaskID LIMIT " + START + ", " + END + ";");
 		
 		List<TaskDTO> tasks = new ArrayList<TaskDTO>();
