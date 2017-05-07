@@ -146,16 +146,17 @@ public class MySQLTaskRepository implements TaskRespository{
 	
 		StringBuilder sb = new StringBuilder();
 		for (Integer integer : tags) {
-			sb.append(tags + ", ");
+			sb.append(integer + ",");
 		}
+		sb.deleteCharAt(sb.length()-1); //removes trailing ","
 		String TAGS = sb.toString();
 		try{
 			
 		
 		//Potential risk of SQL Injection
-		ResultSet rs  = DatabaseConnector.doQuery("select * from Tasks INNER JOIN from TaskTags " + 
+		ResultSet rs  = DatabaseConnector.doQuery("select * from Tasks INNER JOIN" + 
 		"(select TaskID from TaskTags, Tags where Tags.ID in (" + TAGS  + ") GROUP BY TaskID)" + 
-		" AS TaskID ON Tasks.ID = TaskIDs.TaskID LIMIT " + START + ", " + END + ";");
+		" AS TaskIDs ON Tasks.ID = TaskIDs.TaskID LIMIT " + START + ", " + END + ";");
 		
 		List<TaskDTO> tasks = new ArrayList<TaskDTO>();
 		while(rs.next())

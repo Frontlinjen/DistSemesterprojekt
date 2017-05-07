@@ -23,6 +23,7 @@ import exceptions.NotFoundException;
 import exceptions.UnauthorizedException;
 import mockRepositories.MockTaskRepository;
 import modelPOJO.IDObject;
+import modelPOJO.Rating;
 import modelPOJO.Task;
 import wewoAPI.ControllerBase;
 import wewoAPI.TaskController;
@@ -98,6 +99,15 @@ public class TaskControllerTest {
 		out.reset();
 	}
 	
+	@Test
+	public void getTaskAlphabeticalId() throws IOException, InternalServerErrorException{
+		RequestDataMock request = new RequestDataMock();
+		request.addPath("taskID", "Tags");
+		controller.getTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(400, response.getResponseCode());
+	}
+	
 	
 	@Test
 	public void createTaskNoBody()  throws InternalServerErrorException, IOException {
@@ -170,6 +180,18 @@ public class TaskControllerTest {
 		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 401);
+	}
+	
+	@Test
+	public void createTaskInvalidObject() throws InternalServerErrorException, IOException{
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(new Rating()));
+		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(400, response.getResponseCode());
+		String errString = response.getBody("error", String.class);
+		System.out.println(errString);
+		assertTrue(!errString.contains("null"));
 	}
 	
 	@Test
@@ -282,7 +304,7 @@ public class TaskControllerTest {
 		createTask();
 		
 		RequestDataMock request = new RequestDataMock();
-		request.addQuery("tags", "4+22");
+		request.addQuery("tags", "4 22");
 		
 		controller.findTasks(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
