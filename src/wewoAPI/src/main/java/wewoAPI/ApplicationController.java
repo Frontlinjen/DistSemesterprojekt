@@ -6,6 +6,7 @@ import java.util.List;
 import javax.print.attribute.standard.Finishings;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import exceptions.*;
 import modelPOJO.Application;
@@ -113,9 +114,15 @@ public class ApplicationController extends ControllerBase{
 				raiseError(out, 400, "Invalid taskID specified");
 				return;
 			}
-			Application app = request.getObject(Application.class);
+			Application app = null;
+			try{
+				app = request.getObject(Application.class);
+			}catch(UnrecognizedPropertyException ex){
+				raiseError(out, 400, "" + ex.getPropertyName());
+				return;
+			}
 			if(app == null){
-				raiseError(out, 400, "Invalid Application Object");
+				raiseError(out, 400, "No message body recieved");
 				return;
 			}
 			ApplicationDTO dto = ApplicationDTO.fromModel(app);
@@ -201,7 +208,13 @@ public class ApplicationController extends ControllerBase{
 		
 		try {
 			StartRequest(in);
-			Application app = request.getObject(Application.class);
+			Application app = null;
+			try{
+				app = request.getObject(Application.class);
+			}catch(UnrecognizedPropertyException ex){
+				raiseError(out, 400, "" + ex.getPropertyName());
+				return;
+			}
 			int taskID;
 			String applierID;
 			try{

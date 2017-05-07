@@ -9,6 +9,7 @@ import java.util.List;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
@@ -51,9 +52,15 @@ public class TaskController extends ControllerBase{
 				return;
 			}
 			StartRequest(in);
-			Task task = request.getObject(Task.class);
+			Task task = null;
+			try{
+				task = request.getObject(Task.class);
+			}catch(UnrecognizedPropertyException ex){
+				raiseError(out, 400, "Unknown field: " + ex.getPropertyName());
+				return;
+			}
 			if(task == null){
-				raiseError(out, 400, "Invalid Task Object\n Got: " + request.getObject(JsonNode.class));
+				raiseError(out, 400, "No message body recieved");
 				return;
 			}
 			TaskDTO dto = TaskDTO.fromModel(task);
@@ -209,7 +216,13 @@ public class TaskController extends ControllerBase{
 		
 		try {
 			StartRequest(in);
-			Task task = request.getObject(Task.class);
+			Task task = null;
+			try{
+				task = request.getObject(Task.class);
+			}catch(UnrecognizedPropertyException ex){
+				raiseError(out, 400, "" + ex.getPropertyName());
+				return;
+			}
 			int taskID;
 			try{
 				taskID = Integer.parseInt(request.getPath("taskID"));

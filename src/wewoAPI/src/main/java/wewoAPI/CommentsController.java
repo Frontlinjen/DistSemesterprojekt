@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import DatabaseController.AccountRepository;
 import DatabaseController.CommentDTO;
@@ -71,9 +72,15 @@ public class CommentsController extends ControllerBase{
 				raiseError(out, 400, "No taskID specified");
 				return;
 			}
-			Comment com = request.getObject(Comment.class);
+			Comment com = null;
+			try{
+				com = request.getObject(Comment.class);
+			}catch(UnrecognizedPropertyException ex){
+				raiseError(out, 400, "" + ex.getPropertyName());
+				return;
+			}
 			if(com == null){
-				raiseError(out, 400, "Invalid Comment Object");
+				raiseError(out, 400, "No message body recieved");
 				return;
 			}
 			CommentDTO dto = CommentDTO.fromModel(com);
@@ -169,7 +176,13 @@ public class CommentsController extends ControllerBase{
 		
 		try {
 			StartRequest(in);
-			Comment comment = request.getObject(Comment.class);
+			Comment comment = null;
+			try{
+				comment = request.getObject(Comment.class);
+			}catch(UnrecognizedPropertyException ex){
+				raiseError(out, 400, "" + ex.getPropertyName());
+				return;
+			}
 			int commentID;
 			int taskID;
 			String message;

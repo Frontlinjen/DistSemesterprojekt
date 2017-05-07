@@ -1,6 +1,7 @@
 package wewoAPI;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,9 +39,15 @@ public class RatingController extends ControllerBase{
 			StartRequest(in);
 			//GET user/{userID}/ratings/{ratingsID}
 			String rateeID = request.getPath("rateeID");
-			Rating rate = request.getObject(Rating.class);
+			Rating rate = null;
+			try{
+				rate = request.getObject(Rating.class);
+			}catch(UnrecognizedPropertyException ex){
+				raiseError(out, 400, "" + ex.getPropertyName());
+				return;
+			}
 			if(rate == null){
-				raiseError(out, 400, "Invalid Rating Object");
+				raiseError(out, 400, "No message body recieved");
 				return;
 			}
 			
@@ -80,7 +87,13 @@ public class RatingController extends ControllerBase{
 				return;
 			}
 			StartRequest(in);
-			Rating rate = request.getObject(Rating.class);
+			Rating rate = null;
+			try{
+				rate = request.getObject(Rating.class);
+			}catch(UnrecognizedPropertyException ex){
+				raiseError(out, 400, "" + ex.getPropertyName());
+				return;
+			}
 			String raterID = request.getPath("raterID");
 			String rateeID = request.getPath("rateeID");
 			String foo = request.getPath("ratingID");
