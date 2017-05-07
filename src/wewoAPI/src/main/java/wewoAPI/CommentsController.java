@@ -87,7 +87,8 @@ public class CommentsController extends ControllerBase{
 				response.addResponseObject("CommentID", dto.getCommentID());
 				response.addResponseObject("Commenter", dto.getCommenter());
 				response.addResponseObject("TaskID", dto.getTaskID());
-				response.setStatusCode(200);
+				response.setStatusCode(201);
+				response.addHeader("Created", "/tasks/"+dto.getTaskID()+"/comments/"+dto.getCommentID());
 				FinishRequest(out);
 				return;
 			} catch (DALException e) {

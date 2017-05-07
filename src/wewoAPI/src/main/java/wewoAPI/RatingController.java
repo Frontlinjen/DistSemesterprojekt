@@ -56,7 +56,8 @@ public class RatingController extends ControllerBase{
 			try{
 				repository.createRating(dto);
 				response.addResponseObject("RatingID", dto.getRatingID());
-				response.setStatusCode(200);
+				response.setStatusCode(201);
+				response.addHeader("Created", "users/" + dto.getRateeID() + "/ratings/" + dto.getRatingID());
 				FinishRequest(out);
 			} catch (DALException e){
 				raiseError(out, 503, "Database unavailable");		

@@ -96,7 +96,8 @@ public class TaskController extends ControllerBase{
 			try {
 				repository.createTask(dto);
 				response.addResponseObject("TaskID", dto.getId());
-				response.setStatusCode(200);
+				response.setStatusCode(201);
+				response.addHeader("Created", "/tasks/"+dto.getId());
 				FinishRequest(out);
 				return;
 			} 
