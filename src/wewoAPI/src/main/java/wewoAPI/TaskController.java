@@ -53,7 +53,7 @@ public class TaskController extends ControllerBase{
 			StartRequest(in);
 			Task task = request.getObject(Task.class);
 			if(task == null){
-				raiseError(out, 400, "Invalid Task Object\n Got: " + request.getObject(String.class));
+				raiseError(out, 400, "Invalid Task Object\n Got: " + request.getObject(JsonNode.class));
 				return;
 			}
 			TaskDTO dto = TaskDTO.fromModel(task);
@@ -131,7 +131,7 @@ public class TaskController extends ControllerBase{
 				return;
 			}
 				
-				String[] tag = tags.split("\\+");
+				String[] tag = tags.split(" ");
 				List<Integer> tagIds = new ArrayList<Integer>(tag.length);
 				
 				for (String tagStr : tag) {
@@ -143,7 +143,7 @@ public class TaskController extends ControllerBase{
 					}
 				}
 				if(tagIds.size()==0){
-					raiseError(out, 400, "No valid tagIds");
+					raiseError(out, 400, "No valid tagIds " + tags);
 					return;
 				}
 				List<TaskDTO> tasks = repository.queryTasks(tagIds);
