@@ -6,6 +6,10 @@ import java.sql.Date;
 import modelPOJO.Comment;
 
 public class CommentDTO implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	String message;
 	String Commenter;
 	Date submitDate;
@@ -39,36 +43,32 @@ public class CommentDTO implements Serializable{
 		return message;
 	}
 
-	public CommentDTO setMessage(String text) {
-		this.message = text;
-		return this;
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	public String getCommenter() {
 		return Commenter;
 	}
 
-	public CommentDTO setCommenter(String ownerId) {
-		this.Commenter = ownerId;
-		return this;
+	public void setCommenter(String commenter) {
+		Commenter = commenter;
 	}
 
 	public Date getSubmitDate() {
 		return submitDate;
 	}
 
-	public CommentDTO setSubmitDate(Date date) {
-		this.submitDate = date;
-		return this;
-	}
-	
-	public int getCommentID() {
-		return TaskID;
+	public void setSubmitDate(Date submitDate) {
+		this.submitDate = submitDate;
 	}
 
-	public CommentDTO setCommentID(int ID) {
-		this.CommentID = ID;
-		return this;
+	public int getCommentID() {
+		return CommentID;
+	}
+
+	public void setCommentID(int commentID) {
+		CommentID = commentID;
 	}
 
 	public int getTaskID() {
@@ -76,6 +76,7 @@ public class CommentDTO implements Serializable{
 	}
 
 	public void setTaskID(int taskID) {
-		this.TaskID = taskID;
-	}	
+		TaskID = taskID;
+	}
+
 }
