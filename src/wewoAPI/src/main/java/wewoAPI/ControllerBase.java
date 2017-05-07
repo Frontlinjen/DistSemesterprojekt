@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import exceptions.InternalServerErrorException;
@@ -127,26 +128,34 @@ public class ControllerBase {
 			return data.pathParameters.get(id);
 		}
 		
-		public <T> T getObject(String name, Class<T> type){
+		public <T> T getObject(String name, Class<T> type) throws UnrecognizedPropertyException{
 			if(data.body != null && data.body.has(name)){
 				try {
 					TreeNode node = data.body.get(name);
 					if(node != null)
 						return objectConverter.treeToValue(node, type);
-				} catch (JsonProcessingException e) {
+				} 
+				catch (JsonProcessingException e) {
 					e.printStackTrace();
+					if(e.getCause() instanceof UnrecognizedPropertyException)
+					{
+						throw (UnrecognizedPropertyException)e.getCause();
+					}
 				}
 			}
 			return null;
 		}
-		public <T> T getObject(Class<T> type){
+		public <T> T getObject(Class<T> type) throws UnrecognizedPropertyException{
 			if(data.body != null)
 			{
 				try {
 					return objectConverter.treeToValue(data.body, type);
 				} catch (JsonProcessingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
+					if(e.getCause() instanceof UnrecognizedPropertyException)
+					{
+						throw (UnrecognizedPropertyException)e.getCause();
+					}
 				}
 			}
 			return null;
