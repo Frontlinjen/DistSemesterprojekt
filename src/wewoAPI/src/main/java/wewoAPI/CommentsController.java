@@ -172,9 +172,11 @@ public class CommentsController extends ControllerBase{
 			Comment comment = request.getObject(Comment.class);
 			int commentID;
 			int taskID;
+			String message;
 			try{
 				commentID = Integer.parseInt(request.getPath("CommentID"));
 				taskID = Integer.parseInt(request.getPath("TaskID"));
+				message = request.getPath("message");
 			}
 			catch(Exception e)
 			{
@@ -184,6 +186,7 @@ public class CommentsController extends ControllerBase{
 			comment.setCommenter(context.getIdentity().getIdentityId());
 			comment.setCommentID(commentID);
 			comment.setTaskID(taskID);
+			comment.setMessage(message);
 			CommentDTO dto = repository.getComment(taskID, commentID);
 			if(dto == null)
 			{
