@@ -191,7 +191,7 @@ public class ControllerBase {
 	
 	protected  boolean verifyLogin(Context context)
 	{
-		return !(context.getIdentity().getIdentityId() == null || context.getIdentity().getIdentityId().isEmpty());
+		return !(context.getIdentity() == null || context.getIdentity().getIdentityId() == null || context.getIdentity().getIdentityId().isEmpty());
 	}
 	
 	
