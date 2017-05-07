@@ -122,7 +122,9 @@ public class DatabaseConnector {
 	{
 		connector();
 		try { return stm.executeUpdate(cmd); }
-		catch (SQLException e) { throw new DALException(e); }
+		catch (SQLException e) { 
+			throw new DALException(e); 
+			}
 	}
 
 	private static void connector() throws DALException {

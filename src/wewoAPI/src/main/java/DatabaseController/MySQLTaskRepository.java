@@ -137,7 +137,19 @@ public class MySQLTaskRepository implements TaskRespository{
 	}
 
 	public int deleteTask(int id) throws DALException {
-		return DatabaseConnector.doUpdate("DELETE FROM Tasks WHERE ID = " + id + ";");
+		try{
+			DatabaseConnector.StartTransaction();
+			DatabaseConnector.doUpdate("Delete FROM TaskTags WHERE TaskID = " + id + ";");
+			DatabaseConnector.doUpdate("DELETE FROM Comments WHERE TaskID = " + id + ";");
+			DatabaseConnector.doUpdate("DELETE FROM Appliers WHERE TaskID = " + id + ";");
+			DatabaseConnector.doUpdate("DELETE FROM Tasks WHERE ID = " + id + ";"); 
+			DatabaseConnector.EndTransaction();
+			return 0;
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+			throw new DALException(e);
+		}
 	}
 
 	public List<TaskDTO> queryTasks(List<Integer> tags) throws EntryNullException, ForeignKeyException, DALException {

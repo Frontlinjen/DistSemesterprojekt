@@ -36,7 +36,7 @@ public class TaskControllerTest {
 	static int dataCounter = 0;
 	@Before
 	public void setUp() throws Exception {
-		controller = new TaskController(new MockTaskRepository());
+		controller = new TaskController(/*new MockTaskRepository()*/);
 		context = new ContextTest("Jeiner");
 		mapper = new ObjectMapper();
 		out = new ByteArrayOutputStream();
@@ -77,7 +77,7 @@ public class TaskControllerTest {
 		ResponseData response = new ResponseData(out);
 		Integer taskID = response.getBody("TaskID", Integer.class);
 		assertNotNull(taskID);
-		assertEquals(response.getResponseCode(), 200);
+		assertEquals(response.getResponseCode(), 201);
 		assertTrue(taskID >= 0);
 
 		Task newTask;
@@ -206,9 +206,9 @@ public class TaskControllerTest {
 	
 	@Test
 	public void deleteTask()  throws InternalServerErrorException, IOException{
-		createTask();
+		//createTask();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("taskID", "0");
+		request.addPath("taskID", "12");
 		controller.deleteTask(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 200);
