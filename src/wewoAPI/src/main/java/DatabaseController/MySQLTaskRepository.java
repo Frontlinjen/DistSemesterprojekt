@@ -46,7 +46,7 @@ public class MySQLTaskRepository implements TaskRespository{
 	{
 		TaskDTO task = new TaskDTO();
 		task.setId(rs.getInt("ID")).setTitle(rs.getString("title")).setPrice(rs.getInt("price"))
-		.setDescription(rs.getString("description")).setSupplies(rs.getBoolean("supplies") ? 1 : 0).setUrgent(rs.getBoolean("urgent") ? 1 : 0)
+		.setDescription(rs.getString("description")).setSupplies(rs.getInt("supplies")).setUrgent(rs.getInt("urgent"))
 		.setViews(rs.getInt("views")).setStreet(rs.getString("street")).setZipaddress(rs.getInt("zipcode"))
 		.setCreated(rs.getDate("created")).setEdited(rs.getDate("edited")).setCreatorId(rs.getString("creatorID"));
 		return task;

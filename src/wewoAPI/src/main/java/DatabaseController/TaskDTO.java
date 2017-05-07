@@ -55,6 +55,7 @@ public class TaskDTO implements Serializable {
 	
 	public Task getModel(){
 		Task task = new Task();
+		task.setID(this.getId());
 		task.setCreatorid(this.getCreatorId());
 		task.setDescription(this.getDescription());
 		task.setETC(this.getEct());
