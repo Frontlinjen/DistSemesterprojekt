@@ -314,5 +314,17 @@ public class ApplicationControllerTest {
 		assertEquals(401, response.getResponseCode());
 		out.reset();
 	}
+	
+	@Test
+	public void createApplicationInvalidObject() throws InternalServerErrorException, IOException{
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(new Rating()));
+		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(400, response.getResponseCode());
+		String errString = response.getBody("error", String.class);
+		System.out.println(errString);
+		assertTrue(!errString.contains("null"));
+	}
 
 }

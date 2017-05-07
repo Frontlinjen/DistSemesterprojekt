@@ -1,4 +1,5 @@
 import modelPOJO.Rating;
+import modelPOJO.Task;
 import wewoAPI.RatingController;
 
 
@@ -88,4 +89,15 @@ public class RatingControllerTest {
 		
 	}
 	
+	@Test
+	public void createRatingInvalidObject() throws InternalServerErrorException, IOException{
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(new Task()));
+		controller.createRating(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(400, response.getResponseCode());
+		String errString = response.getBody("error", String.class);
+		System.out.println(errString);
+		assertTrue(!errString.contains("null"));
+	}
 }

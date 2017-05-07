@@ -14,6 +14,7 @@ import DatabaseController.MySQLCommentRepository;
 import exceptions.InternalServerErrorException;
 import mockRepositories.MockCommentsRepository;
 import modelPOJO.Comment;
+import modelPOJO.Rating;
 import wewoAPI.CommentsController;
 
 public class CommentsControllerTest {
@@ -196,5 +197,17 @@ public class CommentsControllerTest {
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(401, response.getResponseCode());
+	}
+	
+	@Test
+	public void createCommentInvalidObject() throws InternalServerErrorException, IOException{
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(new Rating()));
+		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(400, response.getResponseCode());
+		String errString = response.getBody("error", String.class);
+		System.out.println(errString);
+		assertTrue(!errString.contains("null"));
 	}
 }
