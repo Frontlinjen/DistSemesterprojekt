@@ -43,19 +43,21 @@ public class CommentsControllerTest {
 		Comment comment = generateTestData();
 
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("TaskID", Integer.toString(1));
-		request.addPath("CommentID", Integer.toString(6));
+		request.addPath("TaskID", "3");
 		request.setBody(mapper.writeValueAsString(comment));
 		System.out.println(new String(request.getContent()));
 		
 		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(200, response.getResponseCode());
+		comment.setCommenter(response.getBody("Commenter", String.class));
+		comment.setCommentID(response.getBody("CommentID", Integer.class));
+		comment.setTaskID(response.getBody("TaskID", Integer.class));
+		assertEquals(201, response.getResponseCode());
 		Comment newCom;
 		out.reset();
 	//	Integer taskID = response.getBody("taskID", Integer.class);
-		request.addPath("TaskID", "1");
-		request.addPath("CommentID", "6");
+		request.addPath("TaskID", "7");
+		request.addPath("CommentID", "7");
 
 		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
 		response = new ResponseData(out);
@@ -78,13 +80,12 @@ public class CommentsControllerTest {
 		
 		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 401);
+		assertEquals(401, response.getResponseCode());
 	}
 	
 	@Test
 	public void createCommentWithoutLogin() throws InternalServerErrorException, IOException{
 		Comment comment = generateTestData();
-		context.clearIdentity();
 		RequestDataMock request = new RequestDataMock();
 		request.setBody(mapper.writeValueAsString(comment));
 		request.addPath("TaskID", "1");
@@ -92,18 +93,18 @@ public class CommentsControllerTest {
 		
 		controller.createComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 401);
+		assertEquals(401, response.getResponseCode());
 	}
 	
 	@Test
 	public void getNonexistingComment() throws InternalServerErrorException, IOException{
 		createComment();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("CommentID", Integer.toString(9001));
-		request.addPath("TaskID", "1");
+		request.addPath("CommentID", "10");
+		request.addPath("TaskID", "2");
 		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 404);
+		assertEquals(404, response.getResponseCode());
 	}
 	
 	@Test
@@ -112,7 +113,7 @@ public class CommentsControllerTest {
 		createComment();
 		RequestDataMock request = new RequestDataMock();
 		request.addPath("CommentID", "0");
-		request.addPath("TaskID", "1");
+		request.addPath("TaskID", "3");
 		controller.deleteComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(200, response.getResponseCode());
@@ -120,19 +121,19 @@ public class CommentsControllerTest {
 		out.reset();
 		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
 		response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 404);
+		assertEquals(404, response.getResponseCode());
 	}
 	
 	@Test
 	public void deleteCommentCheckPermissions()  throws InternalServerErrorException, IOException{
 		createComment();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("CommentID", "0");
+		request.addPath("CommentID", "1");
 		request.addPath("TaskID", "1");
 		context.setIdentity("Jeiner22");
 		controller.deleteComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 403);
+		assertEquals(403, response.getResponseCode());
 	}
 	
 	@Test
@@ -154,7 +155,7 @@ public class CommentsControllerTest {
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 404);
+		assertEquals(404, response.getResponseCode());
 	}
 	
 	@Test
@@ -163,7 +164,7 @@ public class CommentsControllerTest {
 		RequestDataMock request = new RequestDataMock();
 		Comment newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
-		request.addPath("CommentID", "0");
+		request.addPath("CommentID", "1");
 		request.addPath("TaskID", "1");
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
@@ -175,7 +176,7 @@ public class CommentsControllerTest {
 		context.setIdentity("Alice");
 		RequestDataMock request = new RequestDataMock();
 		request.addPath("CommentID", "1");
-		request.addPath("TaskID", "3");
+		request.addPath("TaskID", "1");
 		Comment newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
@@ -193,6 +194,6 @@ public class CommentsControllerTest {
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(response.getResponseCode(), 401);
+		assertEquals(401, response.getResponseCode());
 	}
 }
