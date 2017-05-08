@@ -179,7 +179,6 @@ public class TaskController extends ControllerBase{
 		
 		try {
 			StartRequest(in);
-			
 			int taskID;
 			try{
 				taskID = Integer.parseInt(request.getPath("taskID"));			
@@ -241,6 +240,7 @@ public class TaskController extends ControllerBase{
 			}
 			if(dto.getCreatorId().equals(context.getIdentity().getIdentityId())){
 				dto = TaskDTO.fromModel(task);
+				dto.setId(taskID);
 				repository.updateTask(dto);
 				response.setStatusCode(200);
 				FinishRequest(out);

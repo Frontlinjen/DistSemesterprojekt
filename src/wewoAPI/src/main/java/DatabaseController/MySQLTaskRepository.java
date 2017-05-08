@@ -16,8 +16,8 @@ public class MySQLTaskRepository implements TaskRespository{
 	private final String CREATE_TASK = "INSERT INTO Tasks(creatorID, title, description, price, ECT, supplies, urgent,"
 									 + "street, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 	private final String CREATE_TASK_TAGS = "INSERT INTO TaskTags(TagID, TaskID) VALUES (?, (select LAST_INSERT_ID()));";
-	private final String UPDATE_TASK = "UPDATE ansat SET  ID = '?', title =  '?', description = '?', price = '?', ECT = '?', supplies " +
-									   "= '?', urgent = '?', street = '?', zipcode = '?' WHERE ID = '?';";
+	private final String UPDATE_TASK = "UPDATE Tasks SET title =  ?, description = ?, price = ?, ECT = ?, supplies " +
+									   "= ?, urgent = ?, street = ?, zipcode = ? WHERE ID = ?;";
 	
 	public MySQLTaskRepository() throws DALException{
 		DatabaseConnector.RegisterStatement("GET_TASK", GET_TASK);
