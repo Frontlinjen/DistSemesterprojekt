@@ -76,6 +76,7 @@ public class ApplicationController extends ControllerBase{
 				try {
 					List<String> applicants = repository.getApplicationList(taskid);
 					response.addResponseObject("applicants", applicants);
+					response.addResponseObject("task", "tasks/"+task.getId());
 					response.setStatusCode(200);
 					FinishRequest(out);
 					return;
@@ -129,10 +130,13 @@ public class ApplicationController extends ControllerBase{
 			dto.setTaskid(taskId);
 			dto.setApplierid(context.getIdentity().getIdentityId());
 			
+			TaskDTO taskDTO = new TaskDTO();
+			
 			try {
 				repository.createApplication(dto);
 				response.setStatusCode(201);
 				response.addHeader("Created", "/tasks/"+dto.getTaskid()+"/applicants/"+dto.getApplierid());
+				response.addResponseObject("task", "tasks/"+taskDTO.getId());
 				FinishRequest(out);
 				return;
 			} catch (DALException e) {

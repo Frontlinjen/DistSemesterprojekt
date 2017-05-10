@@ -155,10 +155,12 @@ public class CommentsController extends ControllerBase{
 				raiseError(out, 404, "No comment was found using ID " + commentID);
 				return;
 			}
+			TaskDTO task = new TaskDTO();
 			
 			Comment comment = dto.getModel();
 			comment.setCommenter(context.getIdentity().getIdentityId());
 			response.addResponseObject("Comment", comment);
+			response.addResponseObject("task", "tasks/"+task.getId());
 			response.setStatusCode(200);
 			FinishRequest(out);
 		}catch (DALException e) {

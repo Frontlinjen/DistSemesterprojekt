@@ -44,6 +44,7 @@ public class TagsController extends ControllerBase{
 				return;
 			}
 			response.addResponseObject("Tags", tags);
+			response.addResponseObject("tasks", "/tasks");
 			response.setStatusCode(200);
 			FinishRequest(out);
 			return;

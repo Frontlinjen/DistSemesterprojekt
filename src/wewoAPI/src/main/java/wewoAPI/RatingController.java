@@ -11,6 +11,7 @@ import java.util.List;
 import modelPOJO.Rating;
 import DatabaseController.RatingDTO;
 import DatabaseController.RatingRepository;
+import DatabaseController.TaskDTO;
 import exceptions.InternalServerErrorException;
 import DatabaseController.DALException;
 import DatabaseController.MySQLRatingRepository;
@@ -59,10 +60,12 @@ public class RatingController extends ControllerBase{
 			
 			dto.setRateeID(rateeID);
 			dto.setRaterID(context.getIdentity().getIdentityId());
+			TaskDTO taskDTO = new TaskDTO();
 
 			try{
 				repository.createRating(dto);
 				response.addResponseObject("RatingID", dto.getRatingID());
+				response.addResponseObject("task", "tasks/"+taskDTO.getId());
 				response.setStatusCode(201);
 				response.addHeader("Created", "users/" + dto.getRateeID() + "/ratings/" + dto.getRatingID());
 				FinishRequest(out);
@@ -99,6 +102,7 @@ public class RatingController extends ControllerBase{
 			String foo = request.getPath("ratingID");
 			int ratingID = Integer.parseInt(foo);
 			RatingDTO dto;
+			TaskDTO taskDTO = new TaskDTO();
 			
 			dto = repository.getRating(ratingID, rateeID);
 			if(dto==null){
@@ -110,6 +114,7 @@ public class RatingController extends ControllerBase{
 			response.addResponseObject("message", rate.message);
 			response.addResponseObject("rating", rate.rating);
 			response.addResponseObject("ratingObject", rate);
+			response.addResponseObject("task", "/tasks/"+taskDTO.getId()+"/");
 			response.setStatusCode(200);
 			FinishRequest(out);
 		} catch (DALException e){

@@ -103,6 +103,8 @@ public class TaskController extends ControllerBase{
 			try {
 				repository.createTask(dto);
 				response.addResponseObject("TaskID", dto.getId());
+				response.addResponseObject("applicants", "/tasks/"+dto.getId()+"/applicants");
+				response.addResponseObject("comments", "tasks/"+dto.getId()+"/comments");
 				response.setStatusCode(201);
 				response.addHeader("Created", "/tasks/"+dto.getId());
 				FinishRequest(out);
@@ -164,6 +166,7 @@ public class TaskController extends ControllerBase{
 					models.add(tasks.get(i).getModel());
 				}
 				response.addResponseObject("Results", models);
+				response.addResponseObject("tasks", "/tasks");
 				response.setStatusCode(200);
 				FinishRequest(out);
 				return;
@@ -197,6 +200,8 @@ public class TaskController extends ControllerBase{
 			
 			Task task = dto.getModel();
 			response.addResponseObject("Task", task);
+			response.addResponseObject("comments", "/tasks/"+dto.getId()+"/comments");
+			response.addResponseObject("applicants", "/tasks/"+dto.getId()+"/applicants");
 			response.setStatusCode(200);
 			FinishRequest(out);
 		}catch (DALException e) {
