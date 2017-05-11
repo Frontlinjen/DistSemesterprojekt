@@ -47,11 +47,11 @@ public class TaskController extends ControllerBase{
 	public void createTask(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
 		try{
-			if(!verifyLogin(context)){
+			StartRequest(in, context);
+			if(userID == null){
 				raiseError(out, 401, "Not logged in");
 				return;
 			}
-			StartRequest(in);
 			Task task = null;
 			try{
 				task = request.getObject(Task.class);
@@ -62,9 +62,16 @@ public class TaskController extends ControllerBase{
 			if(task == null){
 				raiseError(out, 400, "No message body recieved");
 				return;
+			} 
+			if(task.getZipaddress() <= 0){
+				raiseError(out, 400, "Zip address may not be less than zero");
+				return;
+			}else if(task.getTags() == null || task.getTags().size() < 3){
+				raiseError(out, 400, "Must specify a minimum of 3 tags");
+				return;
 			}
 			TaskDTO dto = TaskDTO.fromModel(task);
-			dto.setCreatorId(context.getIdentity().getIdentityId());
+			dto.setCreatorId(userID);
 
 			HttpRequestFactory factory = new NetHttpTransport().createRequestFactory();
 			
@@ -133,7 +140,7 @@ public class TaskController extends ControllerBase{
 	public void findTasks(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
 		try{
-			StartRequest(in);
+			StartRequest(in, context);
 			String tags = request.getQuery("tags");
 			if(tags == null){
 				raiseError(out, 400, "No tags specified");
@@ -181,7 +188,7 @@ public class TaskController extends ControllerBase{
 	{
 		
 		try {
-			StartRequest(in);
+			StartRequest(in, context);
 			int taskID;
 			try{
 				taskID = Integer.parseInt(request.getPath("taskID"));			

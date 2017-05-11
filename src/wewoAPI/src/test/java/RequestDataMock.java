@@ -24,7 +24,7 @@ public class RequestDataMock {
 	}
 	
 	public void addHeader(String name, String value){
-		data.headers.put(name, value);
+		data.headers.put(name.toLowerCase(), value);
 	}
 	
 	public void addQuery(String name, String value){

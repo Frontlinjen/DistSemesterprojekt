@@ -75,9 +75,9 @@ public class TaskControllerTest {
 
 		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 201);
 		Integer taskID = response.getBody("TaskID", Integer.class);
 		assertNotNull(taskID);
-		assertEquals(response.getResponseCode(), 201);
 		assertTrue(taskID >= 0);
 
 		Task newTask;
@@ -134,6 +134,8 @@ public class TaskControllerTest {
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 400);
 	}
+
+	
 	@Test
 	public void createTaskUsingNonexistingTags() throws InternalServerErrorException, IOException {
 		Task task = generateTestData();
@@ -180,6 +182,40 @@ public class TaskControllerTest {
 		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 401);
+	}
+	
+	@Test
+	public void createTaskMasterLogin()  throws InternalServerErrorException, IOException{
+		Task task = generateTestData();
+		context.clearIdentity();
+		RequestDataMock request = new RequestDataMock();
+		request.setBody(mapper.writeValueAsString(task));
+		request.addHeader("FrontAuth", "Masterfront");
+		controller.createTask(new ByteArrayInputStream(request.getContent()), out, context);
+		ResponseData response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 201);
+		Integer taskID = response.getBody("TaskID", Integer.class);
+		assertNotNull(taskID);
+		assertTrue(taskID >= 0);
+
+		Task newTask;
+		out.reset();
+		request.addPath("taskID", taskID.toString());
+		controller.getTask(new ByteArrayInputStream(request.getContent()), out, context);
+		response = new ResponseData(out);
+		assertEquals(response.getResponseCode(), 200);
+
+		newTask = response.getBody("Task", Task.class);
+		assertEquals(task.getTitle(), newTask.getTitle());
+		assertEquals(task.getPrice(), newTask.getPrice());
+		assertEquals(task.getDescription(), newTask.getDescription());
+		assertEquals(task.getStreet(), newTask.getStreet());
+		assertEquals(task.getZipaddress(), newTask.getZipaddress());
+		assertTrue(task.getTags().contains(4));
+		assertNotNull(newTask);
+		assertEquals(newTask.getCreatorid(), "Masterfront");
+		out.reset();
+		
 	}
 	
 	@Test

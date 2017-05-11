@@ -7,6 +7,8 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.text.AbstractDocument.Content;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -165,7 +167,7 @@ public class ControllerBase {
 	
 	private ObjectMapper mapper = new ObjectMapper();
 	private JsonFactory factory = new JsonFactory(mapper);
-
+	protected String userID;
 	protected LambdaResponse response;
 	protected LambdaRequest request;
 	
@@ -200,7 +202,11 @@ public class ControllerBase {
 	
 	protected  boolean verifyLogin(Context context)
 	{
-		return !(context.getIdentity() == null || context.getIdentity().getIdentityId() == null || context.getIdentity().getIdentityId().isEmpty());
+		
+		return ((context.getIdentity() != null &&
+			     context.getIdentity().getIdentityId() != null &&
+			     !(userID = context.getIdentity().getIdentityId()).isEmpty()) || 
+				(userID = request.getHeader("FrontAuthorization")) != null);
 	}
 	
 	
@@ -218,9 +224,20 @@ public class ControllerBase {
 	
 	protected void StartRequest(InputStream i)
 	{
+		StartRequest(i, null);
+	}
+	protected void StartRequest(InputStream i, Context context)
+	{
 		response = new LambdaResponse(factory);
 		try {
 			request = new LambdaRequest(factory.createParser(i), new ObjectMapper());
+			if(context.getIdentity() != null && context.getIdentity().getIdentityId() != null && !context.getIdentity().getIdentityId().isEmpty()){
+				userID = context.getIdentity().getIdentityId();
+			}
+			else
+			{
+				userID = request.getHeader("frontauth");
+			}
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
