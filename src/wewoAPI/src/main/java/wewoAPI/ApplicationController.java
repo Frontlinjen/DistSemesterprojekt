@@ -138,7 +138,7 @@ public class ApplicationController extends ControllerBase{
 				repository.createApplication(dto);
 				response.setStatusCode(201);
 				response.addHeader("Created", "/tasks/"+dto.getTaskid()+"/applicants/"+dto.getApplierid());
-				response.addResponseObject("task", "tasks/"+taskDTO.getId());
+				response.addResponseObject("task", "tasks/applicants/"+taskDTO.getId());
 				FinishRequest(out);
 				return;
 			} catch (DALException e) {
