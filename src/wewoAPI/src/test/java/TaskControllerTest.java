@@ -36,7 +36,7 @@ public class TaskControllerTest {
 	static int dataCounter = 0;
 	@Before
 	public void setUp() throws Exception {
-		controller = new TaskController(/*new MockTaskRepository()*/);
+		controller = new TaskController(new MockTaskRepository());
 		context = new ContextTest("Jeiner");
 		mapper = new ObjectMapper();
 		out = new ByteArrayOutputStream();

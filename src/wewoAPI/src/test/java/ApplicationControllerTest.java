@@ -30,11 +30,13 @@ public class ApplicationControllerTest {
 	ContextTest c;
 	ObjectMapper mapper;
 	ByteArrayOutputStream out;
-	
+	MockTaskRepository taskRepo;
 	int dataCounter = 0;
 	@Before
 	public void setUp() throws Exception {
-		controller = new ApplicationController();
+		taskRepo = new MockTaskRepository();
+		
+		controller = new ApplicationController(new MockApplicationRepository(), taskRepo);
 		context = new ContextTest("Boris");
 		con = new ContextTest("Tim");
 		c = new ContextTest("Ib");
@@ -55,18 +57,25 @@ public class ApplicationControllerTest {
 		Application app = generateTestData();
 	
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("taskID", Integer.toString(1));
+		TaskDTO task = new TaskDTO();
+		task.setTags(new ArrayList<Integer>());
+		task.setCreatorId(context.getIdentity().getIdentityId());
+		task.setId(0);
+		taskRepo.createTask(task);
+		
+		
+		request.addPath("taskID", Integer.toString(0));
 		request.addPath("applierID", context.getIdentity().getIdentityId());
 		request.setBody(mapper.writeValueAsString(app));
 		System.out.println(new String(request.getContent()));
 
 		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(200, response.getResponseCode());		
+		assertEquals(201, response.getResponseCode());		
 		Application newApp;
 		out.reset();
 		
-		request.addPath("taskID", "1");
+		request.addPath("taskID", "0");
 		request.addPath("applierID", context.getIdentity().getIdentityId());
 		
 		controller.getApplication(new ByteArrayInputStream(request.getContent()), out, context);
@@ -77,7 +86,7 @@ public class ApplicationControllerTest {
 		assertNotNull(newApp);
 		assertEquals(app.getApplicationMessage(), newApp.getApplicationMessage());
 		assertEquals(context.getIdentity().getIdentityId(), newApp.getApplierId());
-		assertEquals(1, newApp.getTaskId());
+		assertEquals(0, newApp.getTaskId());
 		out.reset();
 	}
 	
@@ -135,13 +144,19 @@ public class ApplicationControllerTest {
 		request.setBody(mapper.writeValueAsString(app));
 		System.out.println(new String(request.getContent()));
 
+		TaskDTO task = new TaskDTO();
+		task.setTags(new ArrayList<Integer>());
+		task.setCreatorId(context.getIdentity().getIdentityId());
+		task.setId(0);
+		taskRepo.createTask(task);
+		
 		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(200, response.getResponseCode());
+		assertEquals(201, response.getResponseCode());
 		
 		controller.deleteApplication(new ByteArrayInputStream(request.getContent()), out, context);
 		response = new ResponseData(out);
-		assertEquals(200, response.getResponseCode());
+		assertEquals(201, response.getResponseCode());
 		
 		out.reset();
 		try {
@@ -159,15 +174,21 @@ public class ApplicationControllerTest {
 	public void deleteApplicaitonCheckPermissions()  throws InternalServerErrorException, IOException, UnauthorizedException, DALException{
 		Application app = generateTestData();
 		
+		
+		TaskDTO task = new TaskDTO();
+		task.setTags(new ArrayList<Integer>());
+		task.setCreatorId(context.getIdentity().getIdentityId());
+		task.setId(0);
+		taskRepo.createTask(task);
 		app.setApplierId("Boris");
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("taskID", Integer.toString(1));
+		request.addPath("taskID", Integer.toString(0));
 		request.setBody(mapper.writeValueAsString(app));
 		System.out.println(new String(request.getContent()));
 
 		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(200, response.getResponseCode());
+		assertEquals(201, response.getResponseCode());
 		out.reset();
 		
 		request.addPath("applierID", "Boris");
@@ -191,15 +212,19 @@ public class ApplicationControllerTest {
 		
 		app.setApplierId("Boris");
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("taskID", Integer.toString(1));
+		request.addPath("taskID", Integer.toString(0));
 		request.setBody(mapper.writeValueAsString(app));
 		System.out.println(new String(request.getContent()));
-
+		TaskDTO task = new TaskDTO();
+		task.setTags(new ArrayList<Integer>());
+		task.setCreatorId(context.getIdentity().getIdentityId());
+		task.setId(0);
+		taskRepo.createTask(task);
 		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(200, response.getResponseCode());
+		assertEquals(201, response.getResponseCode());
 		out.reset();
-		app.setApplierId("CUNT!");
+		app.setApplierId("puppy");
 		app.setTaskId(99);
 		app.setApplicationMessage("Meh");
 		request.setBody(mapper.writeValueAsString(app));
@@ -224,7 +249,7 @@ public class ApplicationControllerTest {
 		Application newApp = response.getBody("Application", Application.class);
 		assertEquals("Boris", newApp.getApplierId());
 		assertEquals("Meh", newApp.getApplicationMessage());
-		assertEquals(1, newApp.getTaskId());
+		assertEquals(0, newApp.getTaskId());
 	}
 	
 	@Test
@@ -269,29 +294,34 @@ public class ApplicationControllerTest {
 		Application app = generateTestData();
 		Application app1 = generateTestData();
 		
+		TaskDTO task = new TaskDTO();
+		task.setTags(new ArrayList<Integer>());
+		task.setCreatorId(c.getIdentity().getIdentityId());
+		task.setId(0);
+		taskRepo.createTask(task);
 		app.setApplierId("Boris");
 		app1.setApplierId("Tim");
 		RequestDataMock request = new RequestDataMock();
 		RequestDataMock re = new RequestDataMock();
 		RequestDataMock r = new RequestDataMock();
-		request.addPath("taskID", Integer.toString(1));
+		request.addPath("taskID", Integer.toString(0));
 		request.setBody(mapper.writeValueAsString(app));
 		System.out.println(new String(request.getContent()));
 
 		controller.createApplications(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
-		assertEquals(200, response.getResponseCode());
+		assertEquals(201, response.getResponseCode());
 		out.reset();
-		re.addPath("taskID", Integer.toString(1));
+		re.addPath("taskID", Integer.toString(0));
 		re.setBody(mapper.writeValueAsString(app1));
 		System.out.println(new String(re.getContent()));
 		
 		controller.createApplications(new ByteArrayInputStream(re.getContent()), out, con);
 		response = new ResponseData(out);
-		assertEquals(200, response.getResponseCode());
+		assertEquals(201, response.getResponseCode());
 		out.reset();
 		
-		r.addPath("taskID", Integer.toString(1));
+		r.addPath("taskID", Integer.toString(0));
 		System.out.println(new String(r.getContent()));
 		
 		controller.getApplicants(new ByteArrayInputStream(r.getContent()), out, c);
@@ -299,11 +329,6 @@ public class ApplicationControllerTest {
 		assertEquals(200, response.getResponseCode());
 		
 		ArrayList<String> sl = new ArrayList<String>();
-		sl.add("2");
-		sl.add("1");
-		sl.add("Boris");
-		sl.add("Boris");
-		sl.add("Boris");
 		sl.add("Boris");
 		sl.add("Tim");
 		assertEquals(sl, response.getBody("applicants", ArrayList.class));

@@ -171,7 +171,7 @@ public class ApplicationController extends ControllerBase{
 				applierID = request.getPath("applierID");			
 			}
 			catch(NumberFormatException neg){
-				raiseError(out, 400, "");
+				raiseError(out, 400, "Invalid path id");
 				return;
 			}
 			ApplicationDTO dto;

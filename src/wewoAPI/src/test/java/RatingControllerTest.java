@@ -28,7 +28,7 @@ public class RatingControllerTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		controller = new RatingController(/*new MockRatingRepository()*/);
+		controller = new RatingController(new MockRatingRepository());
 		context = new ContextTest("Test1");
 		mapper = new ObjectMapper();
 		out = new ByteArrayOutputStream();

@@ -26,7 +26,7 @@ public class CommentsControllerTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		controller = new CommentsController(new MySQLCommentRepository());
+		controller = new CommentsController(new MockCommentsRepository());
 		context = new ContextTest("Boris");
 		mapper = new ObjectMapper();
 		out = new ByteArrayOutputStream();
