@@ -44,7 +44,7 @@ public class CommentsControllerTest {
 		Comment comment = generateTestData();
 
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("TaskID", "3");
+		request.addPath("TaskID", "0");
 		request.setBody(mapper.writeValueAsString(comment));
 		System.out.println(new String(request.getContent()));
 		
@@ -56,9 +56,8 @@ public class CommentsControllerTest {
 		assertEquals(201, response.getResponseCode());
 		Comment newCom;
 		out.reset();
-	//	Integer taskID = response.getBody("taskID", Integer.class);
-		request.addPath("TaskID", "7");
-		request.addPath("CommentID", "7");
+		request.addPath("TaskID", "0");
+		request.addPath("CommentID", Integer.toString(comment.getCommentID()));
 
 		controller.getComment(new ByteArrayInputStream(request.getContent()), out, context);
 		response = new ResponseData(out);
@@ -114,7 +113,7 @@ public class CommentsControllerTest {
 		createComment();
 		RequestDataMock request = new RequestDataMock();
 		request.addPath("CommentID", "0");
-		request.addPath("TaskID", "3");
+		request.addPath("TaskID", "0");
 		controller.deleteComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(200, response.getResponseCode());
@@ -129,8 +128,8 @@ public class CommentsControllerTest {
 	public void deleteCommentCheckPermissions()  throws InternalServerErrorException, IOException{
 		createComment();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("CommentID", "1");
-		request.addPath("TaskID", "1");
+		request.addPath("CommentID", "0");
+		request.addPath("TaskID", "0");
 		context.setIdentity("Jeiner22");
 		controller.deleteComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
@@ -165,8 +164,8 @@ public class CommentsControllerTest {
 		RequestDataMock request = new RequestDataMock();
 		Comment newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
-		request.addPath("CommentID", "1");
-		request.addPath("TaskID", "1");
+		request.addPath("CommentID", "0");
+		request.addPath("TaskID", "0");
 		request.addPath("message", "UpdatedMessage");
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
@@ -175,10 +174,11 @@ public class CommentsControllerTest {
 	
 	@Test
 	public void updateWrongPermissionsComment()   throws InternalServerErrorException, IOException{
+		createComment();
 		context.setIdentity("Alice");
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("CommentID", "1");
-		request.addPath("TaskID", "1");
+		request.addPath("CommentID", "0");
+		request.addPath("TaskID", "0");
 		Comment newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
@@ -188,10 +188,11 @@ public class CommentsControllerTest {
 	
 	@Test
 	public void updateNoPermissionsComment()    throws InternalServerErrorException, IOException{
+		createComment();
 		context.clearIdentity();
 		RequestDataMock request = new RequestDataMock();
 		request.addPath("CommentID", "0");
-		request.addPath("TaskID", "1");
+		request.addPath("TaskID", "0");
 		Comment newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
