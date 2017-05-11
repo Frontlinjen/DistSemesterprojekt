@@ -222,10 +222,6 @@ public class ControllerBase {
 		}
 	}
 	
-	protected void StartRequest(InputStream i)
-	{
-		StartRequest(i, null);
-	}
 	protected void StartRequest(InputStream i, Context context)
 	{
 		response = new LambdaResponse(factory);

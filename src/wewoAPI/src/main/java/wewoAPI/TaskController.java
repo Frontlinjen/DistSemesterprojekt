@@ -220,13 +220,14 @@ public class TaskController extends ControllerBase{
 	//PUT /task/{ID}
 	public void updateTask(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		if(!verifyLogin(context)){
-			raiseError(out, 401, "Not logged in");
-			return;
-		}
+	
 		
 		try {
-			StartRequest(in);
+			StartRequest(in, context);
+			if(userID == null){
+				raiseError(out, 401, "Not logged in");
+				return;
+			}
 			Task task = null;
 			try{
 				task = request.getObject(Task.class);
@@ -271,11 +272,12 @@ public class TaskController extends ControllerBase{
 	
 	public void deleteTask(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		if(!verifyLogin(context)){
-			raiseError(out, 401, "Not logged in");
-		}	
 		try {
-			StartRequest(in);
+			StartRequest(in, context);
+			if(userID == null)
+			{
+				raiseError(out, 401, "Not logged in");
+			}
 			int taskId;
 			try{
 				taskId = Integer.parseInt(request.getPath("taskID"));

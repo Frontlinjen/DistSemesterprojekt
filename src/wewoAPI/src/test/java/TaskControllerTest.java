@@ -242,9 +242,9 @@ public class TaskControllerTest {
 	
 	@Test
 	public void deleteTask()  throws InternalServerErrorException, IOException{
-		//createTask();
+		createTask();
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("taskID", "12");
+		request.addPath("taskID", "0");
 		controller.deleteTask(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(response.getResponseCode(), 200);
