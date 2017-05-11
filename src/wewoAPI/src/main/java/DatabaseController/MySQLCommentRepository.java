@@ -110,7 +110,7 @@ public class MySQLCommentRepository implements CommentRepository{
 	{
 		CommentDTO comment = new CommentDTO();
 		comment.setMessage(rs.getString("message"));
-		comment.setSubmitDate(null);
+		comment.setSubmitDate(rs.getDate("submitDate"));
 		comment.setCommenter(rs.getString("Commenter"));
 		comment.setTaskID(rs.getInt("TaskID"));
 		comment.setCommentID(rs.getInt("CommentID"));

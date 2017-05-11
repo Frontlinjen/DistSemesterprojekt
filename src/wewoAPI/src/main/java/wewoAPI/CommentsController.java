@@ -160,7 +160,7 @@ public class CommentsController extends ControllerBase{
 			Comment comment = dto.getModel();
 			comment.setCommenter(userID);
 			response.addResponseObject("Comment", comment);
-			response.addResponseObject("task", "tasks/"+task.getId());
+			response.addResponseObject("task", "tasks/"+taskID+"/comments/"+commentID);
 			response.setStatusCode(200);
 			FinishRequest(out);
 		}catch (DALException e) {
