@@ -251,7 +251,7 @@ public class TaskController extends ControllerBase{
 				raiseError(out, 404, "No task was found using ID " + task.getID());
 				return;
 			}
-			if(dto.getCreatorId().equals(context.getIdentity().getIdentityId())){
+			if(dto.getCreatorId().equals(userID)){
 				dto = TaskDTO.fromModel(task);
 				dto.setId(taskID);
 				repository.updateTask(dto);
@@ -294,7 +294,7 @@ public class TaskController extends ControllerBase{
 				return;
 			}
 			
-			if(task.getCreatorId().equals(context.getIdentity().getIdentityId())){
+			if(task.getCreatorId().equals(userID)){
 				repository.deleteTask(taskId);
 				response.setStatusCode(200);
 				FinishRequest(out);
