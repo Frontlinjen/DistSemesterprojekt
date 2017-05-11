@@ -55,12 +55,12 @@ public class CommentsController extends ControllerBase{
 	
 	public void createComment(InputStream in, OutputStream out, Context context) throws InternalServerErrorException{
 		try{
-			if(!verifyLogin(context)){
+			StartRequest(in, context);
+			if(userID == null){
 				raiseError(out, 401, "Not logged in");
 				return;
 			}
 			
-			StartRequest(in);
 			int taskID;
 			try{
 				taskID = Integer.parseInt(request.getPath("TaskID"));
@@ -85,7 +85,7 @@ public class CommentsController extends ControllerBase{
 			}
 			CommentDTO dto = CommentDTO.fromModel(com);
 			dto.setTaskID(taskID);
-			dto.setCommenter(context.getIdentity().getIdentityId());
+			dto.setCommenter(userID);
 			
 			try {
 				repository.createComment(dto);
@@ -111,7 +111,7 @@ public class CommentsController extends ControllerBase{
 	}
 	
 	public void getCommentList(InputStream in, OutputStream out, Context context) throws InternalServerErrorException{
-		StartRequest(in);
+		StartRequest(in, context);
 		
 		String taskStr = request.getPath("TaskID");
 		int taskid;
@@ -136,7 +136,7 @@ public class CommentsController extends ControllerBase{
 	{
 		
 		try {
-			StartRequest(in);
+			StartRequest(in, context);
 			
 			int commentID;
 			int taskID;
@@ -158,7 +158,7 @@ public class CommentsController extends ControllerBase{
 			TaskDTO task = new TaskDTO();
 			
 			Comment comment = dto.getModel();
-			comment.setCommenter(context.getIdentity().getIdentityId());
+			comment.setCommenter(userID);
 			response.addResponseObject("Comment", comment);
 			response.addResponseObject("task", "tasks/"+task.getId());
 			response.setStatusCode(200);
@@ -171,13 +171,13 @@ public class CommentsController extends ControllerBase{
 	
 	public void updateComment(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		if(!verifyLogin(context)){
-			raiseError(out, 401, "Not logged in");
-			return;
-		}
-		
 		try {
-			StartRequest(in);
+			StartRequest(in, context);
+			if(userID == null){
+				raiseError(out, 401, "Not logged in");
+				return;
+			}
+			
 			Comment comment = null;
 			try{
 				comment = request.getObject(Comment.class);
@@ -198,7 +198,7 @@ public class CommentsController extends ControllerBase{
 				raiseError(out, 400, "No commentID specified");
 				return;
 			}
-			comment.setCommenter(context.getIdentity().getIdentityId());
+			comment.setCommenter(userID);
 			comment.setCommentID(commentID);
 			comment.setTaskID(taskID);
 			comment.setMessage(message);
@@ -208,7 +208,7 @@ public class CommentsController extends ControllerBase{
 				raiseError(out, 404, "No comment was found using ID " + commentID);
 				return;
 			}
-			if(dto.getCommenter().equals(context.getIdentity().getIdentityId())){
+			if(dto.getCommenter().equals(userID)){
 				dto = CommentDTO.fromModel(comment);
 				if(dto.getCommentID() == comment.getCommentID() && dto.getTaskID() == comment.getTaskID()){
 					repository.updateComment(dto);
@@ -240,11 +240,11 @@ public class CommentsController extends ControllerBase{
 	
 	public void deleteComment(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		if(!verifyLogin(context)){
-			raiseError(out, 401, "Not logged in");
-		}	
 		try {
-			StartRequest(in);
+			StartRequest(in, context);
+			if(userID == null){
+				raiseError(out, 401, "Not logged in");
+			}	
 			int commentId;
 			int taskId;
 			try{
@@ -263,7 +263,7 @@ public class CommentsController extends ControllerBase{
 				return;
 			}
 			
-			if(comment.getCommenter().equals(context.getIdentity().getIdentityId())){
+			if(comment.getCommenter().equals(userID)){
 				repository.deleteComment(taskId, commentId);
 				response.setStatusCode(200);
 				FinishRequest(out);

@@ -32,12 +32,11 @@ public class RatingController extends ControllerBase{
 	public void createRating(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
 		try{
-			context.getIdentity().getIdentityId();
-			if(!verifyLogin(context)){
+			StartRequest(in, context);
+			if(userID == null){
 				raiseError(out, 401, "Not logged in");
 				return;
 			}
-			StartRequest(in);
 			//GET user/{userID}/ratings/{ratingsID}
 			String rateeID = request.getPath("rateeID");
 			Rating rate = null;
@@ -53,13 +52,13 @@ public class RatingController extends ControllerBase{
 			}
 			
 			RatingDTO dto = RatingDTO.fromModel(rate);
-			if(!repository.hasRelation(rateeID, context.getIdentity().getIdentityId())){
+			if(!repository.hasRelation(rateeID, userID)){
 				raiseError(out, 401, "No relation between target person and you");
 				return;
 			}
 			
 			dto.setRateeID(rateeID);
-			dto.setRaterID(context.getIdentity().getIdentityId());
+			dto.setRaterID(userID);
 			TaskDTO taskDTO = new TaskDTO();
 
 			try{
@@ -85,11 +84,11 @@ public class RatingController extends ControllerBase{
 	{
 		
 		try{
-			if(!verifyLogin(context)){
+			StartRequest(in, context);
+			if(userID == null){
 				raiseError(out, 401, "Not logged in");
 				return;
 			}
-			StartRequest(in);
 			Rating rate = null;
 			try{
 				rate = request.getObject(Rating.class);
@@ -126,7 +125,7 @@ public class RatingController extends ControllerBase{
 	public void getLastRatings(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
 		try{
-			StartRequest(in);
+			StartRequest(in, context);
 			List<Rating> rate = new ArrayList<Rating>();
 			String rateeID = request.getPath("rateeID");
 			List<RatingDTO> dto;

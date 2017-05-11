@@ -37,7 +37,7 @@ public class TagsController extends ControllerBase{
 	public void getTags(InputStream in, OutputStream out, Context context) throws InternalServerErrorException{
 		HashMap<String, Integer> tags = new HashMap<String, Integer>();
 		try{
-			StartRequest(in);
+			StartRequest(in, context);
 			tags = repository.getTags();
 			if(tags == null){
 				raiseError(out, 400, "No tags exists.");

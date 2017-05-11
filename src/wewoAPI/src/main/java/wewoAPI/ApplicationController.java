@@ -47,28 +47,30 @@ public class ApplicationController extends ControllerBase{
 		
 	public void getApplicants(InputStream in, OutputStream out, Context context) throws UnauthorizedException, DALException, InternalServerErrorException
 	{
-		
-		if(!verifyLogin(context)){
-			raiseError(out, 401, "Not logged in");
-			return;
-		}
-		StartRequest(in);
-		String taskStr = request.getPath("taskID");
-		int taskid;
-			try{
-				taskid = Integer.parseInt(taskStr);
-			}catch(NumberFormatException e){
-				raiseError(out, 400, "Invalid taskID or applierID specified");					
+					
+		try {
+			StartRequest(in, context);
+			if(userID == null){
+				raiseError(out, 401, "Not logged in");
 				return;
 			}
+			
+			String taskStr = request.getPath("taskID");
+			int taskid;
+			
+				try{
+					taskid = Integer.parseInt(taskStr);
+				}catch(NumberFormatException e){
+					raiseError(out, 400, "Invalid taskID or applierID specified");					
+					return;
+				}
 				
-		try {
 			TaskDTO task = taskRepository.getTask(taskid);
 			if(task == null){
 				raiseError(out, 400, "Task does not exists");
 				return;
 			}
-			if(!task.getCreatorId().equals(context.getIdentity().getIdentityId())){
+			if(!task.getCreatorId().equals(userID)){
 				raiseError(out, 401, "Du har ikke adgang til dette.");
 				return;
 			}
@@ -97,11 +99,11 @@ public class ApplicationController extends ControllerBase{
 	{
 		
 		try{
-			if(!verifyLogin(context)){
+			StartRequest(in, context);
+			if(userID == null){
 				raiseError(out, 401, "Not logged in");
 				return;
 			}
-			StartRequest(in);
 			
 			String taskStr = request.getPath("taskID");
 			if(taskStr == null || taskStr.isEmpty()){
@@ -128,7 +130,7 @@ public class ApplicationController extends ControllerBase{
 			}
 			ApplicationDTO dto = ApplicationDTO.fromModel(app);
 			dto.setTaskid(taskId);
-			dto.setApplierid(context.getIdentity().getIdentityId());
+			dto.setApplierid(userID);
 			
 			TaskDTO taskDTO = new TaskDTO();
 			
@@ -156,11 +158,11 @@ public class ApplicationController extends ControllerBase{
 	{
 		
 		try {
-			StartRequest(in);
-			
 			String applierID;
 			int taskID;
-			if(!verifyLogin(context)){
+			
+			StartRequest(in, context);
+			if(userID == null){
 				raiseError(out, 401, "Not logged in");
 				return;
 			}
@@ -185,7 +187,7 @@ public class ApplicationController extends ControllerBase{
 					raiseError(out, 400, "Task does not exists");
 					return;
 				}
-				if(!task.getCreatorId().equals(context.getIdentity().getIdentityId()) && !applierID.equals(context.getIdentity().getIdentityId())){
+				if(!task.getCreatorId().equals(userID) && !applierID.equals(userID)){
 					raiseError(out, 401, "Du har ikke adgang til dette.");
 					return;
 				}
@@ -205,13 +207,13 @@ public class ApplicationController extends ControllerBase{
 
 	public void updateApplication(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		if(!verifyLogin(context)){
-			raiseError(out, 401, "Not logged in");
-			return;
-		}
-		
 		try {
-			StartRequest(in);
+			StartRequest(in, context);
+			if(userID == null){
+				raiseError(out, 401, "Not logged in");
+				return;
+			}
+			
 			Application app = null;
 			try{
 				app = request.getObject(Application.class);
@@ -230,16 +232,16 @@ public class ApplicationController extends ControllerBase{
 				raiseError(out, 400, "No applierID specified");
 				return;
 			}
-			app.setApplierId(context.getIdentity().getIdentityId());
+			app.setApplierId(userID);
 			app.setTaskId(taskID);
-			ApplicationDTO dto = repository.getApplication(context.getIdentity().getIdentityId(), taskID);
+			ApplicationDTO dto = repository.getApplication(userID, taskID);
 	
 			if(dto == null)
 			{
 				raiseError(out, 404, "No application was found using ID " + app.getApplierId());
 				return;
 			}
-			if(dto.getApplierid().equals(context.getIdentity().getIdentityId())){
+			if(dto.getApplierid().equals(userID)){
 				dto = ApplicationDTO.fromModel(app);
 				if(dto.getApplierid().equals(app.getApplierId()) && dto.getTaskid() == app.getTaskId()){
 					repository.updateApplication(dto);
@@ -269,11 +271,13 @@ public class ApplicationController extends ControllerBase{
 	
 	public void deleteApplication(InputStream in, OutputStream out, Context context) throws InternalServerErrorException
 	{
-		if(!verifyLogin(context)){
-			raiseError(out, 401, "Not logged in");
-		}	
 		try {
-			StartRequest(in);
+			
+			StartRequest(in, context);
+			if(userID == null){
+				raiseError(out, 401, "Not logged in");
+			}
+			
 			String applierID;
 			int taskID;
 			try{
@@ -292,7 +296,7 @@ public class ApplicationController extends ControllerBase{
 				return;
 			}
 			
-			if(app.getApplierid().equals(context.getIdentity().getIdentityId())){
+			if(app.getApplierid().equals(userID)){
 				repository.deleteApplication(applierID, taskID);
 				response.setStatusCode(200);
 				FinishRequest(out);
