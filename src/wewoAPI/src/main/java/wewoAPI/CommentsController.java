@@ -63,7 +63,7 @@ public class CommentsController extends ControllerBase{
 			
 			int taskID;
 			try{
-				taskID = Integer.parseInt(request.getPath("TaskID"));
+				taskID = Integer.parseInt(request.getPath("taskID"));
 			}catch(NumberFormatException e){
 				raiseError(out, 400, "Invalid taskID specified");
 				return;
