@@ -30,6 +30,7 @@ public class DALException extends Exception{
 		super(message);
 	}
 	public DALException(SQLException exception) throws EntryNullException, ForeignKeyException{
+		exception.printStackTrace(); //Print stacktrace so we can find out what went wrong..
 		switch(exception.getErrorCode()){
 		case CANNOT_BE_NULL:
 				throw new EntryNullException(exception);
