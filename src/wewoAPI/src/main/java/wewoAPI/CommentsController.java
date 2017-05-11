@@ -141,8 +141,8 @@ public class CommentsController extends ControllerBase{
 			int commentID;
 			int taskID;
 			try{
-				commentID = Integer.parseInt(request.getPath("CommentID"));		
-				taskID = Integer.parseInt(request.getPath("TaskID"));
+				commentID = Integer.parseInt(request.getPath("commentID"));		
+				taskID = Integer.parseInt(request.getPath("taskID"));
 			}
 			catch(NumberFormatException neg){
 				raiseError(out, 400, "No commentID specified on path");
