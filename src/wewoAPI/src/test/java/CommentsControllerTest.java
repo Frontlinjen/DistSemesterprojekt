@@ -26,7 +26,7 @@ public class CommentsControllerTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		controller = new CommentsController(new MockCommentsRepository());
+		controller = new CommentsController(/*new MockCommentsRepository()*/);
 		context = new ContextTest("Boris");
 		mapper = new ObjectMapper();
 		out = new ByteArrayOutputStream();
@@ -44,7 +44,7 @@ public class CommentsControllerTest {
 		Comment comment = generateTestData();
 
 		RequestDataMock request = new RequestDataMock();
-		request.addPath("TaskID", "0");
+		request.addPath("taskID", "1");
 		request.setBody(mapper.writeValueAsString(comment));
 		System.out.println(new String(request.getContent()));
 		

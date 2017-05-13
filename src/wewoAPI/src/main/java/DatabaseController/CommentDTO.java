@@ -24,7 +24,6 @@ public class CommentDTO implements Serializable{
 		dto.setSubmitDate(comment.getSubmitDate());
 		dto.setCommenter(comment.getCommenter());
 		dto.setMessage(comment.getMessage());
-		dto.setCommentID(comment.getCommentID());
 		dto.setTaskID(comment.getTaskID());
 		return dto;
 	}

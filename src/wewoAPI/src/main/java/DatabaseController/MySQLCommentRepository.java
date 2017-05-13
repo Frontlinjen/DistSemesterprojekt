@@ -12,7 +12,7 @@ public class MySQLCommentRepository implements CommentRepository{
 	private final String GET_COMMENT = "SELECT * FROM Comments WHERE TaskID = ? AND CommentID = ?;";
 	private final String GET_COMMENT_LIST = "SELECT * FROM Comments WHERE TaskID = ?;";
 	private final String DELETE_COMMENT = "DELETE FROM Comments WHERE TaskID = ? AND CommentID = ?;";
-	private final String CREATE_COMMENT = "INSERT INTO Comments(CommentID, TaskID, Commenter, message, submitDate) VALUES (?, ?, ?, ?, CURDATE());";
+	private final String CREATE_COMMENT = "INSERT INTO Comments(TaskID, Commenter, message, submitDate) VALUES (?, ?, ?, CURDATE());";
 	private final String UPDATE_COMMENT = "UPDATE Comments SET message = ?, submitDate = CURDATE() WHERE TaskID = ? AND CommentID = ?;";
 	
 	public MySQLCommentRepository() throws DALException{
@@ -61,15 +61,19 @@ public class MySQLCommentRepository implements CommentRepository{
 	//(commentId, taskId, ownerId, text, date)
 	public int createComment(CommentDTO com) throws DALException {
 		try {
-			//"INSERT INTO Comments(CommentID, TaskID, Commenter, message, submitDate) VALUES (?, ?, ?, ?, CURDATE());";
+			//"INSERT INTO Comments(TaskID, Commenter, message, submitDate) VALUES (?, ?, ?, CURDATE());";
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("CREATE_COMMENT");
-			statement.setInt(1, com.getCommentID());
-			statement.setInt(2, com.getTaskID());
-			statement.setString(3, com.getCommenter());
-			statement.setString(4, com.getMessage());
+			statement.setInt(1, com.getTaskID());
+			statement.setString(2, com.getCommenter());
+			statement.setString(3, com.getMessage());
 
 			int res = statement.executeUpdate();
+			ResultSet rs = DatabaseConnector.doQuery("SELECT LAST_INSERT_ID();");
 			
+			rs.first();
+			int ID = rs.getInt("last_insert_id()");
+			
+			com.CommentID = ID;
 			return res;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
