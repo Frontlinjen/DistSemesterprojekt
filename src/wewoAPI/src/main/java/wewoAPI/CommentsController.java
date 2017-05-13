@@ -190,7 +190,7 @@ public class CommentsController extends ControllerBase{
 			String message;
 			try{
 				commentID = Integer.parseInt(request.getPath("CommentID"));
-				taskID = Integer.parseInt(request.getPath("TaskID"));
+				taskID = Integer.parseInt(request.getPath("taskID"));
 				message = request.getPath("message");
 			}
 			catch(Exception e)
@@ -249,7 +249,7 @@ public class CommentsController extends ControllerBase{
 			int taskId;
 			try{
 				commentId = Integer.parseInt(request.getPath("CommentID"));
-				taskId = Integer.parseInt(request.getPath("TaskID"));
+				taskId = Integer.parseInt(request.getPath("taskID"));
 			}
 			catch(NumberFormatException eng)
 			{
