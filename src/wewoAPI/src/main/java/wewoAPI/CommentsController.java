@@ -183,7 +183,6 @@ public class CommentsController extends ControllerBase{
 			try{
 				commentID = Integer.parseInt(request.getPath("commentID"));
 				taskID = Integer.parseInt(request.getPath("taskID"));
-				message = request.getPath("message");
 				
 			}
 			catch(Exception e)
@@ -201,7 +200,6 @@ public class CommentsController extends ControllerBase{
 			comment.setCommenter(userID);
 			comment.setCommentID(commentID);
 			comment.setTaskID(taskID);
-			comment.setMessage(message);
 			CommentDTO dto = repository.getComment(taskID, commentID);
 			if(dto == null)
 			{
@@ -213,8 +211,6 @@ public class CommentsController extends ControllerBase{
 				dto.setCommentID(commentID);
 				if(dto.getCommentID() == comment.getCommentID() && dto.getTaskID() == comment.getTaskID()){
 					repository.updateComment(dto);
-					response.addResponseObject("Comment", comment);
-					response.addResponseObject("task", "tasks/"+taskID+"/comments/"+commentID);
 					response.setStatusCode(200);
 					FinishRequest(out);
 					return;
@@ -231,7 +227,7 @@ public class CommentsController extends ControllerBase{
 			}
 			else 
 			{
-				raiseError(out, 403, "User does not own that comment" + dto.getCommenter() + " " + userID);
+				raiseError(out, 403, "User does not own that comment");
 				return;
 			
 			}

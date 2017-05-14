@@ -165,7 +165,7 @@ public class CommentsControllerTest {
 		request.setBody(mapper.writeValueAsString(newData));
 		request.addPath("commentID", "12");
 		request.addPath("taskID", "1");
-		request.addPath("message", "UpdatedMessage");
+		request.addPath("message", "UpdatedMessage3");
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
 		assertEquals(200, response.getResponseCode());
