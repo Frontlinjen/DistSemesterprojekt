@@ -177,25 +177,25 @@ public class CommentsController extends ControllerBase{
 				raiseError(out, 401, "Not logged in");
 				return;
 			}
-			
+			int commentID;
+			int taskID;
+			String message;
+			try{
+				commentID = Integer.parseInt(request.getPath("commentID"));
+				taskID = Integer.parseInt(request.getPath("taskID"));
+				message = request.getPath("message");
+				
+			}
+			catch(Exception e)
+			{
+				raiseError(out, 400, "No commentID specified");
+				return;
+			}
 			Comment comment = null;
 			try{
 				comment = request.getObject(Comment.class);
 			}catch(UnrecognizedPropertyException ex){
 				raiseError(out, 400, "" + ex.getPropertyName());
-				return;
-			}
-			int commentID;
-			int taskID;
-			String message;
-			try{
-				commentID = Integer.parseInt(request.getPath("CommentID"));
-				taskID = Integer.parseInt(request.getPath("taskID"));
-				message = request.getPath("message");
-			}
-			catch(Exception e)
-			{
-				raiseError(out, 400, "No commentID specified");
 				return;
 			}
 			comment.setCommenter(userID);
@@ -210,8 +210,11 @@ public class CommentsController extends ControllerBase{
 			}
 			if(dto.getCommenter().equals(userID)){
 				dto = CommentDTO.fromModel(comment);
+				dto.setCommentID(commentID);
 				if(dto.getCommentID() == comment.getCommentID() && dto.getTaskID() == comment.getTaskID()){
 					repository.updateComment(dto);
+					response.addResponseObject("Comment", comment);
+					response.addResponseObject("task", "tasks/"+taskID+"/comments/"+commentID);
 					response.setStatusCode(200);
 					FinishRequest(out);
 					return;
@@ -228,7 +231,7 @@ public class CommentsController extends ControllerBase{
 			}
 			else 
 			{
-				raiseError(out, 403, "User does not own that comment");
+				raiseError(out, 403, "User does not own that comment" + dto.getCommenter() + " " + userID);
 				return;
 			
 			}
@@ -248,7 +251,7 @@ public class CommentsController extends ControllerBase{
 			int commentId;
 			int taskId;
 			try{
-				commentId = Integer.parseInt(request.getPath("CommentID"));
+				commentId = Integer.parseInt(request.getPath("commentID"));
 				taskId = Integer.parseInt(request.getPath("taskID"));
 			}
 			catch(NumberFormatException eng)

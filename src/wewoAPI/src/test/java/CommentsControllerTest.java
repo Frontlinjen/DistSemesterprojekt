@@ -160,12 +160,11 @@ public class CommentsControllerTest {
 	
 	@Test
 	public void updateComment()   throws InternalServerErrorException, IOException{
-		createComment();
 		RequestDataMock request = new RequestDataMock();
 		Comment newData = generateTestData();
 		request.setBody(mapper.writeValueAsString(newData));
-		request.addPath("CommentID", "0");
-		request.addPath("TaskID", "0");
+		request.addPath("commentID", "12");
+		request.addPath("taskID", "1");
 		request.addPath("message", "UpdatedMessage");
 		controller.updateComment(new ByteArrayInputStream(request.getContent()), out, context);
 		ResponseData response = new ResponseData(out);
