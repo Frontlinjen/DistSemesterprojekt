@@ -179,7 +179,6 @@ public class CommentsController extends ControllerBase{
 			}
 			int commentID;
 			int taskID;
-			String message;
 			try{
 				commentID = Integer.parseInt(request.getPath("commentID"));
 				taskID = Integer.parseInt(request.getPath("taskID"));
