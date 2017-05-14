@@ -46,8 +46,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Task'
-      tags:
-        - Products
       responses:
         200:
           description: The identifier of the newly created task
@@ -68,8 +66,6 @@ paths:
           in: path
           type: string
           required: true
-      tags:
-        - Tasks
       responses:
         200:
           description: The requested task
@@ -164,7 +160,7 @@ paths:
           description: new comment
           required: true
           schema:
-            type: string
+            $ref: '#/definitions/Comment'
         - name: taskID
           in: path
           type: number
@@ -198,6 +194,8 @@ paths:
           description: Comment not found
         "200":
           description: Succesful operation
+          schema:
+            $ref: '#/definitions/Comment'
         default:
           description: Unexpected error
           schema:
@@ -248,7 +246,7 @@ paths:
           description: context of the comment
           required: true
           schema:
-            type: string
+            $ref: '#/definitions/Comment'
       responses:
         "404":
           description: Account not found
@@ -321,8 +319,6 @@ paths:
           required: true
           type: integer
           format: int32
-      tags:
-        - Applications
       responses:
         404:
           description: Application not found
@@ -445,48 +441,57 @@ paths:
         400: 
           description: Invalid ID supplied
           
-  /ratings/{ID}:
-    get:
-      summary: Gets last 5 ratings for profile ID
-      description: Gets last 5 ratings for profile ID
-      operationId: getRatingsForID
-      produces: 
-        - application/json
-      parameters:
-        - in: path
-          name: ID
-          type: integer
-          description: Number of ratings
-          required: true
-      responses:
-        404:
-          description: Ratings not found
-        200:
-          description: Successful operation
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Ratings'
-        400: 
-          description: Invalid ID supplied
-    post:
-      summary: Creates a rating for profile ID
-      description: Creates a rating for profile ID
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: path
-          name: ID
-          description: ID of the account
-          required: true
-          type: integer
-          format: int32
-      responses:
-        200:
-          description: Successful operation
-        #ID already in use
+  /account/{ID}/ratings/{ratingID}:
+      get:
+        summary: Gets last 5 ratings for profile ID
+        description: Gets last 5 ratings for profile ID
+        operationId: getRatingsForID
+        produces: 
+          - application/json
+        parameters:
+          - in: path
+            name: ratingID
+            type: integer
+            description: Number of rating
+            required: true
+          - in: path
+            name: ID
+            type: integer
+            description: The account ID
+            required: true
+        responses:
+          404:
+            description: Ratings not found
+          200:
+            description: Successful operation
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/Ratings'
+          400: 
+            description: Invalid ID supplied
+      post:
+        summary: Creates a rating for profile ID
+        description: Creates a rating for profile ID
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - in: path
+            name: ratingID
+            type: integer
+            description: Number of rating
+            required: true
+          - in: path
+            name: ID
+            type: integer
+            description: The account ID
+            required: true
+        responses:
+          200:
+            description: Successful operation
+          #ID already in use
 securityDefinitions:
   sigv4:
     type: "apiKey"
@@ -506,11 +511,29 @@ definitions:
       properties:
         status:
           type: string
+  Comment:
+    type: object
+    properties:
+      message:
+        type: string
+        description: The comment
+      commenter:
+        type: string
+        description: The userID of the guy who commented
+      date:
+        type: string
+        description: When the comment was last updated
+      commentID:
+        type: integer
+        description: The id of this comment
+      taskID: 
+        type: integer 
+        description: The id of the task this comment belongs to
   Task:
     type: object
     properties:
       id:
-        type: string
+        type: integer
         description: the ID identifying this task
       title:
         type: string
@@ -525,14 +548,14 @@ definitions:
         type: integer
         description: The estimated completion time in minutes
       supplies:
-        type: boolean
-        description: Are relevant supplies available for the task
+        type: integer
+        description: Are relevant supplies available for the task should be 0 or 1
       urgent:
-        type: boolean
-        description: Is the task urgent(expires after six hours)
+        type: integer
+        description: Is the task urgent(expires after six hours) should be 0 or 1
       views:
         type: integer
-        description: How many views has this task had?
+        description: How many views has this task had? Readonly
       street:
         type: string
         maxLength: 128
@@ -540,7 +563,7 @@ definitions:
         type: integer
       creatorid:
         type: string
-        description: The userID of the creator if this task
+        description: The userID of the creator if this task Readonly
       tags:
         type: array
         items:
