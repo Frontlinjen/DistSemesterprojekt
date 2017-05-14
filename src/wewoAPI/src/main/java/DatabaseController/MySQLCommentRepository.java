@@ -87,8 +87,8 @@ public class MySQLCommentRepository implements CommentRepository{
 		try{
 			PreparedStatement statement = DatabaseConnector.getPreparedStatement("UPDATE_COMMENT");
 			statement.setString(1, com.getMessage());
-			statement.setInt(2, com.getCommentID());
-			statement.setInt(3, com.getTaskID());
+			statement.setInt(2, com.getTaskID());
+			statement.setInt(3, com.getCommentID());
 			return statement.executeUpdate();
 		}
 		catch(SQLException e){
