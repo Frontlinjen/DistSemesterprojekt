@@ -10,11 +10,9 @@ import java.util.List;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
-import DatabaseController.AccountRepository;
 import DatabaseController.CommentDTO;
 import DatabaseController.CommentRepository;
 import DatabaseController.DALException;
-import DatabaseController.MySQLAccountRepository;
 import DatabaseController.MySQLCommentRepository;
 import DatabaseController.DALException;
 import DatabaseController.DALException.ForeignKeyException;
@@ -36,7 +34,6 @@ import modelPOJO.Task;
 public class CommentsController extends ControllerBase{
 	CommentRepository repository;
 	TaskRespository taskRepo;
-	AccountRepository accountRepo;
 	
 	public CommentsController() throws InternalServerErrorException
 	{
